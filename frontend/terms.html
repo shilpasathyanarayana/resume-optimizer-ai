@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Service — ResumeAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/main.css" />
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav id="navbar">
+    <a href="index.html" class="nav-logo">Resume<span>AI</span></a>
+    <div class="nav-right">
+      <span class="nav-free-badge" id="freeCounter">5 free uses left</span>
+      <div id="guestNav" style="display:flex;align-items:center;gap:8px;">
+        <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
+        <button class="btn btn-primary" onclick="openModal('signup')">Get started free</button>
+      </div>
+      <div id="userNav" style="display:none;">
+        <div class="user-menu-wrap">
+          <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">?</div>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-email"><strong id="dropdownName">—</strong><span id="dropdownEmail">—</span></div>
+            <button class="dropdown-item" onclick="goToDashboard()">📄 My Resumes</button>
+            <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
+            <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── PAGE CONTENT ── -->
+  <main class="page-wrapper">
+    <header class="page-header">
+      <div class="page-eyebrow">Legal</div>
+      <h1 class="page-title">Terms of Service</h1>
+      <p class="page-meta">Last updated: <span id="lastUpdated"></span></p>
+    </header>
+
+    <div class="policy-body">
+
+      <h2>1. Acceptance of Terms</h2>
+      <p>By accessing or using ResumeAI ("the Service", "we", "our"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service. Your continued use of the Service constitutes your acceptance of any updates to these terms.</p>
+
+      <h2>2. Description of Service</h2>
+      <p>ResumeAI is an AI-powered resume optimization tool that helps job seekers tailor their resumes to specific job descriptions. The Service provides:</p>
+      <ul>
+        <li>ATS compatibility scoring — a match score indicating how well your resume fits a job description</li>
+        <li>Keyword gap analysis — identification of missing keywords from the job posting</li>
+        <li>AI resume rewriting — suggested rewrites of your bullet points and summary to better match the role</li>
+        <li>Resume export — download your optimized resume as a PDF or DOCX file</li>
+        <li>Resume history — saved versions of your optimizations (registered users only)</li>
+      </ul>
+      <p>This Service is currently a portfolio project and is provided for demonstration and personal use. Features and availability may change at any time.</p>
+
+      <h2>3. Free Use and Account Registration</h2>
+      <h3>Free Tier</h3>
+      <p>You may use the Service up to 5 times without creating an account. Free uses are tracked using your browser's local storage. Clearing your browser data may reset this counter, but we reserve the right to limit abuse of this mechanism.</p>
+
+      <h3>Registered Accounts</h3>
+      <p>Creating a free account grants you access to unlimited optimizations (subject to fair use), resume history, and additional features. You are responsible for:</p>
+      <ul>
+        <li>Providing accurate and truthful registration information</li>
+        <li>Maintaining the confidentiality of your account password</li>
+        <li>All activity that occurs under your account</li>
+        <li>Notifying us immediately of any unauthorised use of your account</li>
+      </ul>
+
+      <h3>Pro Subscription</h3>
+      <p>A paid Pro plan ($9/month) is available for active job seekers who require unlimited optimizations, priority processing, a cover letter generator, and multiple resume profiles. Subscriptions are billed monthly and may be cancelled at any time. Refunds are handled on a case-by-case basis.</p>
+
+      <h2>4. Acceptable Use</h2>
+      <p>You agree to use the Service only for lawful purposes. You must not:</p>
+      <ul>
+        <li>Upload resume content belonging to another person without their explicit permission</li>
+        <li>Use the Service to generate false, misleading, or fabricated work experience or credentials</li>
+        <li>Attempt to scrape, reverse-engineer, or extract data from the Service programmatically</li>
+        <li>Use automated tools or bots to access or abuse the free-use limit</li>
+        <li>Interfere with or disrupt the Service, its servers, or connected networks</li>
+        <li>Upload content that is unlawful, harmful, or infringes on the intellectual property of others</li>
+        <li>Resell or commercially redistribute outputs from the Service without prior written permission</li>
+      </ul>
+      <p>We reserve the right to suspend or terminate accounts that violate these terms without prior notice.</p>
+
+      <h2>5. Your Content</h2>
+      <p>You retain full ownership of the resume content and job descriptions you submit to the Service. By uploading content, you grant ResumeAI a limited, non-exclusive licence to process that content solely for the purpose of providing the Service to you.</p>
+      <p>We do not claim ownership of your resume data, and we do not share or sell your content to third parties. Please refer to our <a href="privacy.html" style="color:var(--accent);text-decoration:none;font-weight:500;">Privacy Policy</a> for full details on how your data is handled.</p>
+
+      <h2>6. Intellectual Property</h2>
+      <p>All elements of the Service — including the website design, code, AI models, branding, and content produced by ResumeAI — are the intellectual property of the Service owner and are protected by applicable copyright and trademark laws. You may not copy, reproduce, or distribute any part of the Service without prior written consent.</p>
+
+      <h2>7. AI-Generated Content Disclaimer</h2>
+      <p>The resume rewrites and suggestions produced by the Service are generated by artificial intelligence and are provided as a starting point only. We make no guarantee that:</p>
+      <ul>
+        <li>Optimized resumes will result in interviews, job offers, or any specific outcome</li>
+        <li>ATS scores accurately reflect how any specific employer's hiring system will evaluate your resume</li>
+        <li>AI-generated suggestions are free from errors, inaccuracies, or biases</li>
+      </ul>
+      <p>You are solely responsible for reviewing all AI-generated content before submitting it to any employer, and for ensuring it accurately reflects your true experience and qualifications.</p>
+
+      <h2>8. Limitation of Liability</h2>
+      <p>To the fullest extent permitted by law, ResumeAI and its owner shall not be liable for any indirect, incidental, special, consequential, or punitive damages — including loss of employment opportunity, data, or revenue — arising from your use of or inability to use the Service, even if we have been advised of the possibility of such damages.</p>
+      <p>Our total liability for any claim arising from use of the Service shall not exceed the amount you paid us in the 3 months preceding the claim, or $10, whichever is greater.</p>
+
+      <h2>9. Indemnification</h2>
+      <p>You agree to indemnify and hold harmless ResumeAI and its owner from any claims, losses, damages, or expenses (including legal fees) arising from your use of the Service, your violation of these Terms, or your infringement of any third-party rights.</p>
+
+      <h2>10. Termination</h2>
+      <p>We reserve the right to suspend or terminate your access to the Service at any time, with or without cause, and with or without notice. You may also delete your account at any time by contacting us. Upon termination, your right to use the Service ceases immediately.</p>
+
+      <h2>11. Changes to These Terms</h2>
+      <p>We may update these Terms of Service from time to time. When we make material changes, we will update the "Last Updated" date at the top of this page. Continued use of the Service after changes are posted constitutes your acceptance of the revised terms.</p>
+
+      <h2>12. Governing Law</h2>
+      <p>These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which the Service owner is based, without regard to conflict of law principles. Any disputes arising from these Terms shall be subject to the exclusive jurisdiction of the courts in that jurisdiction.</p>
+
+      <h2>13. Contact</h2>
+      <p>If you have any questions about these Terms of Service, please reach out:</p>
+      <div class="contact-block">
+        <p>
+          <strong>Website Owner</strong><br>
+          Shilpa Sathya Narayana<br><br>
+          <strong>Email</strong><br>
+          <a href="mailto:shilpa.sathyanarayana5@gmail.com">shilpa.sathyanarayana5@gmail.com</a><br><br>
+          <!-- <strong>Website</strong><br>
+          <a href="#">[www.yourwebsite.com]</a> -->
+        </p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <a href="index.html" class="nav-logo" style="font-size:1.1rem;">Resume<span style="color:var(--accent)">AI</span></a>
+    <span>© <span id="footerYear"></span> ResumeAI</span>
+    <div class="footer-links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="contact_us.html">Contact</a>
+    </div>
+  </footer>
+
+  <!-- ── AUTH MODAL ── -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+      <div class="modal-logo">Resume<span>AI</span></div>
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabLogin" onclick="switchTab('login')">Log in</button>
+        <button class="modal-tab" id="tabSignup" onclick="switchTab('signup')">Sign up</button>
+      </div>
+      <div class="modal-alert" id="modalAlert"></div>
+      <!-- LOGIN -->
+      <div class="tab-panel active" id="panelLogin">
+        <p class="modal-subtitle">Welcome back. Log in to access your resume history and saved results.</p>
+        <form onsubmit="handleLogin(event)" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email address</label>
+            <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" required />
+            <div class="form-error" id="loginEmailError">Please enter a valid email address.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input class="form-input" type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password" required />
+            <div class="form-error" id="loginPasswordError">Password is required.</div>
+          </div>
+          <button type="submit" class="form-submit" id="loginBtn">Log in<div class="spinner"></div></button>
+        </form>
+        <div class="form-divider">or</div>
+        <p style="text-align:center;font-size:0.84rem;color:var(--muted)">Don't have an account? <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500" onclick="switchTab('signup');return false;">Sign up free →</a></p>
+      </div>
+      <!-- SIGNUP -->
+      <div class="tab-panel" id="panelSignup">
+        <p class="modal-subtitle">Create your free account to save optimizations and access your resume history.</p>
+        <form onsubmit="handleSignup(event)" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="signupName">Full name</label>
+            <input class="form-input" type="text" id="signupName" placeholder="Alex Johnson" autocomplete="name" required />
+            <div class="form-error" id="signupNameError">Please enter your name.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupEmail">Email address</label>
+            <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" required />
+            <div class="form-error" id="signupEmailError">Please enter a valid email address.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupPassword">Password</label>
+            <input class="form-input" type="password" id="signupPassword" placeholder="At least 8 characters" autocomplete="new-password" required oninput="checkStrength(this.value)" />
+            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            <div class="strength-label" id="strengthLabel"></div>
+            <div class="form-error" id="signupPasswordError">Password must be at least 8 characters.</div>
+          </div>
+          <button type="submit" class="form-submit" id="signupBtn">Create account<div class="spinner"></div></button>
+        </form>
+        <div class="form-divider">or</div>
+        <p style="text-align:center;font-size:0.84rem;color:var(--muted)">Already have an account? <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500" onclick="switchTab('login');return false;">Log in →</a></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="assets/js/script.js" defer></script>
+</body>
+</html>

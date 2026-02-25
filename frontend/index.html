@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeAI — Land Your Dream Job</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --black: #0e0e0e;
+      --white: #fafaf8;
+      --ink: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #1a6b4a;
+      --accent-light: #e8f5f0;
+      --accent-mid: #2d9c6e;
+      --border: #e4e4e0;
+      --surface: #f5f5f2;
+      --danger: #c0392b;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+      color: var(--ink);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      background: rgba(250, 250, 248, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      transition: padding 0.3s;
+    }
+
+    nav.scrolled {
+      padding: 14px 48px;
+    }
+
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      color: var(--accent);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-free-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.18s ease;
+      text-decoration: none;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--ink);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(26, 107, 74, 0.22);
+    }
+
+    .btn-primary:hover {
+      background: #155a3d;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(26, 107, 74, 0.32);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      padding: 10px 14px;
+    }
+
+    .btn-ghost:hover {
+      color: var(--ink);
+      background: var(--surface);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(26, 107, 74, 0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 60%, rgba(45, 156, 110, 0.05) 0%, transparent 60%);
+    }
+
+    /* subtle dot grid */
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, #c8c8c0 1px, transparent 1px);
+      background-size: 32px 32px;
+      opacity: 0.35;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 820px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-bottom: 28px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+      }
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.8rem, 7vw, 5.2rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      margin-bottom: 24px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+      line-height: 1.7;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .hero-cta .btn {
+      padding: 13px 28px;
+      font-size: 0.95rem;
+    }
+
+    .hero-note {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .hero-note strong {
+      color: var(--accent);
+    }
+
+    /* free uses counter strip */
+    .free-strip {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 48px;
+      padding: 12px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      animation: fadeUp 0.6s 0.5s ease both;
+    }
+
+    .free-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .free-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      transition: background 0.3s;
+    }
+
+    .free-dot.used {
+      background: var(--border);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── SCROLL INDICATOR ── */
+    .scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      animation: fadeUp 0.6s 0.8s ease both;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scrollPulse 1.8s infinite;
+    }
+
+    @keyframes scrollPulse {
+      0% {
+        transform: scaleY(0);
+        transform-origin: top;
+      }
+
+      50% {
+        transform: scaleY(1);
+        transform-origin: top;
+      }
+
+      51% {
+        transform: scaleY(1);
+        transform-origin: bottom;
+      }
+
+      100% {
+        transform: scaleY(0);
+        transform-origin: bottom;
+      }
+    }
+
+    /* ── HOW IT WORKS ── */
+    .section {
+      padding: 100px 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.9rem, 4vw, 2.8rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 56px;
+      max-width: 480px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .step {
+      background: var(--white);
+      padding: 36px 32px;
+      position: relative;
+      transition: background 0.2s;
+    }
+
+    .step:hover {
+      background: var(--accent-light);
+    }
+
+    .step-num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3rem;
+      color: var(--border);
+      line-height: 1;
+      margin-bottom: 20px;
+      letter-spacing: -0.04em;
+    }
+
+    .step h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .step p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      padding: 32px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--white);
+      transition: all 0.22s ease;
+      cursor: default;
+    }
+
+    .feature-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 8px 32px rgba(26, 107, 74, 0.1);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--accent-light);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 18px;
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── PRICING / FREE vs PRO ── */
+    .pricing-section {
+      background: var(--surface);
+      padding: 100px 24px;
+    }
+
+    .pricing-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .pricing-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 640px) {
+      .pricing-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pricing-card {
+      padding: 36px;
+      border-radius: 16px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+    }
+
+    .pricing-card.featured {
+      border-color: var(--accent);
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .pricing-tier {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .pricing-card.featured .pricing-tier {
+      color: var(--accent-mid);
+    }
+
+    .pricing-price {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.6rem;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .pricing-price span {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .pricing-card.featured .pricing-price span {
+      color: #aaa;
+    }
+
+    .pricing-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pricing-card.featured .pricing-desc {
+      color: #aaa;
+      border-color: #333;
+    }
+
+    .pricing-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .pricing-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .pricing-card.featured .pricing-features li {
+      color: #ccc;
+    }
+
+    .pricing-features li::before {
+      content: '✓';
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .pricing-card.featured .pricing-features li::before {
+      color: var(--accent-mid);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 40px 48px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--ink);
+    }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(14, 14, 14, 0.55);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--white);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      padding: 44px 40px 40px;
+      position: relative;
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.18);
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--surface);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 1.1rem;
+      transition: all 0.15s;
+    }
+
+    .modal-close:hover {
+      background: var(--border);
+      color: var(--ink);
+    }
+
+    .modal-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .modal-logo span {
+      color: var(--accent);
+    }
+
+    .modal-tabs {
+      display: flex;
+      gap: 0;
+      margin: 24px 0;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .modal-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      transition: all 0.18s;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .modal-tab.active {
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .modal-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    /* tab panels */
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* form */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.18s;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+    }
+
+    .form-input::placeholder {
+      color: #b0b0aa;
+    }
+
+    .form-input.error {
+      border-color: var(--danger);
+    }
+
+    .form-error {
+      font-size: 0.78rem;
+      color: var(--danger);
+      margin-top: 5px;
+      display: none;
+    }
+
+    .form-error.visible {
+      display: block;
+    }
+
+    .form-submit {
+      width: 100%;
+      padding: 13px;
+      margin-top: 8px;
+      font-size: 0.95rem;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      position: relative;
+    }
+
+    .form-submit:hover {
+      background: #155a3d;
+    }
+
+    .form-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .form-submit .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .form-submit.loading .spinner {
+      display: block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: translateY(-50%) rotate(360deg);
+      }
+    }
+
+    .form-divider {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 16px 0;
+      position: relative;
+    }
+
+    .form-divider::before,
+    .form-divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 42%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .form-divider::before {
+      left: 0;
+    }
+
+    .form-divider::after {
+      right: 0;
+    }
+
+    .modal-alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.83rem;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .modal-alert.error {
+      background: #fdf0ef;
+      color: var(--danger);
+      border: 1px solid #f5c6c2;
+      display: block;
+    }
+
+    .modal-alert.success {
+      background: var(--accent-light);
+      color: var(--accent);
+      border: 1px solid #b2dece;
+      display: block;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 2000;
+      background: var(--ink);
+      color: var(--white);
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      max-width: 300px;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: var(--accent);
+    }
+
+    .toast.error {
+      background: var(--danger);
+    }
+
+    /* ── USER MENU (logged in state) ── */
+    .user-menu-wrap {
+      position: relative;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid var(--accent-light);
+      transition: all 0.15s;
+    }
+
+    .user-avatar:hover {
+      transform: scale(1.07);
+    }
+
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      min-width: 200px;
+      padding: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-8px);
+      transition: all 0.18s ease;
+    }
+
+    .user-dropdown.open {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    .user-email {
+      padding: 8px 12px 12px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+
+    .user-email strong {
+      display: block;
+      color: var(--ink);
+      font-size: 0.88rem;
+      margin-bottom: 2px;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      color: var(--ink);
+      cursor: pointer;
+      transition: background 0.15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .dropdown-item:hover {
+      background: var(--surface);
+    }
+
+    .dropdown-item.danger {
+      color: var(--danger);
+    }
+
+    .dropdown-item.danger:hover {
+      background: #fdf0ef;
+    }
+
+    /* ── PASSWORD STRENGTH ── */
+    .strength-bar {
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border);
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.3s, background 0.3s;
+    }
+
+    .strength-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav {
+        padding: 16px 20px;
+      }
+
+      nav.scrolled {
+        padding: 12px 20px;
+      }
+
+      .nav-free-badge {
+        display: none;
+      }
+
+      footer {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+
+      .modal {
+        padding: 32px 24px 28px;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── NAV ── -->
+  <nav id="navbar">
+    <a href="#" class="nav-logo">Resume<span>AI</span></a>
+    <div class="nav-right">
+      <span class="nav-free-badge" id="freeCounter">5 free uses left</span>
+      <div id="guestNav" style="display:flex;align-items:center;gap:8px;">
+        <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
+        <button class="btn btn-primary" onclick="openModal('signup')">Get started free</button>
+      </div>
+      <div id="userNav" style="display:none;">
+        <div class="user-menu-wrap">
+          <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">?</div>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-email"><strong id="dropdownName">—</strong><span id="dropdownEmail">—</span></div>
+            <button class="dropdown-item" onclick="goToDashboard()">📄 My Resumes</button>
+            <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
+            <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">AI-powered resume optimization</div>
+      <h1>Your resume,<br /><em>perfectly tailored</em><br />to every role</h1>
+      <p class="hero-sub">
+        Upload your resume and a job description. Our AI scores your fit,
+        identifies gaps, and rewrites your resume to get past ATS filters.
+      </p>
+      <div class="hero-cta">
+        <button class="btn btn-primary" onclick="handleGetStarted()">
+          Optimize my resume →
+        </button>
+        <button class="btn btn-outline" onclick="openModal('login')">
+          Log in to save results
+        </button>
+      </div>
+      <p class="hero-note">No credit card required &nbsp;·&nbsp; <strong>5 free optimizations</strong> without an
+        account</p>
+
+      <div class="free-strip" id="freeStrip">
+        <div class="free-dots" id="freeDots"></div>
+        <span id="freeStripText">5 free uses available — no sign-up needed</span>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ── HOW IT WORKS ── -->
+  <section class="section" id="how">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">From upload to optimized in under a minute</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Upload your resume</h3>
+        <p>Paste your resume text or upload a PDF or DOCX file. We extract the content automatically.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Add the job description</h3>
+        <p>Paste the job posting you're targeting. The AI reads both side by side.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Get your ATS score</h3>
+        <p>See a match score out of 100, keyword gaps, and specific improvement suggestions.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Download optimized resume</h3>
+        <p>Get a fully rewritten resume tailored to the role — ready to send.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FEATURES ── -->
+  <section class="section" id="features">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need to land interviews</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>ATS Compatibility Score</h3>
+        <p>Get a real score showing how well your resume matches the job's requirements and keyword expectations.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Keyword Gap Analysis</h3>
+        <p>Instantly see which keywords from the job description are missing from your resume — and where to add them.
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✍️</div>
+        <h3>AI Resume Rewriting</h3>
+        <p>Our AI rewrites your bullet points and summary to match the role's language without fabricating experience.
+        </p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📥</div>
+        <h3>Download as PDF / DOCX</h3>
+        <p>Export your optimized resume in the format employers expect, cleanly formatted and ready to send.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📁</div>
+        <h3>Resume History</h3>
+        <p>Save all your optimized versions. Log in to keep a history of every role you've tailored your resume for.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Fast Processing</h3>
+        <p>Results arrive in under 30 seconds thanks to async AI processing — no waiting around on a spinning screen.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PRICING ── -->
+  <section class="pricing-section" id="pricing">
+    <div class="pricing-inner">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title" style="margin-bottom:40px;">Simple, honest pricing</h2>
+      <div class="pricing-cards">
+        <div class="pricing-card">
+          <div class="pricing-tier">Free</div>
+          <div class="pricing-price">$0 <span>forever</span></div>
+          <p class="pricing-desc">No account needed to get started</p>
+          <ul class="pricing-features">
+            <li>5 resume optimizations</li>
+            <li>ATS score + keyword gaps</li>
+            <li>Download optimized resume</li>
+            <li>PDF and DOCX upload</li>
+          </ul>
+          <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="handleGetStarted()">
+            Start for free
+          </button>
+        </div>
+        <div class="pricing-card featured">
+          <div class="pricing-tier">Pro</div>
+          <div class="pricing-price">$9 <span>/ month</span></div>
+          <p class="pricing-desc">For active job seekers</p>
+          <ul class="pricing-features">
+            <li>Unlimited optimizations</li>
+            <li>Full resume history</li>
+            <li>Priority AI processing</li>
+            <li>Cover letter generator</li>
+            <li>Multiple resume profiles</li>
+          </ul>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="openModal('signup')">
+            Create free account
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <span class="nav-logo" style="font-size:1.1rem;">Resume<span style="color:var(--accent)">AI</span></span>
+    <span>©
+      <script>document.write(new Date().getFullYear())</script> ResumeAI
+    </span>
+    <div style="display:flex;gap:20px;">
+      <a href="/privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="contact_us.html">Contact</a>
+    </div>
+  </footer>
+
+  <!-- ── AUTH MODAL ── -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+      <div class="modal-logo">Resume<span>AI</span></div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabLogin" onclick="switchTab('login')">Log in</button>
+        <button class="modal-tab" id="tabSignup" onclick="switchTab('signup')">Sign up</button>
+      </div>
+
+      <!-- Alert -->
+      <div class="modal-alert" id="modalAlert"></div>
+
+      <!-- LOGIN PANEL -->
+      <div class="tab-panel active" id="panelLogin">
+        <p class="modal-subtitle">Welcome back. Log in to access your resume history and saved results.</p>
+        <form onsubmit="handleLogin(event)" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email address</label>
+            <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"
+              required />
+            <div class="form-error" id="loginEmailError">Please enter a valid email address.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input class="form-input" type="password" id="loginPassword" placeholder="Your password"
+              autocomplete="current-password" required />
+            <div class="form-error" id="loginPasswordError">Password is required.</div>
+          </div>
+          <button type="submit" class="form-submit" id="loginBtn">
+            Log in
+            <div class="spinner"></div>
+          </button>
+        </form>
+        <div class="form-divider">or</div>
+        <p style="text-align:center;font-size:0.84rem;color:var(--muted)">
+          Don't have an account? <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500"
+            onclick="switchTab('signup');return false;">Sign up free →</a>
+        </p>
+      </div>
+
+      <!-- SIGNUP PANEL -->
+      <div class="tab-panel" id="panelSignup">
+        <p class="modal-subtitle">Create your free account to save optimizations and access your resume history.</p>
+        <form onsubmit="handleSignup(event)" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="signupName">Full name</label>
+            <input class="form-input" type="text" id="signupName" placeholder="Alex Johnson" autocomplete="name"
+              required />
+            <div class="form-error" id="signupNameError">Please enter your name.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupEmail">Email address</label>
+            <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email"
+              required />
+            <div class="form-error" id="signupEmailError">Please enter a valid email address.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupPassword">Password</label>
+            <input class="form-input" type="password" id="signupPassword" placeholder="At least 8 characters"
+              autocomplete="new-password" required oninput="checkStrength(this.value)" />
+            <div class="strength-bar">
+              <div class="strength-fill" id="strengthFill"></div>
+            </div>
+            <div class="strength-label" id="strengthLabel"></div>
+            <div class="form-error" id="signupPasswordError">Password must be at least 8 characters.</div>
+          </div>
+          <button type="submit" class="form-submit" id="signupBtn">
+            Create account
+            <div class="spinner"></div>
+          </button>
+        </form>
+        <div class="form-divider">or</div>
+        <p style="text-align:center;font-size:0.84rem;color:var(--muted)">
+          Already have an account? <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500"
+            onclick="switchTab('login');return false;">Log in →</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TOAST ── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ── JS ── -->
+  <script>
+    // ── CONFIG ──────────────────────────────────────────────────────
+    const API_BASE = '/api'; // Change to 'http://localhost:8000' for local dev without nginx
+    const FREE_LIMIT = 5;
+
+    // ── STATE ────────────────────────────────────────────────────────
+    let currentUser = null;
+
+    // for copy right dynamic year
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('year').textContent = new Date().getFullYear();
+      initFreeCounter();
+      initAuth();
+      initScrollNav();
+    });
+
+    // ── INIT ─────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      initFreeCounter();
+      initAuth();
+      initScrollNav();
+    });
+
+    // ── NAV SCROLL ───────────────────────────────────────────────────
+    function initScrollNav() {
+      const nav = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 40);
+      }, { passive: true });
+    }
+
+    // ── FREE COUNTER ─────────────────────────────────────────────────
+    function getFreeUses() {
+      return parseInt(localStorage.getItem('freeUses') || '0', 10);
+    }
+
+    function incrementFreeUses() {
+      const uses = getFreeUses() + 1;
+      localStorage.setItem('freeUses', uses);
+      updateFreeUI();
+      return uses;
+    }
+
+    function initFreeCounter() {
+      updateFreeUI();
+    }
+
+    function updateFreeUI() {
+      if (currentUser) {
+        document.getElementById('freeStrip').style.display = 'none';
+        document.getElementById('freeCounter').style.display = 'none';
+        return;
+      }
+
+      const used = getFreeUses();
+      const remaining = Math.max(FREE_LIMIT - used, 0);
+
+      // nav badge
+      const badge = document.getElementById('freeCounter');
+      badge.textContent = `${remaining} free ${remaining === 1 ? 'use' : 'uses'} left`;
+      badge.style.display = remaining > 0 ? 'inline-flex' : 'none';
+
+      // dots in hero
+      const dotsEl = document.getElementById('freeDots');
+      const stripText = document.getElementById('freeStripText');
+      dotsEl.innerHTML = '';
+      for (let i = 0; i < FREE_LIMIT; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'free-dot' + (i < used ? ' used' : '');
+        dotsEl.appendChild(dot);
+      }
+
+      if (remaining > 0) {
+        stripText.textContent = `${remaining} free ${remaining === 1 ? 'use' : 'uses'} remaining — no sign-up needed`;
+      } else {
+        stripText.innerHTML = 'Free uses exhausted — <strong style="color:var(--accent)">sign up free to continue</strong>';
+      }
+    }
+
+    function handleGetStarted() {
+      if (!currentUser) {
+        const used = getFreeUses();
+        if (used >= FREE_LIMIT) {
+          openModal('signup');
+          showAlert('modal', "You've used all 5 free optimizations. Create a free account to continue.", 'error');
+          return;
+        }
+      }
+      // Navigate to the optimizer tool (page to be built)
+      window.location.href = '/optimize.html';
+    }
+
+    // ── AUTH INIT ────────────────────────────────────────────────────
+    function initAuth() {
+      const token = localStorage.getItem('authToken');
+      const userData = localStorage.getItem('userData');
+      if (token && userData) {
+        try {
+          currentUser = JSON.parse(userData);
+          setLoggedIn(currentUser);
+        } catch (e) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('userData');
+        }
+      }
+    }
+
+    function setLoggedIn(user) {
+      currentUser = user;
+      document.getElementById('guestNav').style.display = 'none';
+      document.getElementById('userNav').style.display = 'block';
+
+      const initials = user.name
+        ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+        : user.email[0].toUpperCase();
+
+      document.getElementById('userAvatar').textContent = initials;
+      document.getElementById('dropdownName').textContent = user.name || 'User';
+      document.getElementById('dropdownEmail').textContent = user.email;
+
+      updateFreeUI();
+    }
+
+    function setLoggedOut() {
+      currentUser = null;
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      document.getElementById('guestNav').style.display = 'flex';
+      document.getElementById('userNav').style.display = 'none';
+      updateFreeUI();
+    }
+
+    // ── MODAL ────────────────────────────────────────────────────────
+    function openModal(tab = 'login') {
+      clearModalAlert();
+      switchTab(tab);
+      document.getElementById('modalOverlay').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    function switchTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('tabLogin').classList.toggle('active', isLogin);
+      document.getElementById('tabSignup').classList.toggle('active', !isLogin);
+      document.getElementById('panelLogin').classList.toggle('active', isLogin);
+      document.getElementById('panelSignup').classList.toggle('active', !isLogin);
+      clearModalAlert();
+      clearFormErrors();
+    }
+
+    // ── FORM HELPERS ─────────────────────────────────────────────────
+    function showFieldError(id, msg) {
+      const el = document.getElementById(id);
+      const input = document.getElementById(id.replace('Error', ''));
+      el.textContent = msg;
+      el.classList.add('visible');
+      if (input) input.classList.add('error');
+    }
+
+    function clearFormErrors() {
+      document.querySelectorAll('.form-error').forEach(el => el.classList.remove('visible'));
+      document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
+    }
+
+    function showAlert(ctx, msg, type = 'error') {
+      const el = document.getElementById('modalAlert');
+      el.textContent = msg;
+      el.className = 'modal-alert ' + type;
+    }
+
+    function clearModalAlert() {
+      const el = document.getElementById('modalAlert');
+      el.className = 'modal-alert';
+      el.textContent = '';
+    }
+
+    function setButtonLoading(id, loading) {
+      const btn = document.getElementById(id);
+      btn.classList.toggle('loading', loading);
+      btn.disabled = loading;
+    }
+
+    // ── PASSWORD STRENGTH ────────────────────────────────────────────
+    function checkStrength(val) {
+      const fill = document.getElementById('strengthFill');
+      const label = document.getElementById('strengthLabel');
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      const levels = [
+        { pct: 0, color: 'transparent', text: '' },
+        { pct: 25, color: '#e74c3c', text: 'Weak' },
+        { pct: 50, color: '#f39c12', text: 'Fair' },
+        { pct: 75, color: '#3498db', text: 'Good' },
+        { pct: 100, color: '#27ae60', text: 'Strong' },
+      ];
+
+      const lvl = val.length === 0 ? levels[0] : levels[score] || levels[1];
+      fill.style.width = lvl.pct + '%';
+      fill.style.background = lvl.color;
+      label.textContent = lvl.text;
+      label.style.color = lvl.color;
+    }
+
+    // ── LOGIN ────────────────────────────────────────────────────────
+    async function handleLogin(e) {
+      e.preventDefault();
+      clearFormErrors();
+      clearModalAlert();
+
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      let valid = true;
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldError('loginEmailError', 'Please enter a valid email address.');
+        valid = false;
+      }
+      if (!password) {
+        showFieldError('loginPasswordError', 'Password is required.');
+        valid = false;
+      }
+      if (!valid) return;
+
+      setButtonLoading('loginBtn', true);
+
+      try {
+        // FastAPI expects form-encoded data for OAuth2 password flow
+        const formData = new FormData();
+        formData.append('username', email);
+        formData.append('password', password);
+
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          body: new URLSearchParams({ username: email, password }),
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.detail || 'Invalid email or password.');
+        }
+
+        localStorage.setItem('authToken', data.access_token);
+        const user = { email, name: data.name || email.split('@')[0] };
+        localStorage.setItem('userData', JSON.stringify(user));
+
+        setLoggedIn(user);
+        closeModal();
+        showToast('Welcome back! 👋', 'success');
+
+      } catch (err) {
+        showAlert('modal', err.message || 'Login failed. Please try again.', 'error');
+      } finally {
+        setButtonLoading('loginBtn', false);
+      }
+    }
+
+    // ── SIGNUP ───────────────────────────────────────────────────────
+    async function handleSignup(e) {
+      e.preventDefault();
+      clearFormErrors();
+      clearModalAlert();
+
+      const name = document.getElementById('signupName').value.trim();
+      const email = document.getElementById('signupEmail').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      let valid = true;
+
+      if (!name) {
+        showFieldError('signupNameError', 'Please enter your name.');
+        valid = false;
+      }
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldError('signupEmailError', 'Please enter a valid email address.');
+        valid = false;
+      }
+      if (!password || password.length < 8) {
+        showFieldError('signupPasswordError', 'Password must be at least 8 characters.');
+        valid = false;
+      }
+      if (!valid) return;
+
+      setButtonLoading('signupBtn', true);
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.detail || 'Could not create account.');
+        }
+
+        // Auto-login after signup
+        localStorage.setItem('authToken', data.access_token);
+        const user = { email, name };
+        localStorage.setItem('userData', JSON.stringify(user));
+
+        setLoggedIn(user);
+        closeModal();
+        showToast('Account created! Welcome to ResumeAI 🎉', 'success');
+
+      } catch (err) {
+        showAlert('modal', err.message || 'Sign up failed. Please try again.', 'error');
+      } finally {
+        setButtonLoading('signupBtn', false);
+      }
+    }
+
+    // ── LOGOUT ───────────────────────────────────────────────────────
+    function logout() {
+      setLoggedOut();
+      closeDropdown();
+      showToast('Logged out successfully.');
+    }
+
+    // ── DROPDOWN ────────────────────────────────────────────────────
+    function toggleDropdown() {
+      document.getElementById('userDropdown').classList.toggle('open');
+    }
+
+    function closeDropdown() {
+      document.getElementById('userDropdown').classList.remove('open');
+    }
+
+    document.addEventListener('click', (e) => {
+      const wrap = document.querySelector('.user-menu-wrap');
+      if (wrap && !wrap.contains(e.target)) closeDropdown();
+    });
+
+    function goToDashboard() { window.location.href = '/dashboard.html'; }
+    function goToSettings() { window.location.href = '/settings.html'; }
+
+    // ── TOAST ────────────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg, type = '') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast ' + type;
+      clearTimeout(toastTimer);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => toast.classList.add('show'));
+      });
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+    }
+  </script>
+</body>
+
+</html>
