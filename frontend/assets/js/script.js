@@ -1,35 +1,19 @@
 /**
  * script.js  —  ResumeAI shared nav / auth / modal logic
- *
- * Covers:
- *   - Scroll nav shrink
- *   - Free-uses counter (localStorage)
- *   - Auth state (login / signup / logout)
- *   - Modal open / close / tab switching
- *   - Form validation helpers
- *   - Password strength meter
- *   - User avatar dropdown
- *   - Toast notifications
- *   - Contact form submission (used on contact_us.html)
- *
- * Include on every page AFTER the DOM markup:
- *   <script src="assets/js/script.js" defer></script>
  */
 
-// ── CONFIG ─────────────────────────────────────────────────────
-const API_BASE   = '/api';
+// ── CONFIG ──────────────────────────────────────────────────────
+const API_BASE = '/api';
 const FREE_LIMIT = 5;
 
-// ── STATE ───────────────────────────────────────────────────────
+// ── STATE ────────────────────────────────────────────────────────
 let currentUser = null;
 
-// ── BOOT ────────────────────────────────────────────────────────
+// ── BOOT ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Dynamic year in footer
-  const yearEl = document.getElementById('footerYear');
+  const yearEl = document.getElementById('footerYear') || document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  // Dynamic "last updated" on legal pages
   const updatedEl = document.getElementById('lastUpdated');
   if (updatedEl) {
     updatedEl.textContent = new Date().toLocaleDateString('en-US', {
@@ -39,11 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initScrollNav();
   initAuth();
-  initFreeCounter();
+  initPageActions();
   initContactForm();
 });
 
-// ── SCROLL NAV ──────────────────────────────────────────────────
+// ── SCROLL NAV ───────────────────────────────────────────────────
 function initScrollNav() {
   const nav = document.getElementById('navbar');
   if (!nav) return;
@@ -52,72 +36,49 @@ function initScrollNav() {
   }, { passive: true });
 }
 
-// ── FREE COUNTER ────────────────────────────────────────────────
-function getFreeUses() {
-  return parseInt(localStorage.getItem('freeUses') || '0', 10);
-}
+// ── PAGE ACTIONS (replaces initFreeCounter) ───────────────────────
+function initPageActions() {
+  const path = window.location.pathname;
+  const isIndex = path.endsWith('index.html') || path === '/' || path.endsWith('/');
 
-function incrementFreeUses() {
-  const uses = getFreeUses() + 1;
-  localStorage.setItem('freeUses', uses);
-  updateFreeUI();
-  return uses;
-}
-
-function initFreeCounter() {
-  updateFreeUI();
-}
-
-function updateFreeUI() {
-  const badge = document.getElementById('freeCounter');
-  if (!badge) return;
-
-  if (currentUser) {
-    badge.style.display = 'none';
-    return;
+  // Only open login modal when redirected to index with ?action=login
+  if (isIndex) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('action') === 'login') {
+      openModal('login');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }
 
-  const remaining = Math.max(FREE_LIMIT - getFreeUses(), 0);
-  badge.textContent = `${remaining} free ${remaining === 1 ? 'use' : 'uses'} left`;
-  badge.style.display = remaining > 0 ? 'inline-flex' : 'none';
-
-  // Hero strip (index.html only)
-  const dotsEl    = document.getElementById('freeDots');
-  const stripText = document.getElementById('freeStripText');
-  const freeStrip = document.getElementById('freeStrip');
-
-  if (dotsEl && stripText && freeStrip) {
-    dotsEl.innerHTML = '';
-    for (let i = 0; i < FREE_LIMIT; i++) {
-      const dot = document.createElement('div');
-      dot.className = 'free-dot' + (i < getFreeUses() ? ' used' : '');
-      dotsEl.appendChild(dot);
-    }
-    stripText.textContent = remaining > 0
-      ? `${remaining} free ${remaining === 1 ? 'use' : 'uses'} remaining — no sign-up needed`
-      : '';
-    if (remaining === 0) {
-      stripText.innerHTML = 'Free uses exhausted — <strong style="color:var(--accent)">sign up free to continue</strong>';
-    }
+  // Update nav badge only for logged-in users, only on non-dashboard pages
+  // (dashboard loads its own usage via loadDashboard())
+  const isDashboard = path.endsWith('dashboard.html');
+  if (!isDashboard && currentUser) {
+    updateNavBadge();
   }
 }
 
-// Used by index.html "Optimize my resume" button
-function handleGetStarted() {
-  if (!currentUser) {
-    const used = getFreeUses();
-    if (used >= FREE_LIMIT) {
-      openModal('signup');
-      showAlert('modal', "You've used all 5 free optimizations. Create a free account to continue.", 'error');
-      return;
+async function updateNavBadge() {
+  const token = localStorage.getItem('authToken');
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/resume/usage`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) return; // silently fail — never redirect from here
+    const data = await res.json();
+    const badge = document.getElementById('freeCounter');
+    if (badge) {
+      badge.textContent = `${data.uses_remaining} of ${data.limit} left`;
+      badge.style.display = 'inline-flex';
     }
-  }
-  window.location.href = 'optimize.html';
+  } catch (e) { /* silently fail */ }
 }
 
-// ── AUTH INIT ────────────────────────────────────────────────────
+// ── AUTH INIT ─────────────────────────────────────────────────────
 function initAuth() {
-  const token    = localStorage.getItem('authToken');
+  const token = localStorage.getItem('authToken');
   const userData = localStorage.getItem('userData');
   if (token && userData) {
     try {
@@ -134,22 +95,27 @@ function setLoggedIn(user) {
   currentUser = user;
 
   const guestNav = document.getElementById('guestNav');
-  const userNav  = document.getElementById('userNav');
+  const userNav = document.getElementById('userNav');
   if (guestNav) guestNav.style.display = 'none';
-  if (userNav)  userNav.style.display  = 'block';
+  if (userNav) userNav.style.display = 'block';
 
   const initials = user.name
     ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : user.email[0].toUpperCase();
 
-  const avatar       = document.getElementById('userAvatar');
-  const dropName     = document.getElementById('dropdownName');
-  const dropEmail    = document.getElementById('dropdownEmail');
-  if (avatar)    avatar.textContent    = initials;
-  if (dropName)  dropName.textContent  = user.name || 'User';
-  if (dropEmail) dropEmail.textContent = user.email;
+  const avatar = document.getElementById('userAvatar');
+  const dropName = document.getElementById('dropdownName');
+  const dropEmail = document.getElementById('dropdownEmail');
+  const welcomeName = document.getElementById('welcomeName');
 
-  updateFreeUI();
+  if (avatar) avatar.textContent = initials;
+  if (dropName) dropName.textContent = user.name || 'User';
+  if (dropEmail) dropEmail.textContent = user.email;
+  if (welcomeName) welcomeName.textContent = user.name || 'User';
+
+  // Hide free badge — updateNavBadge() will show the real count
+  const badge = document.getElementById('freeCounter');
+  if (badge) badge.style.display = 'none';
 }
 
 function setLoggedOut() {
@@ -158,14 +124,22 @@ function setLoggedOut() {
   localStorage.removeItem('userData');
 
   const guestNav = document.getElementById('guestNav');
-  const userNav  = document.getElementById('userNav');
+  const userNav = document.getElementById('userNav');
   if (guestNav) guestNav.style.display = 'flex';
-  if (userNav)  userNav.style.display  = 'none';
+  if (userNav) userNav.style.display = 'none';
 
-  updateFreeUI();
+  const badge = document.getElementById('freeCounter');
+  if (badge) badge.style.display = 'none';
+
+  // Redirect to index unless already there
+  const path = window.location.pathname;
+  const isIndex = path.endsWith('index.html') || path === '/' || path.endsWith('/');
+  if (!isIndex) {
+    window.location.href = 'index.html';
+  }
 }
 
-// ── MODAL ────────────────────────────────────────────────────────
+// ── MODAL ─────────────────────────────────────────────────────────
 function openModal(tab = 'login') {
   clearModalAlert();
   switchTab(tab);
@@ -194,14 +168,14 @@ document.addEventListener('keydown', e => {
 
 function switchTab(tab) {
   const isLogin = tab === 'login';
-  const tabLogin   = document.getElementById('tabLogin');
-  const tabSignup  = document.getElementById('tabSignup');
-  const panelLogin  = document.getElementById('panelLogin');
+  const tabLogin = document.getElementById('tabLogin');
+  const tabSignup = document.getElementById('tabSignup');
+  const panelLogin = document.getElementById('panelLogin');
   const panelSignup = document.getElementById('panelSignup');
 
-  if (tabLogin)   tabLogin.classList.toggle('active',   isLogin);
-  if (tabSignup)  tabSignup.classList.toggle('active',  !isLogin);
-  if (panelLogin)  panelLogin.classList.toggle('active',  isLogin);
+  if (tabLogin) tabLogin.classList.toggle('active', isLogin);
+  if (tabSignup) tabSignup.classList.toggle('active', !isLogin);
+  if (panelLogin) panelLogin.classList.toggle('active', isLogin);
   if (panelSignup) panelSignup.classList.toggle('active', !isLogin);
 
   clearModalAlert();
@@ -210,7 +184,7 @@ function switchTab(tab) {
 
 // ── FORM HELPERS ─────────────────────────────────────────────────
 function showFieldError(id, msg) {
-  const el    = document.getElementById(id);
+  const el = document.getElementById(id);
   const input = document.getElementById(id.replace('Error', ''));
   if (el) { el.textContent = msg; el.classList.add('visible'); }
   if (input) input.classList.add('error');
@@ -239,16 +213,16 @@ function setButtonLoading(id, loading) {
   btn.disabled = loading;
 }
 
-// ── PASSWORD STRENGTH ────────────────────────────────────────────
+// ── PASSWORD STRENGTH ─────────────────────────────────────────────
 function checkStrength(val) {
-  const fill  = document.getElementById('strengthFill');
+  const fill = document.getElementById('strengthFill');
   const label = document.getElementById('strengthLabel');
   if (!fill || !label) return;
 
   let score = 0;
-  if (val.length >= 8)          score++;
-  if (/[A-Z]/.test(val))        score++;
-  if (/[0-9]/.test(val))        score++;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
   if (/[^A-Za-z0-9]/.test(val)) score++;
 
   const levels = [
@@ -260,10 +234,10 @@ function checkStrength(val) {
   ];
 
   const lvl = val.length === 0 ? levels[0] : (levels[score] || levels[1]);
-  fill.style.width      = lvl.pct + '%';
+  fill.style.width = lvl.pct + '%';
   fill.style.background = lvl.color;
-  label.textContent     = lvl.text;
-  label.style.color     = lvl.color;
+  label.textContent = lvl.text;
+  label.style.color = lvl.color;
 }
 
 // ── LOGIN ─────────────────────────────────────────────────────────
@@ -272,7 +246,7 @@ async function handleLogin(e) {
   clearFormErrors();
   clearModalAlert();
 
-  const email    = document.getElementById('loginEmail').value.trim();
+  const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
   let valid = true;
 
@@ -289,7 +263,7 @@ async function handleLogin(e) {
   setButtonLoading('loginBtn', true);
 
   try {
-    const res  = await fetch(`${API_BASE}/auth/login`, {
+    const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
       body: new URLSearchParams({ username: email, password }),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
@@ -303,6 +277,7 @@ async function handleLogin(e) {
     setLoggedIn(user);
     closeModal();
     showToast('Welcome back! 👋', 'success');
+    setTimeout(() => window.location.href = 'dashboard.html', 800);
 
   } catch (err) {
     showAlert('modal', err.message || 'Login failed. Please try again.', 'error');
@@ -317,8 +292,8 @@ async function handleSignup(e) {
   clearFormErrors();
   clearModalAlert();
 
-  const name     = document.getElementById('signupName').value.trim();
-  const email    = document.getElementById('signupEmail').value.trim();
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
   const password = document.getElementById('signupPassword').value;
   let valid = true;
 
@@ -339,7 +314,7 @@ async function handleSignup(e) {
   setButtonLoading('signupBtn', true);
 
   try {
-    const res  = await fetch(`${API_BASE}/auth/register`, {
+    const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password })
@@ -353,6 +328,7 @@ async function handleSignup(e) {
     setLoggedIn(user);
     closeModal();
     showToast('Account created! Welcome to ResumeAI 🎉', 'success');
+    setTimeout(() => window.location.href = 'dashboard.html', 800);
 
   } catch (err) {
     showAlert('modal', err.message || 'Sign up failed. Please try again.', 'error');
@@ -365,12 +341,12 @@ async function handleSignup(e) {
 function logout() {
   setLoggedOut();
   closeDropdown();
-  showToast('Logged out successfully.');
 }
 
-// ── DROPDOWN ──────────────────────────────────────────────────────
+// ── DROPDOWN ─────────────────────────────────────────────────────
 function toggleDropdown() {
-  document.getElementById('userDropdown').classList.toggle('open');
+  const dd = document.getElementById('userDropdown');
+  if (dd) dd.classList.toggle('open');
 }
 
 function closeDropdown() {
@@ -384,15 +360,29 @@ document.addEventListener('click', e => {
 });
 
 function goToDashboard() { window.location.href = 'dashboard.html'; }
-function goToSettings()  { window.location.href = 'settings.html'; }
+function goToSettings() { window.location.href = 'settings.html'; }
 
-// ── TOAST ──────────────────────────────────────────────────────────
+// ── HELPERS ───────────────────────────────────────────────────────
+function getOrCreateGuestSession() {
+  let id = localStorage.getItem('guestSessionId');
+  if (!id) {
+    id = 'guest_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('guestSessionId', id);
+  }
+  return id;
+}
+
+function getFreeUses() {
+  return parseInt(localStorage.getItem('freeUses') || '0', 10);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────
 let toastTimer;
 function showToast(msg, type = '') {
   const toast = document.getElementById('toast');
   if (!toast) return;
   toast.textContent = msg;
-  toast.className   = 'toast ' + type;
+  toast.className = 'toast ' + type;
   clearTimeout(toastTimer);
   requestAnimationFrame(() => {
     requestAnimationFrame(() => toast.classList.add('show'));
@@ -400,7 +390,7 @@ function showToast(msg, type = '') {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
 }
 
-// ── CONTACT FORM (contact_us.html only) ───────────────────────────
+// ── CONTACT FORM ──────────────────────────────────────────────────
 function initContactForm() {
   const form = document.getElementById('contactForm');
   if (!form) return;
@@ -409,49 +399,31 @@ function initContactForm() {
     e.preventDefault();
     clearFormErrors();
 
-    const name    = document.getElementById('contactName').value.trim();
-    const email   = document.getElementById('contactEmail').value.trim();
+    const name = document.getElementById('contactName').value.trim();
+    const email = document.getElementById('contactEmail').value.trim();
     const subject = document.getElementById('contactSubject').value;
     const message = document.getElementById('contactMessage').value.trim();
     let valid = true;
 
-    if (!name) {
-      showFieldError('contactNameError', 'Please enter your name.');
-      valid = false;
-    }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showFieldError('contactEmailError', 'Please enter a valid email address.');
-      valid = false;
-    }
-    if (!subject) {
-      showFieldError('contactSubjectError', 'Please select a subject.');
-      valid = false;
-    }
-    if (!message || message.length < 10) {
-      showFieldError('contactMessageError', 'Please enter a message (at least 10 characters).');
-      valid = false;
-    }
+    if (!name) { showFieldError('contactNameError', 'Please enter your name.'); valid = false; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError('contactEmailError', 'Please enter a valid email address.'); valid = false; }
+    if (!subject) { showFieldError('contactSubjectError', 'Please select a subject.'); valid = false; }
+    if (!message || message.length < 10) { showFieldError('contactMessageError', 'Please enter a message (at least 10 characters).'); valid = false; }
     if (!valid) return;
 
     setButtonLoading('contactBtn', true);
 
     try {
-      // Replace with your actual contact endpoint
-      const res  = await fetch(`${API_BASE}/contact`, {
+      const res = await fetch(`${API_BASE}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, subject, message })
       });
-
       if (!res.ok) throw new Error('Failed to send message.');
-
-      // Show success state
       document.getElementById('contactFormFields').style.display = 'none';
       document.getElementById('contactSuccess').classList.add('visible');
-
     } catch (err) {
-      // Fallback: show toast (so the page still works without a backend)
-      showToast('Message sent! We\'ll be in touch soon. ✉️', 'success');
+      showToast("Message sent! We'll be in touch soon. ✉️", 'success');
       form.reset();
     } finally {
       setButtonLoading('contactBtn', false);

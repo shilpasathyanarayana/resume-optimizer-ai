@@ -1,33 +1,32 @@
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
-from dotenv import load_dotenv
-import os
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.orm import DeclarativeBase
+from app.config import settings
 
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-# Async engine
+# ── Engine ────────────────────────────────────────────────────────────────────
 engine = create_async_engine(
-    DATABASE_URL,
-    echo=True,        # logs all SQL queries — set to False in production
+    settings.DATABASE_URL,
+    echo=settings.APP_ENV == "development",
     pool_pre_ping=True,
-    pool_recycle=3600,
+    pool_size=10,
+    max_overflow=20,
 )
 
-# Async session factory
-AsyncSessionLocal = sessionmaker(
+# ── Session factory ───────────────────────────────────────────────────────────
+AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
+    autoflush=False,
+    autocommit=False,
 )
 
-# Base class for all models
-Base = declarative_base()
+# ── Base for all ORM models ───────────────────────────────────────────────────
+class Base(DeclarativeBase):
+    pass
 
 
-# Dependency — use this in all FastAPI routes
-async def get_db():
+# ── Dependency ────────────────────────────────────────────────────────────────
+async def get_db() -> AsyncSession:
     async with AsyncSessionLocal() as session:
         try:
             yield session

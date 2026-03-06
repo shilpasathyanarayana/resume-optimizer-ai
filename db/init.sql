@@ -16,10 +16,11 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255)     NOT NULL,
     is_active     TINYINT(1)       NOT NULL DEFAULT 1,
     is_verified   TINYINT(1)       NOT NULL DEFAULT 0,
+    monthly_usage TINYINT UNSIGNED NOT NULL DEFAULT 0,
     plan          ENUM('free','pro') NOT NULL DEFAULT 'free',
     created_at    DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
+    usage_reset_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     UNIQUE KEY uq_users_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -116,7 +117,7 @@ CREATE TABLE IF NOT EXISTS guest_usage (
 INSERT IGNORE INTO users (name, email, password_hash, is_active, is_verified, plan)
 VALUES (
     'Test User',
-    'test@example.com',
+    'shilpa.sathyanarayana5@gmail.com',
     '$2y$10$9gfDMG9HrHMHWyiMtLQWu.m5UAEXh1JxLusQDPshZOPjymT/4Yf.m',
     1,
     1,

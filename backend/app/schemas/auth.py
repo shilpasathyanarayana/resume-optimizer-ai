@@ -1,57 +1,64 @@
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
+from datetime import datetime
 
 
-# ── REGISTER ──────────────────────────────────────────────────
+# ── Register ──────────────────────────────────────────────────────────────────
+
 class RegisterRequest(BaseModel):
-    name:     str
-    email:    EmailStr
+    name: str
+    email: EmailStr
     password: str
 
     @field_validator("name")
-    def name_not_empty(cls, v):
-        if not v.strip():
-            raise ValueError("Name cannot be empty")
-        return v.strip()
+    @classmethod
+    def name_not_empty(cls, v: str) -> str:
+        v = v.strip()
+        if not v:
+            raise ValueError("Name must not be empty.")
+        return v
 
     @field_validator("password")
-    def password_strength(cls, v):
+    @classmethod
+    def password_min_length(cls, v: str) -> str:
         if len(v) < 8:
-            raise ValueError("Password must be at least 8 characters")
+            raise ValueError("Password must be at least 8 characters.")
         return v
 
 
 class RegisterResponse(BaseModel):
-    message: str
-    email:   str
+    access_token: str
+    token_type: str = "bearer"
+    name: str
+    email: EmailStr
 
 
-# ── LOGIN ──────────────────────────────────────────────────────
-class LoginRequest(BaseModel):
-    email:    EmailStr
-    password: str
-
+# ── Login ─────────────────────────────────────────────────────────────────────
+# FastAPI OAuth2PasswordRequestForm handles the form fields (username/password).
+# We return the same shape the frontend expects.
 
 class LoginResponse(BaseModel):
     access_token: str
-    token_type:   str = "bearer"
-    name:         str
-    email:        str
-    plan:         str
+    token_type: str = "bearer"
+    name: str
+    email: EmailStr
 
 
-# ── TOKEN ──────────────────────────────────────────────────────
-class TokenData(BaseModel):
-    user_id: Optional[int] = None
-    email:   Optional[str] = None
+# ── Current user (decoded from JWT) ──────────────────────────────────────────
+
+class TokenPayload(BaseModel):
+    sub: str          # user email
+    user_id: int
+    name: str
+    exp: Optional[datetime] = None
 
 
-# ── ME ─────────────────────────────────────────────────────────
-class UserMeResponse(BaseModel):
-    id:          int
-    name:        str
-    email:       str
-    plan:        str
+class CurrentUser(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    plan: str
+    is_active: bool
     is_verified: bool
 
     class Config:

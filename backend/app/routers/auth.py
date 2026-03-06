@@ -1,242 +1,163 @@
+"""
+routers/auth.py
+Exposes:
+  POST /api/auth/register  – create account, return JWT
+  POST /api/auth/login     – OAuth2 password flow, return JWT
+  GET  /api/auth/me        – return current user profile (protected)
+"""
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from passlib.context import CryptContext
-from jose import JWTError, jwt
-from datetime import datetime, timedelta
-from typing import Optional
-import os
+from sqlalchemy.exc import IntegrityError
 
-from database import get_db
-from models.user import User, UserLoginLog
-from schemas.auth import (
-    RegisterRequest, RegisterResponse,
-    LoginRequest, LoginResponse,
-    TokenData, UserMeResponse
+from app.database import get_db
+from app.schemas.auth import (
+    RegisterRequest,
+    RegisterResponse,
+    LoginResponse,
+    CurrentUser,
 )
-from services.email_service import send_verification_email
+from app.services.auth_service import (
+    get_user_by_email,
+    create_user,
+    verify_password,
+    create_access_token,
+    decode_access_token,
+    write_login_log,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# ── CONFIG ────────────────────────────────────────────────────
-SECRET_KEY  = os.getenv("SECRET_KEY", "changeme")
-ALGORITHM   = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 1440))
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
-# ── HELPERS ───────────────────────────────────────────────────
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+# ── helpers ───────────────────────────────────────────────────────────────────
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for")
+    return forwarded.split(",")[0].strip() if forwarded else request.client.host
 
 
-def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
-
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-
-def create_verification_token(email: str) -> str:
-    expire = datetime.utcnow() + timedelta(hours=24)
-    return jwt.encode({"sub": email, "exp": expire, "type": "verify"}, SECRET_KEY, algorithm=ALGORITHM)
-
-
-def decode_token(token: str) -> Optional[dict]:
-    try:
-        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    except JWTError:
-        return None
-
-
-def get_client_ip(request: Request) -> str:
-    forwarded = request.headers.get("X-Forwarded-For")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
-
-
-# ── CURRENT USER DEPENDENCY ──────────────────────────────────
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
-) -> Optional[User]:
-    if not token:
-        return None
-    payload = decode_token(token)
-    if not payload:
-        return None
-    user_id = payload.get("user_id")
-    if not user_id:
-        return None
-    result = await db.execute(select(User).where(User.id == user_id))
-    return result.scalar_one_or_none()
+    db: AsyncSession = Depends(get_db),
+) -> CurrentUser:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials.",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    payload = decode_access_token(token)
+    if payload is None:
+        raise credentials_exception
+
+    user = await get_user_by_email(db, payload.sub)
+    if user is None or not user.is_active:
+        raise credentials_exception
+
+    return CurrentUser.model_validate(user)
 
 
-async def require_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: AsyncSession = Depends(get_db)
-) -> User:
-    user = await get_current_user(token, db)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-    return user
+# ── REGISTER ──────────────────────────────────────────────────────────────────
 
-
-# ── REGISTER ─────────────────────────────────────────────────
-@router.post("/register", response_model=RegisterResponse, status_code=201)
+@router.post(
+    "/register",
+    response_model=RegisterResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a new user account",
+)
 async def register(
     body: RegisterRequest,
-    request: Request,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ):
-    # Check if email already exists
-    result = await db.execute(select(User).where(User.email == body.email))
-    existing = result.scalar_one_or_none()
-
+    # Check for duplicate email
+    existing = await get_user_by_email(db, body.email)
     if existing:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="An account with this email already exists."
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An account with this email already exists.",
         )
 
-    # Create user
-    new_user = User(
-        name=body.name,
-        email=body.email,
-        password_hash=hash_password(body.password),
-        is_active=True,
-        is_verified=False,
-    )
-    db.add(new_user)
-    await db.flush()  # get the ID without committing
-
-    # Send verification email
-    verify_token = create_verification_token(body.email)
     try:
-        send_verification_email(body.email, body.name, verify_token)
-    except Exception as e:
-        print(f"[register] Email send failed: {e}")
-        # Don't block registration if email fails — log and continue
-
-    await db.commit()
-
-    return RegisterResponse(
-        message="Account created! Please check your email to verify your account.",
-        email=body.email
-    )
-
-
-# ── LOGIN ─────────────────────────────────────────────────────
-@router.post("/login", response_model=LoginResponse)
-async def login(
-    body: LoginRequest,
-    request: Request,
-    db: AsyncSession = Depends(get_db)
-):
-    ip = get_client_ip(request)
-    user_agent = request.headers.get("User-Agent", "")
-
-    # Find user
-    result = await db.execute(select(User).where(User.email == body.email))
-    user = result.scalar_one_or_none()
-
-    # Log helper
-    async def log_attempt(status: str, reason: str = None):
-        log = UserLoginLog(
-            user_id=user.id if user else None,
-            email=body.email,
-            ip_address=ip,
-            user_agent=user_agent[:500] if user_agent else None,
-            status=status,
-            fail_reason=reason
+        user = await create_user(db, name=body.name, email=body.email, password=body.password)
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An account with this email already exists.",
         )
-        db.add(log)
-        await db.commit()
+
+    token = create_access_token(user)
+    return RegisterResponse(access_token=token, name=user.name, email=user.email)
+
+
+# ── LOGIN ─────────────────────────────────────────────────────────────────────
+
+@router.post(
+    "/login",
+    response_model=LoginResponse,
+    summary="Login with email + password (OAuth2 form)",
+)
+async def login(
+    request: Request,
+    form: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(get_db),
+):
+    ip = _client_ip(request)
+    ua = request.headers.get("user-agent", "")[:500]
+    email = form.username.lower().strip()
+
+    user = await get_user_by_email(db, email)
 
     # User not found
-    if not user:
-        await log_attempt("failed", "user_not_found")
+    if user is None:
+        await write_login_log(
+            db, email=email, status="failed",
+            ip_address=ip, user_agent=ua, fail_reason="user_not_found",
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password."
+            detail="Invalid email or password.",
         )
 
     # Wrong password
-    if not verify_password(body.password, user.password_hash):
-        await log_attempt("failed", "wrong_password")
+    if not verify_password(form.password, user.password_hash):
+        await write_login_log(
+            db, email=email, status="failed", user_id=user.id,
+            ip_address=ip, user_agent=ua, fail_reason="wrong_password",
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password."
+            detail="Invalid email or password.",
         )
 
-    # Not verified
-    if not user.is_verified:
-        await log_attempt("failed", "not_verified")
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Please verify your email before logging in. Check your inbox."
-        )
-
-    # Not active
+    # Inactive account
     if not user.is_active:
-        await log_attempt("failed", "account_disabled")
+        await write_login_log(
+            db, email=email, status="blocked", user_id=user.id,
+            ip_address=ip, user_agent=ua, fail_reason="account_inactive",
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Your account has been disabled."
+            detail="Your account has been deactivated.",
         )
 
-    # Success — create token
-    token = create_access_token({"user_id": user.id, "email": user.email})
-    await log_attempt("success")
-
-    return LoginResponse(
-        access_token=token,
-        token_type="bearer",
-        name=user.name,
-        email=user.email,
-        plan=user.plan.value
+    # Success
+    await write_login_log(
+        db, email=email, status="success", user_id=user.id,
+        ip_address=ip, user_agent=ua,
     )
 
-
-# ── VERIFY EMAIL ──────────────────────────────────────────────
-@router.get("/verify-email")
-async def verify_email(
-    token: str,
-    db: AsyncSession = Depends(get_db)
-):
-    payload = decode_token(token)
-
-    if not payload or payload.get("type") != "verify":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired verification link."
-        )
-
-    email = payload.get("sub")
-    result = await db.execute(select(User).where(User.email == email))
-    user = result.scalar_one_or_none()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found.")
-
-    if user.is_verified:
-        return {"message": "Email already verified. You can log in."}
-
-    user.is_verified = True
-    await db.commit()
-
-    return {"message": "Email verified successfully! You can now log in."}
+    token = create_access_token(user)
+    return LoginResponse(access_token=token, name=user.name, email=user.email)
 
 
-# ── GET CURRENT USER (/me) ────────────────────────────────────
-@router.get("/me", response_model=UserMeResponse)
-async def get_me(current_user: User = Depends(require_current_user)):
+# ── ME (protected) ────────────────────────────────────────────────────────────
+
+@router.get(
+    "/me",
+    response_model=CurrentUser,
+    summary="Return the currently logged-in user",
+)
+async def me(current_user: CurrentUser = Depends(get_current_user)):
     return current_user

@@ -10,11 +10,15 @@ python-dotenv==1.0.1
 python-multipart==0.0.12
 pydantic==2.9.2
 pydantic-settings==2.5.2
-# use anthropic for clause api
-anthropic==0.34.2
+pydantic[email]
+# use anthropic for claude api
+# anthropic==0.34.2
+# google-generativeai
+groq
 PyPDF2==3.0.1
 python-docx==1.1.2
 httpx==0.27.2
+bcrypt==4.2.0
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
 email-validator==2.1.0
