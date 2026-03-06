@@ -8,14 +8,16 @@ from pydantic import BaseModel
 from groq import Groq
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+
 from app.config import settings
 from app.database import get_db
 from jose import jwt, JWTError
+from typing import List, Optional
 
 router = APIRouter(prefix="/api/resume", tags=["resume"])
 
 FREE_MONTHLY_LIMIT = 5
-PRO_MONTHLY_LIMIT = 999999  # unlimited effectively
+PRO_MONTHLY_LIMIT = 999999
 
 security = HTTPBearer()
 
@@ -27,13 +29,14 @@ class AnalyzeRequest(BaseModel):
 
 class AnalyzeResponse(BaseModel):
     ats_score: int
-    missing_keywords: list[str]
-    improvements: list[str]
+    missing_keywords: List[str]
+    improvements: List[str]
     optimized_text: str
     uses_this_month: int
     uses_remaining: int
+    resume_id: Optional[int] = None
 
-# ── Auth Helper ────────────────────────────────────────────────────────────────
+# ── Auth ───────────────────────────────────────────────────────────────────────
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
@@ -59,22 +62,17 @@ async def get_current_user(
 # ── Usage Helpers ──────────────────────────────────────────────────────────────
 
 async def check_and_increment_usage(user, db: AsyncSession):
-    """Check monthly limit, reset if new month, increment count."""
     now = datetime.utcnow()
     reset_at = user.usage_reset_at
+    monthly_usage = user.monthly_usage
 
-    # Reset counter if it's been more than 30 days
     if (now - reset_at) > timedelta(days=30):
+        monthly_usage = 0
         await db.execute(
             text("UPDATE users SET monthly_usage = 0, usage_reset_at = :now WHERE id = :id"),
             {"now": now, "id": user.id}
         )
-        await db.commit()
-        monthly_usage = 0
-    else:
-        monthly_usage = user.monthly_usage
 
-    # Check limit based on plan
     limit = FREE_MONTHLY_LIMIT if user.plan == 'free' else PRO_MONTHLY_LIMIT
 
     if monthly_usage >= limit:
@@ -83,44 +81,96 @@ async def check_and_increment_usage(user, db: AsyncSession):
             detail=f"You've used all {limit} free optimizations this month. Upgrade to Pro for unlimited access."
         )
 
-    # Increment
+    new_usage = monthly_usage + 1
     await db.execute(
         text("UPDATE users SET monthly_usage = monthly_usage + 1 WHERE id = :id"),
         {"id": user.id}
     )
     await db.commit()
 
-    return monthly_usage + 1, max(limit - (monthly_usage + 1), 0)
+    return new_usage, max(limit - new_usage, 0)
 
-# ── Prompt ─────────────────────────────────────────────────────────────────────
+# ── Save Resume ────────────────────────────────────────────────────────────────
+
+async def save_resume(
+    db: AsyncSession,
+    user_id: int,
+    original_text: str,
+    job_description: str,
+    ats_score: int,
+    missing_keywords: list,
+    improvements: list,
+    optimized_text: str,
+    original_filename: str = None,
+    file_format: str = None,
+) -> int:
+    job_title = job_description.strip().split('\n')[0][:255] if job_description else None
+
+    result = await db.execute(
+        text("""
+            INSERT INTO resumes (
+                user_id, original_filename, original_text, job_title,
+                job_description, ats_score, missing_keywords, improvements,
+                optimized_text, file_format, status
+            ) VALUES (
+                :user_id, :original_filename, :original_text, :job_title,
+                :job_description, :ats_score, :missing_keywords, :improvements,
+                :optimized_text, :file_format, 'completed'
+            )
+        """),
+        {
+            "user_id": user_id,
+            "original_filename": original_filename,
+            "original_text": original_text,
+            "job_title": job_title,
+            "job_description": job_description,
+            "ats_score": ats_score,
+            "missing_keywords": json.dumps(missing_keywords),
+            "improvements": json.dumps(improvements),
+            "optimized_text": optimized_text,
+            "file_format": file_format,
+        }
+    )
+    await db.commit()
+    return result.lastrowid
+
+# ── Usage Endpoint ─────────────────────────────────────────────────────────────
+
+@router.get("/usage")
+async def get_usage(
+    user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    now = datetime.utcnow()
+    monthly_usage = user.monthly_usage
+    if (now - user.usage_reset_at) > timedelta(days=30):
+        monthly_usage = 0
+
+    limit = FREE_MONTHLY_LIMIT if user.plan == 'free' else PRO_MONTHLY_LIMIT
+    return {
+        "plan": user.plan,
+        "uses_this_month": monthly_usage,
+        "uses_remaining": max(limit - monthly_usage, 0),
+        "limit": limit,
+        "resets_at": (user.usage_reset_at + timedelta(days=30)).isoformat()
+    }
+
+# ── AI Service ─────────────────────────────────────────────────────────────────
 
 def build_prompt(resume_text: str, job_description: str) -> str:
-    return f"""You are an expert resume consultant and ATS optimization specialist.
-Analyze the resume against the job description and return ONLY a valid JSON object.
-No markdown fences, no explanation — just the raw JSON.
+    return f"""Analyze this resume against the job description and return a JSON object with exactly these fields:
+{{
+  "ats_score": <integer 0-100>,
+  "missing_keywords": ["keyword1", "keyword2"],
+  "improvements": ["suggestion1", "suggestion2"],
+  "optimized_text": "<full rewritten resume text>"
+}}
 
 RESUME:
 {resume_text}
 
 JOB DESCRIPTION:
-{job_description}
-
-Return this exact JSON structure:
-{{
-  "ats_score": <integer 0-100>,
-  "missing_keywords": ["keyword1", "keyword2"],
-  "improvements": ["specific suggestion 1", "specific suggestion 2"],
-  "optimized_text": "<full rewritten resume tailored to the role>"
-}}
-
-Rules:
-- ats_score honestly reflects keyword match and formatting quality
-- missing_keywords are the most impactful absent skills/terms from the job description
-- improvements are specific and actionable (4-6 items)
-- optimized_text is a complete, ready-to-use resume — do NOT truncate it
-- Never invent experience or credentials the candidate doesn't have"""
-
-# ── AI Call ────────────────────────────────────────────────────────────────────
+{job_description}"""
 
 async def run_ai(resume_text: str, job_description: str) -> dict:
     try:
@@ -153,28 +203,7 @@ async def run_ai(resume_text: str, job_description: str) -> dict:
     try:
         return json.loads(raw)
     except json.JSONDecodeError:
-        raise HTTPException(status_code=502, detail="AI returned an unexpected response. Please try again.")
-
-# ── Usage Status Endpoint ──────────────────────────────────────────────────────
-
-@router.get("/usage")
-async def get_usage(
-    user=Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    now = datetime.utcnow()
-    monthly_usage = user.monthly_usage
-    if (now - user.usage_reset_at) > timedelta(days=30):
-        monthly_usage = 0
-
-    limit = FREE_MONTHLY_LIMIT if user.plan == 'free' else PRO_MONTHLY_LIMIT
-    return {
-        "plan": user.plan,
-        "uses_this_month": monthly_usage,
-        "uses_remaining": max(limit - monthly_usage, 0),
-        "limit": limit,
-        "resets_at": (user.usage_reset_at + timedelta(days=30)).isoformat()
-    }
+        raise HTTPException(status_code=502, detail="AI returned invalid JSON. Please try again.")
 
 # ── Analyze Endpoint ───────────────────────────────────────────────────────────
 
@@ -192,6 +221,18 @@ async def analyze_resume(
     uses_this_month, uses_remaining = await check_and_increment_usage(user, db)
     result = await run_ai(body.resume_text, body.job_description)
 
+    resume_id = await save_resume(
+        db=db,
+        user_id=user.id,
+        original_text=body.resume_text,
+        job_description=body.job_description,
+        ats_score=int(result.get("ats_score", 0)),
+        missing_keywords=result.get("missing_keywords", []),
+        improvements=result.get("improvements", []),
+        optimized_text=result.get("optimized_text", ""),
+        file_format="txt",
+    )
+
     return AnalyzeResponse(
         ats_score=int(result.get("ats_score", 0)),
         missing_keywords=result.get("missing_keywords", []),
@@ -199,6 +240,7 @@ async def analyze_resume(
         optimized_text=result.get("optimized_text", ""),
         uses_this_month=uses_this_month,
         uses_remaining=uses_remaining,
+        resume_id=resume_id,
     )
 
 # ── Upload Endpoint ────────────────────────────────────────────────────────────
@@ -236,6 +278,19 @@ async def upload_resume(
     uses_this_month, uses_remaining = await check_and_increment_usage(user, db)
     result = await run_ai(resume_text, job_description)
 
+    resume_id = await save_resume(
+        db=db,
+        user_id=user.id,
+        original_text=resume_text,
+        job_description=job_description,
+        ats_score=int(result.get("ats_score", 0)),
+        missing_keywords=result.get("missing_keywords", []),
+        improvements=result.get("improvements", []),
+        optimized_text=result.get("optimized_text", ""),
+        original_filename=resume_file.filename,
+        file_format=ext if ext in ['pdf', 'docx'] else 'txt',
+    )
+
     return AnalyzeResponse(
         ats_score=int(result.get("ats_score", 0)),
         missing_keywords=result.get("missing_keywords", []),
@@ -243,4 +298,5 @@ async def upload_resume(
         optimized_text=result.get("optimized_text", ""),
         uses_this_month=uses_this_month,
         uses_remaining=uses_remaining,
+        resume_id=resume_id,
     )

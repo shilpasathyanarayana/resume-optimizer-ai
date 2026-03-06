@@ -60,7 +60,6 @@ CREATE TABLE IF NOT EXISTS user_login_log (
 CREATE TABLE IF NOT EXISTS resumes (
     id                  INT UNSIGNED        NOT NULL AUTO_INCREMENT,
     user_id             INT UNSIGNED        NULL,               -- NULL = guest (free, no account)
-    guest_session_id    VARCHAR(64)         NULL,               -- track guest by localStorage token
     original_filename   VARCHAR(255)        NULL,               -- uploaded file name
     original_text       LONGTEXT            NOT NULL,           -- extracted plain text from resume
     job_title           VARCHAR(255)        NULL,               -- parsed from job description
@@ -80,7 +79,6 @@ CREATE TABLE IF NOT EXISTS resumes (
     KEY idx_resumes_user_id     (user_id),
     KEY idx_resumes_status      (status),
     KEY idx_resumes_created     (created_at),
-    KEY idx_resumes_guest       (guest_session_id),
 
     CONSTRAINT fk_resumes_user
         FOREIGN KEY (user_id) REFERENCES users (id)

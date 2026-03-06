@@ -254,7 +254,6 @@
 
   <script>
     // Handle ?action=login redirect from optimize.html
-
     const params = new URLSearchParams(window.location.search);
     if (params.get('action') === 'login') {
       history.replaceState({}, '', 'dashbiard.html');

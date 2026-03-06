@@ -1,52 +1,42 @@
-/**
- * optimize.js  —  ResumeAI optimizer page logic
- * Requires script.js to be loaded first.
- */
 
-// ── STATE ─────────────────────────────────────────────────────────
+const API_BASE = '/api';
 let currentResults = null;
 
-// ── INIT ──────────────────────────────────────────────────────────
+// ── INIT ───────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Auth guard — must be logged in
   const token = localStorage.getItem('authToken');
   if (!token) {
+    // Not logged in — redirect to home and open login modal
     window.location.href = 'index.html?action=login';
     return;
   }
-
   syncUsage();
-  showPanel('input');
-  updateStepBar(1);
 });
 
 // ── USAGE (from backend) ───────────────────────────────────────────
 async function syncUsage() {
   const token = localStorage.getItem('authToken');
   if (!token) return;
-
   try {
-    const res = await fetch('/api/resume/usage', {
+    const res = await fetch(`${API_BASE}/resume/usage`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-
     if (res.status === 401) {
+      // Token expired
       localStorage.removeItem('authToken');
       localStorage.removeItem('userData');
       window.location.href = 'index.html?action=login';
       return;
     }
-
     if (!res.ok) return;
     const data = await res.json();
-    updateUsageBanner(data.uses_remaining, data.limit);
+    updateUsageUI(data.uses_remaining, data.limit, data.uses_this_month);
   } catch (e) { /* silently fail */ }
 }
 
-function updateUsageBanner(remaining, limit) {
+function updateUsageUI(remaining, limit, used) {
   const freeText = document.getElementById('freeText');
   if (!freeText) return;
-
   if (remaining <= 0) {
     freeText.innerHTML = '<span style="color:var(--danger)">No optimizations left this month — <a href="pricing.html" style="color:var(--accent)">upgrade to Pro</a></span>';
     const btn = document.getElementById('optimizeBtn');
@@ -56,26 +46,15 @@ function updateUsageBanner(remaining, limit) {
   }
 }
 
-// ── FILE UPLOAD ───────────────────────────────────────────────────
-function handleDragOver(e, zoneId) {
-  e.preventDefault();
-  const zone = document.getElementById(zoneId);
-  if (zone) zone.classList.add('dragover');
-}
-
-function handleDragLeave(e, zoneId) {
-  const zone = document.getElementById(zoneId);
-  if (zone) zone.classList.remove('dragover');
-}
-
+// ── FILE UPLOAD ────────────────────────────────────────────────────
+function handleDragOver(e, zoneId) { e.preventDefault(); document.getElementById(zoneId).classList.add('dragover'); }
+function handleDragLeave(e, zoneId) { document.getElementById(zoneId).classList.remove('dragover'); }
 function handleDrop(e, type) {
   e.preventDefault();
-  const zone = document.getElementById('resumeUploadZone');
-  if (zone) zone.classList.remove('dragover');
+  document.getElementById('resumeUploadZone').classList.remove('dragover');
   const file = e.dataTransfer.files[0];
   if (file) processFile(file);
 }
-
 function handleFileSelect(e) {
   const file = e.target.files[0];
   if (file) processFile(file);
@@ -83,109 +62,93 @@ function handleFileSelect(e) {
 
 function processFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
-
-  if (!['pdf', 'docx', 'doc'].includes(ext)) {
-    showToast('Only PDF or DOCX files are supported.', 'error');
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    showToast('File must be under 5MB.', 'error');
-    return;
-  }
+  if (!['pdf', 'docx', 'doc'].includes(ext)) { showToast('Only PDF or DOCX files are supported.', 'error'); return; }
+  if (file.size > 5 * 1024 * 1024) { showToast('File must be under 5MB.', 'error'); return; }
 
   const zone = document.getElementById('resumeUploadZone');
-  if (zone) {
-    zone.classList.add('has-file');
-    zone.innerHTML = `
-      <div class="upload-filename">📎 ${file.name}</div>
-      <div class="upload-formats" style="margin-top:4px;">Click to change file</div>
-    `;
-  }
+  zone.classList.add('has-file');
+  zone.innerHTML = `<div class="upload-filename">📎 ${file.name}</div><div class="upload-formats" style="margin-top:4px;">Click to change file</div>`;
 
-  window._resumeFile = file;
-
-  const resumeTextEl = document.getElementById('resumeText');
-  if (resumeTextEl) {
-    resumeTextEl.value = '';
-    resumeTextEl.placeholder = `"${file.name}" will be extracted by the server when you click Optimize.`;
+  // PDFs are binary — never read as text, send to backend for extraction
+  if (ext === 'pdf') {
+    window._resumeFile = file;
+    document.getElementById('resumeText').value = '';
+    document.getElementById('resumeText').placeholder = `"${file.name}" will be extracted by the server when you click Optimize.`;
     updateCharCount('resumeText', 'resumeCount');
+    showToast(`"${file.name}" ready — text will be extracted automatically`, 'success');
+    return;
   }
 
-  showToast(`"${file.name}" ready`, 'success');
+  // DOCX — try reading as plain text (works for simple cases)
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const text = e.target.result;
+    // DOCX raw text will contain readable content mixed with XML
+    // Strip obvious XML tags to get something usable
+    const cleaned = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (cleaned.length > 50) {
+      document.getElementById('resumeText').value = cleaned;
+      updateCharCount('resumeText', 'resumeCount');
+      showToast(`"${file.name}" loaded`, 'success');
+    } else {
+      // Fallback: send to backend
+      window._resumeFile = file;
+      document.getElementById('resumeText').placeholder = `"${file.name}" will be extracted by the server when you click Optimize.`;
+      showToast(`"${file.name}" ready`, 'success');
+    }
+  };
+  reader.onerror = () => showToast('Could not read file. Please paste your resume text instead.', 'error');
+  reader.readAsText(file);
+  window._resumeFile = file;
 }
 
-// ── CHAR COUNT ────────────────────────────────────────────────────
 function updateCharCount(textareaId, countId) {
-  const textarea = document.getElementById(textareaId);
-  const counter = document.getElementById(countId);
-  if (textarea && counter) {
-    counter.textContent = `${textarea.value.length.toLocaleString()} characters`;
-  }
+  const len = document.getElementById(textareaId).value.length;
+  document.getElementById(countId).textContent = `${len.toLocaleString()} characters`;
 }
 
-// ── VALIDATE ──────────────────────────────────────────────────────
+// ── VALIDATE ───────────────────────────────────────────────────────
 function validateInputs() {
-  const resumeText = (document.getElementById('resumeText')?.value || '').trim();
-  const jobText = (document.getElementById('jobText')?.value || '').trim();
+  const resumeText = document.getElementById('resumeText').value.trim();
+  const jobText = document.getElementById('jobText').value.trim();
 
+  // Accept either a pasted text OR an uploaded file
   if (!resumeText && !window._resumeFile) {
-    showToast('Please upload or paste your resume.', 'error');
-    return false;
+    showToast('Please upload or paste your resume.', 'error'); return false;
   }
   if (!window._resumeFile && resumeText.length < 50) {
-    showToast('Resume text seems too short.', 'error');
-    return false;
+    showToast('Resume text seems too short.', 'error'); return false;
   }
-  if (!jobText) {
-    showToast('Please paste the job description.', 'error');
-    return false;
-  }
-  if (jobText.length < 50) {
-    showToast('Job description seems too short.', 'error');
-    return false;
-  }
+  if (!jobText) { showToast('Please paste the job description.', 'error'); return false; }
+  if (jobText.length < 50) { showToast('Job description seems too short.', 'error'); return false; }
   return true;
 }
 
-// ── OPTIMIZE ──────────────────────────────────────────────────────
+// ── OPTIMIZE ───────────────────────────────────────────────────────
 async function startOptimize() {
-  const token = localStorage.getItem('authToken');
-  if (!token) {
-    window.location.href = 'index.html?action=login';
-    return;
-  }
-
   if (!validateInputs()) return;
-
   showPanel('processing');
   updateStepBar(2);
-  await animateProgressSteps();
+  await runOptimization();
 }
 
-async function animateProgressSteps() {
-  const steps = [
-    { id: 'pStep1', statusId: 'pStep1Status', duration: 1500 },
-    { id: 'pStep2', statusId: 'pStep2Status', duration: 2000 },
-    { id: 'pStep3', statusId: 'pStep3Status', duration: 1500 },
-    { id: 'pStep4', statusId: 'pStep4Status', duration: 0 },
-  ];
+async function runOptimization() {
+  setStepState('pStep1', 'active', 'pStep1Status', 'In progress...');
+  await delay(1500);
+  setStepState('pStep1', 'done', 'pStep1Status', 'Done ✓');
 
-  // Start API call immediately in parallel
-  const apiPromise = callOptimizeAPI();
+  setStepState('pStep2', 'active', 'pStep2Status', 'In progress...');
+  await delay(2000);
+  setStepState('pStep2', 'done', 'pStep2Status', 'Done ✓');
 
-  // Animate first 3 steps with delays
-  for (let i = 0; i < steps.length - 1; i++) {
-    const step = steps[i];
-    setStepState(step.id, 'active', step.statusId, 'In progress...');
-    await delay(step.duration);
-    setStepState(step.id, 'done', step.statusId, 'Done ✓');
-  }
+  setStepState('pStep3', 'active', 'pStep3Status', 'In progress...');
+  await delay(1500);
+  setStepState('pStep3', 'done', 'pStep3Status', 'Done ✓');
 
-  // Final step — wait for actual API result
   setStepState('pStep4', 'active', 'pStep4Status', 'Rewriting with AI...');
+
   try {
-    const result = await apiPromise;
+    const result = await callAI();
     setStepState('pStep4', 'done', 'pStep4Status', 'Done ✓');
     await delay(500);
     showResults(result);
@@ -198,27 +161,30 @@ async function animateProgressSteps() {
 
 function setStepState(stepId, state, statusId, statusText) {
   const el = document.getElementById(stepId);
-  if (el) { el.classList.remove('active', 'done'); if (state) el.classList.add(state); }
-  const statusEl = document.getElementById(statusId);
-  if (statusEl) statusEl.textContent = statusText;
+  el.classList.remove('active', 'done');
+  if (state) el.classList.add(state);
+  document.getElementById(statusId).textContent = statusText;
 }
 
-// ── API CALL ──────────────────────────────────────────────────────
-async function callOptimizeAPI() {
+async function callAI() {
+  const resumeText = document.getElementById('resumeText').value.trim();
+  const jobText = document.getElementById('jobText').value.trim();
   const token = localStorage.getItem('authToken');
-  if (!token) throw new Error('Please log in to continue.');
+
+  if (!token) {
+    window.location.href = 'index.html?action=login';
+    throw new Error('Please log in to continue.');
+  }
 
   const authHeader = { 'Authorization': `Bearer ${token}` };
-  const jobText = document.getElementById('jobText').value.trim();
-  const resumeText = document.getElementById('resumeText').value.trim();
 
-  // PDF/DOCX file upload
-  if (window._resumeFile) {
+  // PDF upload — send as FormData
+  if (window._resumeFile && window._resumeFile.name.toLowerCase().endsWith('.pdf')) {
     const formData = new FormData();
     formData.append('resume_file', window._resumeFile);
     formData.append('job_description', jobText);
 
-    const res = await fetch('/api/resume/upload', {
+    const res = await fetch(`${API_BASE}/resume/upload`, {
       method: 'POST',
       headers: authHeader,
       body: formData
@@ -226,19 +192,15 @@ async function callOptimizeAPI() {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      if (res.status === 401) { window.location.href = 'index.html?action=login'; throw new Error('Session expired.'); }
+      if (res.status === 401) { window.location.href = 'index.html?action=login'; throw new Error('Session expired. Please log in again.'); }
       if (res.status === 429) throw new Error(err.detail || 'Monthly limit reached. Upgrade to Pro for unlimited access.');
-      throw new Error(err.detail || `Server error (${res.status}).`);
+      throw new Error(err.detail || `Server error (${res.status}). Please try again.`);
     }
-
-    const data = await res.json();
-    // Update usage banner after successful call
-    if (data.uses_remaining !== undefined) updateUsageBanner(data.uses_remaining, 5);
-    return data;
+    return await res.json();
   }
 
   // Text-based submission
-  const res = await fetch('/api/resume/analyze', {
+  const res = await fetch(`${API_BASE}/resume/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeader },
     body: JSON.stringify({ resume_text: resumeText, job_description: jobText })
@@ -246,149 +208,132 @@ async function callOptimizeAPI() {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    if (res.status === 401) { window.location.href = 'index.html?action=login'; throw new Error('Session expired.'); }
+    if (res.status === 401) { window.location.href = 'index.html?action=login'; throw new Error('Session expired. Please log in again.'); }
     if (res.status === 429) throw new Error(err.detail || 'Monthly limit reached. Upgrade to Pro for unlimited access.');
-    throw new Error(err.detail || `Server error (${res.status}).`);
+    throw new Error(err.detail || `Server error (${res.status}). Please try again.`);
   }
 
-  const data = await res.json();
-  if (data.uses_remaining !== undefined) updateUsageBanner(data.uses_remaining, 5);
-  return data;
+  return await res.json();
 }
 
-// ── RESULTS ───────────────────────────────────────────────────────
+async function pollJob(initialData) {
+  const jobId = initialData.job_id;
+  for (let i = 0; i < 30; i++) {
+    await delay(2000);
+    const res = await fetch(`${API_BASE}/jobs/${jobId}`);
+    const data = await res.json();
+    if (data.status === 'completed') return data;
+    if (data.status === 'failed') throw new Error(data.error_message || 'Processing failed.');
+  }
+  throw new Error('Processing timed out. Please try again.');
+}
+
+// ── RESULTS ────────────────────────────────────────────────────────
 function showResults(data) {
   currentResults = data;
 
-  // ATS score
+  // Update usage counter from response
+  if (data.uses_remaining !== undefined) {
+    updateUsageUI(data.uses_remaining, 5, data.uses_this_month);
+  }
+
   const score = data.ats_score || 0;
   const scoreEl = document.getElementById('atsScore');
-  if (scoreEl) {
-    scoreEl.textContent = score;
-    scoreEl.className = 'ats-number ' + (score >= 75 ? 'high' : score >= 50 ? 'mid' : 'low');
-  }
+  scoreEl.textContent = score;
+  scoreEl.className = 'ats-number ' + (score >= 75 ? 'high' : score >= 50 ? 'mid' : 'low');
 
-  // Missing keywords
   const keywords = data.missing_keywords || [];
-  const keywordsPanel = document.getElementById('keywordsPanel');
-  const keywordsList = document.getElementById('keywordsList');
-  if (keywordsPanel && keywordsList) {
-    if (keywords.length > 0) {
-      keywordsList.innerHTML = keywords.map(k => `<span class="keyword-tag">⚠ ${k}</span>`).join('');
-      keywordsPanel.style.display = 'block';
-    } else {
-      keywordsPanel.style.display = 'none';
-    }
+  if (keywords.length > 0) {
+    document.getElementById('keywordsList').innerHTML = keywords.map(k => `<span class="keyword-tag">⚠ ${k}</span>`).join('');
+    document.getElementById('keywordsPanel').style.display = 'block';
   }
 
-  // Improvements
   const improvements = data.improvements || [];
-  const improvementsPanel = document.getElementById('improvementsPanel');
-  const improvementsList = document.getElementById('improvementsList');
-  if (improvementsPanel && improvementsList) {
-    if (improvements.length > 0) {
-      improvementsList.innerHTML = improvements.map(i => `<div class="improvement-item">${i}</div>`).join('');
-      improvementsPanel.style.display = 'block';
-    } else {
-      improvementsPanel.style.display = 'none';
-    }
+  if (improvements.length > 0) {
+    document.getElementById('improvementsList').innerHTML = improvements.map(i => `<div class="improvement-item">${i}</div>`).join('');
+    document.getElementById('improvementsPanel').style.display = 'block';
   }
 
-  // Original vs Optimized
-  const resumeTextEl = document.getElementById('resumeText');
-  const originalContent = document.getElementById('originalContent');
-  const optimizedContent = document.getElementById('optimizedContent');
-  if (originalContent) originalContent.textContent = resumeTextEl?.value.trim() || '[Extracted from uploaded file]';
-  if (optimizedContent) optimizedContent.textContent = data.optimized_text || '';
+  document.getElementById('originalContent').textContent = document.getElementById('resumeText').value.trim() || '[Extracted from uploaded file]';
+  document.getElementById('optimizedContent').textContent = data.optimized_text || '';
 
   showPanel('results');
   updateStepBar(3);
 }
 
-// ── DOWNLOAD ──────────────────────────────────────────────────────
+// ── DOWNLOAD & COPY ────────────────────────────────────────────────
 function downloadTxt() {
   if (!currentResults) return;
-  const text = currentResults.optimized_text || '';
-  const blob = new Blob([text], { type: 'text/plain' });
+  const blob = new Blob([currentResults.optimized_text || ''], { type: 'text/plain' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'optimized-resume.txt';
-  a.click();
+  a.href = url; a.download = 'optimized-resume.txt'; a.click();
   URL.revokeObjectURL(url);
-  showToast('TXT downloaded!', 'success');
+  showToast('Downloaded!', 'success');
 }
 
-async function downloadDocx() {
-  if (!currentResults) return;
-  downloadTxt(); // fallback until DOCX endpoint is ready
-}
-
-// ── COPY ──────────────────────────────────────────────────────────
 function copyText(elementId) {
-  const el = document.getElementById(elementId);
-  if (!el) return;
-  navigator.clipboard.writeText(el.textContent).then(() => {
-    showToast('Copied to clipboard!', 'success');
-  }).catch(() => {
-    showToast('Copy failed — please select and copy manually.', 'error');
-  });
+  navigator.clipboard.writeText(document.getElementById(elementId).textContent)
+    .then(() => showToast('Copied!', 'success'))
+    .catch(() => showToast('Copy failed.', 'error'));
 }
 
-// ── PANEL SWITCHING ───────────────────────────────────────────────
+// ── PANEL UTILS ────────────────────────────────────────────────────
 function showPanel(panel) {
-  ['inputPanel', 'processingPanel', 'resultsPanel'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = id === `${panel}Panel` ? 'block' : 'none';
-  });
+  document.getElementById('inputPanel').style.display = panel === 'input' ? 'block' : 'none';
+  document.getElementById('processingPanel').style.display = panel === 'processing' ? 'block' : 'none';
+  document.getElementById('resultsPanel').style.display = panel === 'results' ? 'block' : 'none';
 }
 
 function updateStepBar(activeStep) {
   for (let i = 1; i <= 3; i++) {
     const el = document.getElementById(`step${i}`);
-    if (!el) continue;
     el.classList.remove('active', 'done');
     if (i < activeStep) el.classList.add('done');
     else if (i === activeStep) el.classList.add('active');
   }
 }
 
-// ── RESET ─────────────────────────────────────────────────────────
 function resetPage() {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById(`pStep${i}`);
+    if (el) { el.className = 'progress-step'; document.getElementById(`pStep${i}Status`).textContent = 'Waiting'; }
+  }
   currentResults = null;
   window._resumeFile = null;
 
-  for (let i = 1; i <= 4; i++) {
-    const el = document.getElementById(`pStep${i}`);
-    const statusEl = document.getElementById(`pStep${i}Status`);
-    if (el) el.classList.remove('active', 'done');
-    if (statusEl) statusEl.textContent = 'Waiting';
-  }
-
   const zone = document.getElementById('resumeUploadZone');
-  if (zone) {
-    zone.classList.remove('has-file');
-    zone.innerHTML = `
-      <div class="upload-icon">📎</div>
-      <div class="upload-text"><strong>Click to upload</strong> or drag & drop</div>
-      <div class="upload-formats">PDF or DOCX · Max 5MB</div>
-    `;
-    zone.onclick = () => document.getElementById('resumeFile')?.click();
-  }
+  zone.classList.remove('has-file');
+  zone.innerHTML = `<div class="upload-icon">📎</div><div class="upload-text"><strong>Click to upload</strong> or drag & drop</div><div class="upload-formats">PDF or DOCX · Max 5MB</div>`;
+  zone.onclick = () => document.getElementById('resumeFile').click();
 
-  const resumeTextEl = document.getElementById('resumeText');
-  const jobTextEl = document.getElementById('jobText');
-  if (resumeTextEl) { resumeTextEl.value = ''; resumeTextEl.placeholder = 'Paste your resume text here...'; }
-  if (jobTextEl) jobTextEl.value = '';
-
+  document.getElementById('resumeText').value = '';
+  document.getElementById('jobText').value = '';
   updateCharCount('resumeText', 'resumeCount');
   updateCharCount('jobText', 'jobCount');
-  syncUsage();
+  document.getElementById('keywordsPanel').style.display = 'none';
+  document.getElementById('improvementsPanel').style.display = 'none';
 
   showPanel('input');
   updateStepBar(1);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── UTILS ─────────────────────────────────────────────────────────
-function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+// ── GUEST SESSION ──────────────────────────────────────────────────
+function getOrCreateGuestSession() {
+  let id = localStorage.getItem('guestSessionId');
+  if (!id) { id = 'guest_' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('guestSessionId', id); }
+  return id;
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+let toastTimer;
+function showToast(msg, type = '') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = 'toast ' + type;
+  clearTimeout(toastTimer);
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+}

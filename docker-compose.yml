@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
     environment:
-      - SECRET_KEY=${SECRET_KEY}
+    - SECRET_KEY=${SECRET_KEY}
     depends_on:
       - redis
       - db
