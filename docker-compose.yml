@@ -10,7 +10,9 @@ services:
     env_file:
       - .env
     environment:
-    - SECRET_KEY=${SECRET_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
     depends_on:
       - redis
       - db
@@ -70,6 +72,19 @@ services:
     depends_on:
       - redis
       - db
-      
+  
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    container_name: resume-optimizer-stripe-cli
+    env_file:
+      - ./backend/.env          # ← adjust path to where your .env lives
+    command: >
+      listen
+      --api-key ${STRIPE_SECRET_KEY}
+      --forward-to http://backend:8000/api/payments/webhook
+    depends_on:
+      - backend
+    profiles:
+      - stripe                  # only starts with: docker compose --profile stripe up
 volumes:
   mariadb_data:

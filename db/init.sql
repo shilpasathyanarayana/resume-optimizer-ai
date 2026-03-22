@@ -121,3 +121,29 @@ VALUES (
     1,
     'free'
 );
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id                      INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    user_id                 INT UNSIGNED    NOT NULL,
+    stripe_customer_id      VARCHAR(64)     NULL,
+    stripe_subscription_id  VARCHAR(64)     NULL,
+    stripe_price_id         VARCHAR(64)     NULL,
+    plan    ENUM('free','pro_monthly','pro_yearly')                     NOT NULL DEFAULT 'free',
+    status  ENUM('active','trialing','past_due','cancelled','inactive') NOT NULL DEFAULT 'inactive',
+    is_pro                  TINYINT(1)      NOT NULL DEFAULT 0,
+    current_period_start    DATETIME        NULL,
+    current_period_end      DATETIME        NULL,
+    cancel_at_period_end    TINYINT(1)      NOT NULL DEFAULT 0,
+    created_at              DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at              DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    UNIQUE  KEY uq_subscriptions_user_id           (user_id),
+    KEY         idx_subscriptions_customer_id      (stripe_customer_id),
+    KEY         idx_subscriptions_subscription_id  (stripe_subscription_id),
+
+    CONSTRAINT fk_subscriptions_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

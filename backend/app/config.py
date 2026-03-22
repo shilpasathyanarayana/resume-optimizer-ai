@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    # STRIPE FIELDS TO ADD:
+    STRIPE_SECRET_KEY:           str = ""   # sk_test_...  /  sk_live_...
+    STRIPE_PUBLISHABLE_KEY:      str = ""   # pk_test_...  /  pk_live_...
+    STRIPE_WEBHOOK_SECRET:       str = ""   # whsec_...    (from Stripe CLI or Dashboard)
+    STRIPE_PRICE_ID_PRO_MONTHLY: str = ""   # price_...    (run stripe_setup.py to generate)
+    STRIPE_PRICE_ID_PRO_YEARLY:  str = ""   # price_...    (run stripe_setup.py to generate)
+    
     @property
     def DATABASE_URL(self) -> str:
         return (
