@@ -24,6 +24,7 @@ from app.services.auth_service import (
     create_access_token,
     decode_access_token,
     write_login_log,
+    hash_password,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -161,3 +162,133 @@ async def login(
 )
 async def me(current_user: CurrentUser = Depends(get_current_user)):
     return current_user
+
+
+from sqlalchemy import text
+from app.services.auth_service import hash_password   # add to existing import
+ 
+ 
+# ── UPDATE PROFILE (name and/or email) ────────────────────────────────────────
+
+@router.patch(
+    "/update-profile",
+    summary="Update name or email",
+)
+async def update_profile(
+    request: Request,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    body = await request.json()
+
+    new_name  = (body.get("name")  or "").strip() or None
+    new_email = (body.get("email") or "").strip() or None
+    password  = body.get("current_password")
+
+    if not new_name and not new_email:
+        raise HTTPException(status_code=422, detail="Nothing to update.")
+
+    result = await db.execute(
+        text("SELECT id, name, email, password_hash FROM users WHERE id = :id"),
+        {"id": current_user.id}
+    )
+    user = result.fetchone()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    # ── Update name ──────────────────────────────────────────────
+    if new_name:
+        if len(new_name) < 2:
+            raise HTTPException(status_code=422, detail="Name must be at least 2 characters.")
+        await db.execute(
+            text("UPDATE users SET name = :name WHERE id = :id"),
+            {"name": new_name, "id": current_user.id}
+        )
+        await db.commit()
+        return {"message": "Name updated successfully.", "name": new_name}
+
+    # ── Update email (requires password confirmation) ─────────────
+    if new_email:
+        if not password:
+            raise HTTPException(status_code=422, detail="Current password is required to change email.")
+        if not verify_password(password, user.password_hash):
+            raise HTTPException(status_code=401, detail="Incorrect password.")
+
+        existing = await db.execute(
+            text("SELECT id FROM users WHERE email = :email AND id != :id"),
+            {"email": new_email, "id": current_user.id}
+        )
+        if existing.fetchone():
+            raise HTTPException(status_code=409, detail="This email is already in use.")
+
+        await db.execute(
+            text("UPDATE users SET email = :email WHERE id = :id"),
+            {"email": new_email, "id": current_user.id}
+        )
+        await db.commit()
+        return {"message": "Email updated successfully.", "email": new_email}
+
+
+# ── CHANGE PASSWORD ───────────────────────────────────────────────────────────
+
+@router.post(
+    "/change-password",
+    summary="Change password — requires current password",
+)
+async def change_password(
+    request: Request,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    body = await request.json()
+
+    current_pw = body.get("current_password", "")
+    new_pw     = body.get("new_password", "")
+
+    if not current_pw:
+        raise HTTPException(status_code=422, detail="Current password is required.")
+    if not new_pw or len(new_pw) < 8:
+        raise HTTPException(status_code=422, detail="New password must be at least 8 characters.")
+    if current_pw == new_pw:
+        raise HTTPException(status_code=422, detail="New password must be different from current password.")
+
+    result = await db.execute(
+        text("SELECT password_hash FROM users WHERE id = :id"),
+        {"id": current_user.id}
+    )
+    row = result.fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    if not verify_password(current_pw, row.password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect current password.")
+
+    new_hash = hash_password(new_pw)
+    await db.execute(
+        text("UPDATE users SET password_hash = :hash WHERE id = :id"),
+        {"hash": new_hash, "id": current_user.id}
+    )
+    await db.commit()
+    return {"message": "Password changed successfully."}
+ 
+ 
+# ── DELETE ACCOUNT ────────────────────────────────────────────────────────────
+ 
+@router.delete(
+    "/delete-account",
+    summary="Permanently delete account and all associated data",
+)
+async def delete_account(
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    user_id = current_user.id
+ 
+    # Delete in dependency order to respect FK constraints
+    await db.execute(text("DELETE FROM resumes       WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM user_login_logs WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM subscriptions WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM users          WHERE id      = :id"), {"id": user_id})
+    await db.commit()
+ 
+    return {"message": "Account deleted successfully."}

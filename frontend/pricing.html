@@ -1,489 +1,765 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Resume Optimizer — Upgrade to Pro</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resume Optimizer — Upgrade to Pro</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  :root {
-    --ink:      #0f0d0a;
-    --cream:    #faf7f2;
-    --sand:     #ede9e0;
-    --gold:     #c9a84c;
-    --gold-lt:  #f0d98a;
-    --green:    #1a7a4a;
-    --green-lt: #e8f5ef;
-    --muted:    #7a7369;
-    --border:   #ddd9d0;
-    --radius:   12px;
-  }
+    :root {
+      --ink: #0f0d0a;
+      --cream: #faf7f2;
+      --sand: #ede9e0;
+      --gold: #c9a84c;
+      --gold-lt: #f0d98a;
+      --green: #1a7a4a;
+      --green-lt: #e8f5ef;
+      --muted: #7a7369;
+      --border: #ddd9d0;
+      --radius: 12px;
+    }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--cream);
-    color: var(--ink);
-    min-height: 100vh;
-  }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+    }
 
-  /* ── Header ── */
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 1.25rem 2.5rem;
-    border-bottom: 1px solid var(--border);
-    background: white;
-  }
-  .logo { font-family: 'DM Serif Display', serif; font-size: 1.3rem; letter-spacing: -.01em; }
-  .logo span { color: var(--gold); }
-  .badge-plan {
-    font-size: .75rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-    padding: .3rem .75rem; border-radius: 999px;
-  }
-  .badge-free { background: var(--sand);     color: var(--muted); }
-  .badge-pro  { background: var(--gold);     color: white; }
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2.5rem;
+      border-bottom: 1px solid var(--border);
+      background: white;
+    }
 
-  /* ── Auth wall ── */
-  #auth-wall {
-    display: none;
-    text-align: center; padding: 6rem 1rem;
-  }
-  #auth-wall h2 { font-family: 'DM Serif Display', serif; font-size: 1.8rem; margin-bottom: .75rem; }
-  #auth-wall p  { color: var(--muted); margin-bottom: 1.5rem; }
+    .logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      letter-spacing: -.01em;
+    }
 
-  /* ── Hero ── */
-  .hero {
-    text-align: center;
-    padding: 4rem 1rem 2.5rem;
-  }
-  .eyebrow {
-    display: inline-block;
-    font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
-    color: var(--gold); margin-bottom: 1rem;
-  }
-  .hero h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    line-height: 1.15;
-    max-width: 600px; margin: 0 auto 1rem;
-  }
-  .hero p { color: var(--muted); font-size: 1.05rem; max-width: 480px; margin: 0 auto 2rem; }
+    .logo span {
+      color: var(--gold);
+    }
 
-  /* ── Toggle ── */
-  .toggle-wrap {
-    display: flex; align-items: center; justify-content: center; gap: 1rem;
-    margin-bottom: 2.5rem;
-  }
-  .toggle-label { font-weight: 500; color: var(--muted); font-size: .9rem; }
-  .toggle-label.active { color: var(--ink); }
-  .pill-toggle {
-    position: relative; width: 52px; height: 28px;
-    background: var(--gold); border-radius: 999px; cursor: pointer; border: none;
-    transition: background .2s;
-  }
-  .pill-toggle::after {
-    content: ''; position: absolute; top: 3px; left: 3px;
-    width: 22px; height: 22px; border-radius: 50%; background: white;
-    transition: transform .2s;
-  }
-  .pill-toggle.yearly::after { transform: translateX(24px); }
-  .save-chip {
-    background: var(--green-lt); color: var(--green);
-    font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
-    padding: .25rem .6rem; border-radius: 999px;
-  }
+    .badge-plan {
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: .3rem .75rem;
+      border-radius: 999px;
+    }
 
-  /* ── Cards ── */
-  .cards {
-    display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center;
-    padding: 0 1.5rem 4rem; max-width: 900px; margin: 0 auto;
-  }
-  .card {
-    background: white; border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 2rem;
-    flex: 1 1 320px; max-width: 380px;
-    transition: box-shadow .2s, transform .2s;
-    position: relative;
-  }
-  .card:hover { box-shadow: 0 12px 40px rgba(0,0,0,.08); transform: translateY(-2px); }
-  .card.free { background: var(--cream); }
-  .card.pro {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(201,168,76,.15), 0 12px 40px rgba(0,0,0,.07);
-  }
+    .badge-free {
+      background: var(--sand);
+      color: var(--muted);
+    }
 
-  .plan-tag {
-    font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 1rem;
-  }
-  .card.pro .plan-tag { color: var(--gold); }
-  .card h2 { font-family: 'DM Serif Display', serif; font-size: 1.65rem; margin-bottom: .25rem; }
+    .badge-pro {
+      background: var(--gold);
+      color: white;
+    }
 
-  .price-row { display: flex; align-items: baseline; gap: .3rem; margin: 1rem 0 .5rem; }
-  .currency { font-size: 1.1rem; font-weight: 600; color: var(--muted); }
-  .amount { font-family: 'DM Serif Display', serif; font-size: 3rem; line-height: 1; }
-  .period { font-size: .85rem; color: var(--muted); }
-  .billed-note { font-size: .8rem; color: var(--muted); margin-bottom: 1.5rem; min-height: 1.1rem; }
+    /* ── Auth wall ── */
+    #auth-wall {
+      display: none;
+      text-align: center;
+      padding: 6rem 1rem;
+    }
 
-  .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+    #auth-wall h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      margin-bottom: .75rem;
+    }
 
-  .features { list-style: none; display: flex; flex-direction: column; gap: .7rem; margin-bottom: 2rem; }
-  .features li { display: flex; align-items: flex-start; gap: .6rem; font-size: .9rem; }
-  .features li .icon { flex-shrink: 0; margin-top: .05rem; }
-  .check { color: var(--green); }
-  .cross { color: #bbb; }
+    #auth-wall p {
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
 
-  /* ── Buttons ── */
-  .btn {
-    display: block; width: 100%; text-align: center;
-    padding: .85rem 1.5rem; border-radius: var(--radius);
-    font-family: 'DM Sans', sans-serif; font-size: .95rem; font-weight: 600;
-    cursor: pointer; border: none; transition: all .15s; text-decoration: none;
-  }
-  .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink); }
-  .btn-outline:hover { border-color: var(--ink); }
-  .btn-gold { background: var(--gold); color: white; }
-  .btn-gold:hover { background: #b8953e; }
-  .btn-muted { background: var(--sand); color: var(--muted); cursor: default; }
-  .btn:disabled { opacity: .6; cursor: not-allowed; }
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem 2.5rem;
+    }
 
-  .spinner {
-    display: inline-block; width: 14px; height: 14px;
-    border: 2px solid rgba(255,255,255,.4); border-top-color: white;
-    border-radius: 50%; animation: spin .7s linear infinite; margin-right: .4rem;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+    .eyebrow {
+      display: inline-block;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
 
-  /* ── Trust bar ── */
-  .trust {
-    text-align: center; padding: 1rem 1.5rem 3rem;
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 1.5rem 3rem;
-  }
-  .trust-item { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--muted); }
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.15;
+      max-width: 600px;
+      margin: 0 auto 1rem;
+    }
 
-  /* ── Toast ── */
-  #toast {
-    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(3rem);
-    background: var(--ink); color: white;
-    padding: .75rem 1.5rem; border-radius: var(--radius);
-    font-size: .875rem; opacity: 0; transition: all .3s; pointer-events: none; z-index: 999;
-  }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  #toast.error { background: #c0392b; }
-  #toast.success { background: var(--green); }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 480px;
+      margin: 0 auto 2rem;
+    }
 
-  /* ── Success overlay ── */
-  #success-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(250,247,242,.97);
-    flex-direction: column; align-items: center; justify-content: center;
-    z-index: 100; text-align: center; padding: 2rem;
-  }
-  #success-overlay.show { display: flex; }
-  .success-icon { font-size: 4rem; margin-bottom: 1rem; }
-  #success-overlay h2 { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: .5rem; }
-  #success-overlay p { color: var(--muted); max-width: 360px; }
+    /* ── Toggle ── */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
 
-  /* ── Already Pro banner ── */
-  #pro-banner {
-    display: none;
-    background: var(--green-lt); border: 1px solid #b2dfc7;
-    border-radius: var(--radius); padding: 1rem 1.5rem;
-    margin: 0 auto 2rem; max-width: 600px; text-align: center;
-    color: var(--green); font-weight: 500;
-  }
-  #pro-banner.show { display: block; }
-</style>
+    .toggle-label {
+      font-weight: 500;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .toggle-label.active {
+      color: var(--ink);
+    }
+
+    .pill-toggle {
+      position: relative;
+      width: 52px;
+      height: 28px;
+      background: var(--gold);
+      border-radius: 999px;
+      cursor: pointer;
+      border: none;
+      transition: background .2s;
+    }
+
+    .pill-toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      transition: transform .2s;
+    }
+
+    .pill-toggle.yearly::after {
+      transform: translateX(24px);
+    }
+
+    .save-chip {
+      background: var(--green-lt);
+      color: var(--green);
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: .25rem .6rem;
+      border-radius: 999px;
+    }
+
+    /* ── Cards ── */
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      justify-content: center;
+      padding: 0 1.5rem 4rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      flex: 1 1 320px;
+      max-width: 380px;
+      transition: box-shadow .2s, transform .2s;
+      position: relative;
+    }
+
+    .card:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .08);
+      transform: translateY(-2px);
+    }
+
+    .card.free {
+      background: var(--cream);
+    }
+
+    .card.pro {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201, 168, 76, .15), 0 12px 40px rgba(0, 0, 0, .07);
+    }
+
+    .plan-tag {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .card.pro .plan-tag {
+      color: var(--gold);
+    }
+
+    .card h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.65rem;
+      margin-bottom: .25rem;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: .3rem;
+      margin: 1rem 0 .5rem;
+    }
+
+    .currency {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .amount {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3rem;
+      line-height: 1;
+    }
+
+    .period {
+      font-size: .85rem;
+      color: var(--muted);
+    }
+
+    .billed-note {
+      font-size: .8rem;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      min-height: 1.1rem;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+
+    .features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: .7rem;
+      margin-bottom: 2rem;
+    }
+
+    .features li {
+      display: flex;
+      align-items: flex-start;
+      gap: .6rem;
+      font-size: .9rem;
+    }
+
+    .features li .icon {
+      flex-shrink: 0;
+      margin-top: .05rem;
+    }
+
+    .check {
+      color: var(--green);
+    }
+
+    .cross {
+      color: #bbb;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: .85rem 1.5rem;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+      text-decoration: none;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--ink);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--ink);
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: white;
+    }
+
+    .btn-gold:hover {
+      background: #b8953e;
+    }
+
+    .btn-muted {
+      background: var(--sand);
+      color: var(--muted);
+      cursor: default;
+    }
+
+    .btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, .4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin-right: .4rem;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Trust bar ── */
+    .trust {
+      text-align: center;
+      padding: 1rem 1.5rem 3rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem 3rem;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .85rem;
+      color: var(--muted);
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(3rem);
+      background: var(--ink);
+      color: white;
+      padding: .75rem 1.5rem;
+      border-radius: var(--radius);
+      font-size: .875rem;
+      opacity: 0;
+      transition: all .3s;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    #toast.error {
+      background: #c0392b;
+    }
+
+    #toast.success {
+      background: var(--green);
+    }
+
+    /* ── Success overlay ── */
+    #success-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(250, 247, 242, .97);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    #success-overlay.show {
+      display: flex;
+    }
+
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    #success-overlay h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      margin-bottom: .5rem;
+    }
+
+    #success-overlay p {
+      color: var(--muted);
+      max-width: 360px;
+    }
+
+    /* ── Already Pro banner ── */
+    #pro-banner {
+      display: none;
+      background: var(--green-lt);
+      border: 1px solid #b2dfc7;
+      border-radius: var(--radius);
+      padding: 1rem 1.5rem;
+      margin: 0 auto 2rem;
+      max-width: 600px;
+      text-align: center;
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    #pro-banner.show {
+      display: block;
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">Resume<span>AI</span></div>
-  <!-- Updated dynamically from /api/auth/me -->
-  <span class="badge-plan badge-free" id="plan-badge">Free Plan</span>
-</header>
+  <header>
+    <div class="logo">Resume<span>AI</span></div>
+    <!-- Updated dynamically from /api/auth/me -->
+    <span class="badge-plan badge-free" id="plan-badge">Free Plan</span>
+  </header>
 
-<!-- Shown if user is not logged in -->
-<div id="auth-wall">
-  <h2>Sign in to upgrade</h2>
-  <p>You need an account to access Pro features.</p>
-  <a class="btn btn-gold" style="max-width:200px;margin:0 auto" href="/index.html">Sign in / Register</a>
-</div>
-
-<!-- Main content — hidden until auth check passes -->
-<div id="main-content">
-
-  <div id="pro-banner">
-    ✅ You're already on <strong>Pro</strong> — enjoy unlimited optimisations!
-    &nbsp;<a href="#" onclick="openPortal(event)" style="color:var(--green);text-decoration:underline;cursor:pointer">Manage billing →</a>
+  <!-- Shown if user is not logged in -->
+  <div id="auth-wall">
+    <h2>Sign in to upgrade</h2>
+    <p>You need an account to access Pro features.</p>
+    <a class="btn btn-gold" style="max-width:200px;margin:0 auto" href="/index.html">Sign in / Register</a>
   </div>
 
-  <section class="hero">
-    <span class="eyebrow">✦ Upgrade</span>
-    <h1>Land your dream job<br><em>faster.</em></h1>
-    <p>Unlock unlimited optimisations, ATS keyword analysis, and AI cover letters.</p>
+  <!-- Main content — hidden until auth check passes -->
+  <div id="main-content">
 
-    <div class="toggle-wrap">
-      <span class="toggle-label active" id="lbl-monthly">Monthly</span>
-      <button class="pill-toggle" id="billing-toggle" onclick="toggleBilling()" aria-label="Toggle billing period"></button>
-      <span class="toggle-label" id="lbl-yearly">Yearly</span>
-      <span class="save-chip">Save 33%</span>
+    <div id="pro-banner">
+      ✅ You're already on <strong>Pro</strong> — enjoy unlimited optimisations!
+      &nbsp;<a href="#" onclick="openPortal(event)"
+        style="color:var(--green);text-decoration:underline;cursor:pointer">Manage billing →</a>
     </div>
-  </section>
 
-  <div class="cards">
-    <!-- Free Card -->
-    <div class="card free">
-      <div class="plan-tag">Free forever</div>
-      <h2>Starter</h2>
-      <div class="price-row">
-        <span class="currency">$</span>
-        <span class="amount">0</span>
-        <span class="period">/ mo</span>
+    <section class="hero">
+      <span class="eyebrow">✦ Upgrade</span>
+      <h1>Land your dream job<br><em>faster.</em></h1>
+      <p>Unlock unlimited optimisations, ATS keyword analysis, and AI cover letters.</p>
+
+      <div class="toggle-wrap">
+        <span class="toggle-label active" id="lbl-monthly">Monthly</span>
+        <button class="pill-toggle" id="billing-toggle" onclick="toggleBilling()"
+          aria-label="Toggle billing period"></button>
+        <span class="toggle-label" id="lbl-yearly">Yearly</span>
+        <span class="save-chip">Save 33%</span>
       </div>
-      <p class="billed-note">&nbsp;</p>
-      <hr class="divider" />
-      <ul class="features">
-        <li><span class="icon check">✓</span> 5 resume optimisations / month</li>
-        <li><span class="icon check">✓</span> Basic ATS score</li>
-        <li><span class="icon check">✓</span> PDF download</li>
-        <li><span class="icon cross">✕</span> <span style="color:var(--muted)">Unlimited optimisations</span></li>
-        <li><span class="icon cross">✕</span> <span style="color:var(--muted)">Keyword gap analysis</span></li>
-        <li><span class="icon cross">✕</span> <span style="color:var(--muted)">AI cover letter</span></li>
-      </ul>
-      <a class="btn btn-outline" href="/dashboard.html">Continue free</a>
-    </div>
+    </section>
 
-    <!-- Pro Card -->
-    <div class="card pro">
-      <div class="plan-tag">⭐ Most popular</div>
-      <h2>Pro</h2>
-      <div class="price-row">
-        <span class="currency">$</span>
-        <span class="amount" id="price-display">9<small style="font-size:1.5rem">.99</small></span>
-        <span class="period">/ mo</span>
+    <div class="cards">
+      <!-- Free Card -->
+      <div class="card free">
+        <div class="plan-tag">Free forever</div>
+        <h2>Starter</h2>
+        <div class="price-row">
+          <span class="currency">$</span>
+          <span class="amount">0</span>
+          <span class="period">/ mo</span>
+        </div>
+        <p class="billed-note">&nbsp;</p>
+        <hr class="divider" />
+        <ul class="features">
+          <li><span class="icon check">✓</span> 5 resume optimisations / month</li>
+          <li><span class="icon check">✓</span> Basic ATS score</li>
+          <li><span class="icon check">✓</span> Download Optimised Resume</li>
+          <li><span class="icon check">✓</span> PDF &amp; DOCX download</li>
+          <li><span class="icon cross">✕</span> <span style="color:var(--muted)">Unlimited</strong> resume
+              optimisations</span></li>
+          <li><span class="icon cross">✕</span> <span style="color:var(--muted)">Priority AI processing</span></li>
+          <li><span class="icon cross">✕</span> <span style="color:var(--muted)">Full Resume History</span></li>
+        </ul>
+        <a class="btn btn-outline" href="/dashboard.html">Continue free</a>
       </div>
-      <p class="billed-note" id="billed-note">&nbsp;</p>
-      <hr class="divider" />
-      <ul class="features">
-        <li><span class="icon check">✓</span> <strong>Unlimited</strong> resume optimisations</li>
-        <li><span class="icon check">✓</span> ATS keyword gap analysis</li>
-        <li><span class="icon check">✓</span> AI cover letter generator</li>
-        <li><span class="icon check">✓</span> Priority processing</li>
-        <li><span class="icon check">✓</span> PDF &amp; DOCX download</li>
-        <li><span class="icon check">✓</span> LinkedIn optimisation <em style="font-size:.78rem;color:var(--muted)">(coming soon)</em></li>
-      </ul>
-      <!-- Button state is set by initPage() based on current plan -->
-      <button class="btn btn-gold" id="checkout-btn" onclick="startCheckout()">
-        Upgrade to Pro
-      </button>
+
+      <!-- Pro Card -->
+      <div class="card pro">
+        <div class="plan-tag">⭐ Most popular</div>
+        <h2>Pro</h2>
+        <div class="price-row">
+          <span class="currency">$</span>
+          <span class="amount" id="price-display">9<small style="font-size:1.5rem">.99</small></span>
+          <span class="period">/ mo</span>
+        </div>
+        <p class="billed-note" id="billed-note">&nbsp;</p>
+        <hr class="divider" />
+        <ul class="features">
+          <li><span class="icon check">✓</span> <strong>Unlimited</strong> resume optimisations</li>
+          <li><span class="icon check">✓</span> ATS keyword gap analysis</li>
+          <li><span class="icon check">✓</span> Download Optimised Resume</li>
+          <li><span class="icon check">✓</span> PDF &amp; DOCX download</li>
+          <li><span class="icon check">✓</span> Priority AI processing</li>
+          <li><span class="icon check">✓</span> Full Resume History</li>
+        </ul>
+        <!-- Button state is set by initPage() based on current plan -->
+        <button class="btn btn-gold" id="checkout-btn" onclick="startCheckout()">
+          Upgrade to Pro
+        </button>
+      </div>
     </div>
+
+    <div class="trust">
+      <div class="trust-item">🔒 Payments secured by Stripe</div>
+      <div class="trust-item">↩ Cancel anytime</div>
+      <div class="trust-item">🧾 Instant receipt</div>
+      <div class="trust-item">📞 Email support</div>
+    </div>
+
+  </div><!-- /main-content -->
+
+  <div id="toast"></div>
+
+  <div id="success-overlay">
+    <div class="success-icon">🎉</div>
+    <h2>You're on Pro!</h2>
+    <p>Your account has been upgraded. Enjoy unlimited optimisations.</p>
+    <br />
+    <a class="btn btn-gold" style="max-width:220px;margin:0 auto" href="/dashboard.html">Start optimising</a>
   </div>
 
-  <div class="trust">
-    <div class="trust-item">🔒 Payments secured by Stripe</div>
-    <div class="trust-item">↩ Cancel anytime</div>
-    <div class="trust-item">🧾 Instant receipt</div>
-    <div class="trust-item">📞 Email support</div>
-  </div>
+  <script>
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Config
+    // ─────────────────────────────────────────────────────────────────────────────
+    const API_BASE = 'http://localhost';
 
-</div><!-- /main-content -->
+    // JWT is stored in localStorage by your login page under the key 'access_token'
+    // (matches what auth.py returns: { access_token, token_type, name, email })
+    function getToken() {
+      return localStorage.getItem('authToken');
+    }
 
-<div id="toast"></div>
+    // Shared fetch helper — injects Bearer token and handles 401 globally
+    async function apiFetch(path, options = {}) {
+      const token = getToken();
+      const res = await fetch(`${API_BASE}${path}`, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          ...(options.headers || {}),
+        },
+      });
 
-<div id="success-overlay">
-  <div class="success-icon">🎉</div>
-  <h2>You're on Pro!</h2>
-  <p>Your account has been upgraded. Enjoy unlimited optimisations.</p>
-  <br/>
-  <a class="btn btn-gold" style="max-width:220px;margin:0 auto" href="/dashboard.html">Start optimising</a>
-</div>
+      // Token expired or invalid → redirect to login
+      if (res.status === 401) {
+        localStorage.removeItem('authToken');
+        window.location.href = '/index.html?reason=session_expired';
+        throw new Error('Session expired');
+      }
 
-<script>
-// ─────────────────────────────────────────────────────────────────────────────
-//  Config
-// ─────────────────────────────────────────────────────────────────────────────
-const API_BASE = 'http://localhost:8000';
+      return res;
+    }
 
-// JWT is stored in localStorage by your login page under the key 'access_token'
-// (matches what auth.py returns: { access_token, token_type, name, email })
-function getToken() {
-   return localStorage.getItem('authToken');
-}
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Page init — runs on load
+    // ─────────────────────────────────────────────────────────────────────────────
+    let billingYearly = false;
 
-// Shared fetch helper — injects Bearer token and handles 401 globally
-async function apiFetch(path, options = {}) {
-  const token = getToken();
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
+    async function initPage() {
+      const token = getToken();
 
-  // Token expired or invalid → redirect to login
-  if (res.status === 401) {
-    localStorage.removeItem('authToken');
-    window.location.href = '/index.html?reason=session_expired';
-    throw new Error('Session expired');
-  }
+      // ── No token → show auth wall, hide everything else ──────────────────────
+      if (!token) {
+        document.getElementById('auth-wall').style.display = 'block';
+        document.getElementById('main-content').style.display = 'none';
+        return;
+      }
 
-  return res;
-}
+      document.getElementById('main-content').style.display = 'block';
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Page init — runs on load
-// ─────────────────────────────────────────────────────────────────────────────
-let billingYearly = false;
+      // ── Handle return from Stripe ─────────────────────────────────────────────
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('session_id')) {
+        // Payment completed — show success overlay
+        document.getElementById('success-overlay').classList.add('show');
+        return;
+      }
+      if (params.get('cancelled') === 'true') {
+        showToast('Checkout cancelled — your card was not charged.', '');
+        // Clean up URL
+        history.replaceState({}, '', window.location.pathname);
+      }
 
-async function initPage() {
-  const token = getToken();
+      // ── Load current user from /api/auth/me ───────────────────────────────────
+      try {
+        const res = await apiFetch('/api/auth/me');
+        if (!res.ok) return;
+        const user = await res.json();
 
-  // ── No token → show auth wall, hide everything else ──────────────────────
-  if (!token) {
-    document.getElementById('auth-wall').style.display = 'block';
-    document.getElementById('main-content').style.display = 'none';
-    return;
-  }
+        // Update plan badge in header
+        const badge = document.getElementById('plan-badge');
+        if (user.plan === 'pro') {
+          badge.textContent = '⭐ Pro';
+          badge.className = 'badge-plan badge-pro';
 
-  document.getElementById('main-content').style.display = 'block';
+          // Show "already Pro" banner, swap button to Manage Billing
+          document.getElementById('pro-banner').classList.add('show');
+          const btn = document.getElementById('checkout-btn');
+          btn.textContent = 'Manage Billing';
+          btn.className = 'btn btn-muted';
+          btn.onclick = openPortal;
+        } else {
+          badge.textContent = 'Free Plan';
+          badge.className = 'badge-plan badge-free';
+        }
+      } catch (err) {
+        // Silently fail — page still works, just no plan badge
+        console.warn('Could not load user profile:', err.message);
+      }
+    }
 
-  // ── Handle return from Stripe ─────────────────────────────────────────────
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('session_id')) {
-    // Payment completed — show success overlay
-    document.getElementById('success-overlay').classList.add('show');
-    return;
-  }
-  if (params.get('cancelled') === 'true') {
-    showToast('Checkout cancelled — your card was not charged.', '');
-    // Clean up URL
-    history.replaceState({}, '', window.location.pathname);
-  }
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Billing toggle
+    // ─────────────────────────────────────────────────────────────────────────────
+    function toggleBilling() {
+      billingYearly = !billingYearly;
+      document.getElementById('billing-toggle').classList.toggle('yearly', billingYearly);
+      document.getElementById('lbl-monthly').classList.toggle('active', !billingYearly);
+      document.getElementById('lbl-yearly').classList.toggle('active', billingYearly);
 
-  // ── Load current user from /api/auth/me ───────────────────────────────────
-  try {
-    const res = await apiFetch('/api/auth/me');
-    if (!res.ok) return;
-    const user = await res.json();
+      if (billingYearly) {
+        document.getElementById('price-display').innerHTML = '6<small style="font-size:1.5rem">.67</small>';
+        document.getElementById('billed-note').textContent = 'Billed $79.99/year — save $39.89';
+      } else {
+        document.getElementById('price-display').innerHTML = '9<small style="font-size:1.5rem">.99</small>';
+        document.getElementById('billed-note').innerHTML = '&nbsp;';
+      }
+    }
 
-    // Update plan badge in header
-    const badge = document.getElementById('plan-badge');
-    if (user.plan === 'pro') {
-      badge.textContent  = '⭐ Pro';
-      badge.className    = 'badge-plan badge-pro';
-
-      // Show "already Pro" banner, swap button to Manage Billing
-      document.getElementById('pro-banner').classList.add('show');
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Checkout — sends JWT in header, only needs { plan } in body
+    // ─────────────────────────────────────────────────────────────────────────────
+    async function startCheckout() {
       const btn = document.getElementById('checkout-btn');
-      btn.textContent = 'Manage Billing';
-      btn.className   = 'btn btn-muted';
-      btn.onclick     = openPortal;
-    } else {
-      badge.textContent = 'Free Plan';
-      badge.className   = 'badge-plan badge-free';
-    }
-  } catch (err) {
-    // Silently fail — page still works, just no plan badge
-    console.warn('Could not load user profile:', err.message);
-  }
-}
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Redirecting…';
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Billing toggle
-// ─────────────────────────────────────────────────────────────────────────────
-function toggleBilling() {
-  billingYearly = !billingYearly;
-  document.getElementById('billing-toggle').classList.toggle('yearly', billingYearly);
-  document.getElementById('lbl-monthly').classList.toggle('active', !billingYearly);
-  document.getElementById('lbl-yearly').classList.toggle('active',  billingYearly);
+      const plan = billingYearly ? 'pro_yearly' : 'pro_monthly';
 
-  if (billingYearly) {
-    document.getElementById('price-display').innerHTML = '6<small style="font-size:1.5rem">.67</small>';
-    document.getElementById('billed-note').textContent  = 'Billed $79.99/year — save $39.89';
-  } else {
-    document.getElementById('price-display').innerHTML = '9<small style="font-size:1.5rem">.99</small>';
-    document.getElementById('billed-note').innerHTML    = '&nbsp;';
-  }
-}
+      try {
+        // ✅ Only send { plan } — backend reads user_id & email from the JWT
+        const res = await apiFetch('/api/payments/checkout', {
+          method: 'POST',
+          body: JSON.stringify({ plan }),
+        });
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Checkout — sends JWT in header, only needs { plan } in body
-// ─────────────────────────────────────────────────────────────────────────────
-async function startCheckout() {
-  const btn  = document.getElementById('checkout-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Redirecting…';
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Checkout failed');
+        }
 
-  const plan = billingYearly ? 'pro_yearly' : 'pro_monthly';
+        const { checkout_url } = await res.json();
+        window.location.href = checkout_url;  // → Stripe Checkout page
 
-  try {
-    // ✅ Only send { plan } — backend reads user_id & email from the JWT
-    const res = await apiFetch('/api/payments/checkout', {
-      method: 'POST',
-      body: JSON.stringify({ plan }),
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.detail || 'Checkout failed');
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.disabled = false;
+        btn.innerHTML = 'Upgrade to Pro';
+      }
     }
 
-    const { checkout_url } = await res.json();
-    window.location.href = checkout_url;  // → Stripe Checkout page
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Customer portal — for Pro users to manage billing
+    // ─────────────────────────────────────────────────────────────────────────────
+    async function openPortal(e) {
+      if (e) e.preventDefault();
+      const btn = document.getElementById('checkout-btn');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Opening…';
 
-  } catch (err) {
-    showToast(err.message, 'error');
-    btn.disabled  = false;
-    btn.innerHTML = 'Upgrade to Pro';
-  }
-}
+      try {
+        const res = await apiFetch('/api/payments/portal', { method: 'POST' });
 
-// ─────────────────────────────────────────────────────────────────────────────
-//  Customer portal — for Pro users to manage billing
-// ─────────────────────────────────────────────────────────────────────────────
-async function openPortal(e) {
-  if (e) e.preventDefault();
-  const btn = document.getElementById('checkout-btn');
-  const originalText = btn.textContent;
-  btn.disabled  = true;
-  btn.innerHTML = '<span class="spinner"></span>Opening…';
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Could not open billing portal');
+        }
 
-  try {
-    const res = await apiFetch('/api/payments/portal', { method: 'POST' });
+        const { portal_url } = await res.json();
+        window.location.href = portal_url;  // → Stripe Customer Portal
 
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.detail || 'Could not open billing portal');
+      } catch (err) {
+        showToast(err.message, 'error');
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
     }
 
-    const { portal_url } = await res.json();
-    window.location.href = portal_url;  // → Stripe Customer Portal
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Toast helper
+    // ─────────────────────────────────────────────────────────────────────────────
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'show' + (type ? ` ${type}` : '');
+      setTimeout(() => { t.className = ''; }, 4000);
+    }
 
-  } catch (err) {
-    showToast(err.message, 'error');
-    btn.disabled  = false;
-    btn.textContent = originalText;
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Toast helper
-// ─────────────────────────────────────────────────────────────────────────────
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className   = 'show' + (type ? ` ${type}` : '');
-  setTimeout(() => { t.className = ''; }, 4000);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-//  Boot
-// ─────────────────────────────────────────────────────────────────────────────
-initPage();
-</script>
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Boot
+    // ─────────────────────────────────────────────────────────────────────────────
+    initPage();
+  </script>
 </body>
+
 </html>

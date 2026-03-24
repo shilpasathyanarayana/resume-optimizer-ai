@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resume History — ResumeAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <script src="assets/js/script.js" defer></script>
+    <style>
+        body {
+            padding-top: 80px;
+        }
+
+        .dashboard-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 24px 100px;
+        }
+
+        /* ── WELCOME HEADER ── */
+        .dashboard-header {
+            margin-bottom: 40px;
+        }
+
+        .dashboard-eyebrow {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-subtitle {
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2rem;
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            line-height: 1;
+        }
+
+        .stat-value.accent { color: var(--accent); }
+        .stat-value.gold   { color: #c9a84c; }
+
+        .stat-desc {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* ── SECTION HEADER ── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .section-heading {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.3rem;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+        }
+
+        /* ── FILTER BAR ── */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            font-family: inherit;
+            font-size: 0.85rem;
+            color: var(--ink);
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 12px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .filter-select:focus {
+            border-color: var(--accent);
+        }
+
+        .filter-search {
+            font-family: inherit;
+            font-size: 0.85rem;
+            color: var(--ink);
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 14px;
+            outline: none;
+            flex: 1;
+            min-width: 180px;
+            transition: border-color 0.15s;
+        }
+
+        .filter-search:focus {
+            border-color: var(--accent);
+        }
+
+        .filter-search::placeholder {
+            color: var(--muted);
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center;
+            padding: 64px 24px;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+        }
+
+        .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .empty-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.3rem;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+
+        .empty-desc {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 24px;
+            max-width: 360px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+        }
+
+        /* ── RESUME LIST ── */
+        .resume-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .resume-item {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: border-color 0.18s, box-shadow 0.18s;
+            cursor: pointer;
+        }
+
+        .resume-item:hover {
+            border-color: var(--accent);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .resume-item-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .resume-item-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .resume-item-info {
+            min-width: 0;
+        }
+
+        .resume-item-title {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--ink);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .resume-item-meta {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .meta-dot {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: var(--border);
+            display: inline-block;
+        }
+
+        .resume-item-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        /* ── SCORE BADGE ── */
+        .score-badge {
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 4px 11px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .score-high { background: var(--accent-light); color: var(--accent); }
+        .score-mid  { background: #fef3c7; color: #d97706; }
+        .score-low  { background: #fdf0ef; color: var(--danger); }
+        .score-none { background: var(--surface); color: var(--muted); }
+
+        /* ── STATUS BADGE ── */
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 20px;
+            text-transform: capitalize;
+            white-space: nowrap;
+        }
+
+        .status-completed  { background: #d1fae5; color: #065f46; }
+        .status-pending    { background: #fef3c7; color: #92400e; }
+        .status-processing { background: #dbeafe; color: #1e40af; }
+        .status-failed     { background: #fdf0ef; color: var(--danger); }
+
+        /* ── LOADING SKELETON ── */
+        .skeleton-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .skeleton-item {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .skeleton-block {
+            background: var(--surface);
+            border-radius: 6px;
+            animation: shimmer 1.4s infinite;
+        }
+
+        @keyframes shimmer {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.45; }
+            100% { opacity: 1; }
+        }
+
+        /* ── ERROR BANNER ── */
+        .error-banner {
+            background: #fdf0ef;
+            border: 1px solid #f5c6c2;
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: var(--danger);
+            font-size: 0.9rem;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .error-banner.show { display: flex; }
+
+        /* ── PAGINATION ── */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 28px;
+        }
+
+        .page-btn {
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            color: var(--ink);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .page-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 640px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .resume-item-right { flex-direction: column; align-items: flex-end; gap: 6px; }
+        }
+    </style>
+</head>
+
+<body>
+<!-- ── NAVBAR ── -->
+<nav id="navbar">
+    <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
+    <div class="nav-right">
+        <!-- <div id="guestNav" style="display:none;">
+            <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
+            <button class="btn btn-primary" onclick="openModal('signup')">Get started free</button>
+        </div> -->
+        <div id="userNav" style="display:none;">
+            <div class="user-menu-wrap">
+                <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">?</div>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-email">
+                        <strong id="dropdownName">—</strong>
+                        <span id="dropdownEmail">—</span>
+                    </div>
+                    <button class="dropdown-item" onclick="goToMyResumes()">📄 History</button>
+                    <button class="dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize Resume</button>
+                    <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
+                    <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="dashboard-wrapper">
+
+    <!-- ── HEADER ── -->
+    <div class="dashboard-header">
+        <div class="dashboard-eyebrow">Your Account</div>
+        <h1 class="dashboard-title">Resume Optimisation History</h1>
+        <p class="dashboard-subtitle" id="headerSubtitle">Loading your optimisations…</p>
+    </div>
+
+    <!-- ── STATS ── -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">Total Optimisations</div>
+            <div class="stat-value accent" id="statTotal">—</div>
+            <div class="stat-desc">all time</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Best ATS Score</div>
+            <div class="stat-value gold" id="statBest">—</div>
+            <div class="stat-desc">highest achieved</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Avg ATS Score</div>
+            <div class="stat-value" id="statAvg">—</div>
+            <div class="stat-desc">across all submissions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Completed</div>
+            <div class="stat-value accent" id="statCompleted">—</div>
+            <div class="stat-desc">successfully processed</div>
+        </div>
+    </div>
+
+    <!-- ── ERROR BANNER ── -->
+    <div class="error-banner" id="errorBanner">
+        <span>⚠️</span>
+        <span id="errorMsg">Something went wrong loading your history.</span>
+    </div>
+
+    <!-- ── HISTORY SECTION ── -->
+    <div class="section-header">
+        <h2 class="section-heading">All Submissions</h2>
+        <a href="optimize.html" class="btn btn-primary" style="font-size:0.85rem;padding:8px 18px;">+ New Optimisation</a>
+    </div>
+
+    <!-- ── FILTER BAR ── -->
+    <div class="filter-bar" id="filterBar" style="display:none;">
+        <input
+            type="search"
+            class="filter-search"
+            id="searchInput"
+            placeholder="🔍  Search by filename or job title…"
+            oninput="applyFilters()"
+        />
+        <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+            <option value="">All Statuses</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="failed">Failed</option>
+        </select>
+        <select class="filter-select" id="scoreFilter" onchange="applyFilters()">
+            <option value="">All Scores</option>
+            <option value="high">High (80+)</option>
+            <option value="mid">Medium (50–79)</option>
+            <option value="low">Low (&lt;50)</option>
+        </select>
+    </div>
+
+    <!-- ── CONTENT AREA ── -->
+    <div id="contentArea">
+        <!-- Skeleton shown while loading -->
+        <div class="skeleton-list" id="skeletonLoader">
+            <div class="skeleton-item">
+                <div class="skeleton-block" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+                    <div class="skeleton-block" style="height:14px;width:55%;"></div>
+                    <div class="skeleton-block" style="height:11px;width:35%;"></div>
+                </div>
+                <div class="skeleton-block" style="height:24px;width:60px;border-radius:20px;"></div>
+            </div>
+            <div class="skeleton-item">
+                <div class="skeleton-block" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+                    <div class="skeleton-block" style="height:14px;width:45%;"></div>
+                    <div class="skeleton-block" style="height:11px;width:28%;"></div>
+                </div>
+                <div class="skeleton-block" style="height:24px;width:60px;border-radius:20px;"></div>
+            </div>
+            <div class="skeleton-item">
+                <div class="skeleton-block" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+                    <div class="skeleton-block" style="height:14px;width:60%;"></div>
+                    <div class="skeleton-block" style="height:11px;width:40%;"></div>
+                </div>
+                <div class="skeleton-block" style="height:24px;width:60px;border-radius:20px;"></div>
+            </div>
+        </div>
+
+        <!-- Populated list -->
+        <div class="resume-list" id="resumeList" style="display:none;"></div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <div class="empty-icon">📄</div>
+            <div class="empty-title">No optimisations yet</div>
+            <p class="empty-desc">Upload your resume and a job description to get an ATS score and tailored improvements.</p>
+            <a href="optimize.html" class="btn btn-primary">Start your first optimisation</a>
+        </div>
+
+        <!-- No filter results -->
+        <div class="empty-state" id="noResults" style="display:none;">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-title">No matching results</div>
+            <p class="empty-desc">Try adjusting your search or filter criteria.</p>
+            <button class="btn btn-ghost" onclick="clearFilters()">Clear filters</button>
+        </div>
+    </div>
+
+    <!-- ── PAGINATION ── -->
+    <div class="pagination" id="pagination"></div>
+
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+    <a href="index.html" class="nav-logo" style="font-size:1.1rem;">Resume<span style="color:var(--accent)">AI</span></a>
+    <span>© <span id="footerYear"></span> ResumeAI</span>
+    <div style="display:flex;gap:20px;">
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="contact_us.html">Contact</a>
+    </div>
+</footer>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const PAGE_SIZE  = 10;
+
+// ─── STATE ────────────────────────────────────────────────
+let allResumes   = [];
+let filtered     = [];
+let currentPage  = 1;
+
+// ─── AUTH HELPERS ─────────────────────────────────────────
+function getToken() {
+    return localStorage.getItem('authToken');
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    const token = getToken();
+    if (!token) {
+        window.location.replace('index.html');
+        return;
+    }
+    document.getElementById('footerYear').textContent = new Date().getFullYear();
+    loadHistory();
+});
+
+// ─── FETCH HISTORY ────────────────────────────────────────
+async function loadHistory() {
+    try {
+        const res = await fetch(`${API_BASE}/resume/history`, {
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (res.status === 401) {
+            window.location.replace('index.html');
+            return;
+        }
+
+        if (!res.ok) {
+            throw new Error(`Server returned ${res.status}`);
+        }
+
+        const data = await res.json();
+        allResumes = data.resumes || [];
+
+        renderStats();
+        applyFilters();
+
+        document.getElementById('skeletonLoader').style.display = 'none';
+        document.getElementById('filterBar').style.display      = allResumes.length ? 'flex' : 'none';
+        document.getElementById('headerSubtitle').textContent   =
+            allResumes.length
+                ? `${allResumes.length} optimisation${allResumes.length !== 1 ? 's' : ''} found`
+                : 'No optimisations yet — start below!';
+
+    } catch (err) {
+        document.getElementById('skeletonLoader').style.display = 'none';
+        showError('Failed to load your history. Please refresh and try again.');
+        console.error(err);
+    }
+}
+
+// ─── STATS ────────────────────────────────────────────────
+function renderStats() {
+    const scored = allResumes.filter(r => r.ats_score != null);
+    const completed = allResumes.filter(r => r.status === 'completed').length;
+    const best  = scored.length ? Math.max(...scored.map(r => r.ats_score)) : null;
+    const avg   = scored.length ? Math.round(scored.reduce((s, r) => s + r.ats_score, 0) / scored.length) : null;
+
+    document.getElementById('statTotal').textContent     = allResumes.length;
+    document.getElementById('statBest').textContent      = best  != null ? `${best}%`  : '—';
+    document.getElementById('statAvg').textContent       = avg   != null ? `${avg}%`   : '—';
+    document.getElementById('statCompleted').textContent = completed;
+}
+
+// ─── FILTERS ──────────────────────────────────────────────
+function applyFilters() {
+    const query       = document.getElementById('searchInput').value.toLowerCase().trim();
+    const statusVal   = document.getElementById('statusFilter').value;
+    const scoreVal    = document.getElementById('scoreFilter').value;
+
+    filtered = allResumes.filter(r => {
+        // text search
+        if (query) {
+            const haystack = `${r.original_filename || ''} ${r.job_title || ''}`.toLowerCase();
+            if (!haystack.includes(query)) return false;
+        }
+        // status filter
+        if (statusVal && r.status !== statusVal) return false;
+        // score filter
+        if (scoreVal) {
+            if (r.ats_score == null) return false;
+            if (scoreVal === 'high' && r.ats_score < 80)  return false;
+            if (scoreVal === 'mid'  && (r.ats_score < 50 || r.ats_score >= 80)) return false;
+            if (scoreVal === 'low'  && r.ats_score >= 50) return false;
+        }
+        return true;
+    });
+
+    currentPage = 1;
+    renderPage();
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value    = '';
+    document.getElementById('statusFilter').value   = '';
+    document.getElementById('scoreFilter').value    = '';
+    applyFilters();
+}
+
+// ─── RENDER PAGE ──────────────────────────────────────────
+function renderPage() {
+    const list       = document.getElementById('resumeList');
+    const emptyState = document.getElementById('emptyState');
+    const noResults  = document.getElementById('noResults');
+    const pagination = document.getElementById('pagination');
+
+    list.innerHTML = '';
+    pagination.innerHTML = '';
+
+    if (allResumes.length === 0) {
+        list.style.display       = 'none';
+        emptyState.style.display = 'block';
+        noResults.style.display  = 'none';
+        return;
+    }
+
+    if (filtered.length === 0) {
+        list.style.display       = 'none';
+        emptyState.style.display = 'none';
+        noResults.style.display  = 'block';
+        return;
+    }
+
+    emptyState.style.display = 'none';
+    noResults.style.display  = 'none';
+    list.style.display       = 'flex';
+
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    const start      = (currentPage - 1) * PAGE_SIZE;
+    const pageItems  = filtered.slice(start, start + PAGE_SIZE);
+
+    pageItems.forEach(r => {
+        list.insertAdjacentHTML('beforeend', buildResumeItem(r));
+    });
+
+    // Pagination
+    if (totalPages > 1) {
+        renderPagination(totalPages);
+    }
+}
+
+// ─── BUILD RESUME ROW ─────────────────────────────────────
+function buildResumeItem(r) {
+    const icon       = fileIcon(r.file_format);
+    const scoreHtml  = scoreTag(r.ats_score);
+    const statusHtml = statusTag(r.status);
+    const date       = formatDate(r.created_at);
+    const title      = r.original_filename || 'Unnamed Resume';
+    const jobTitle   = r.job_title || 'Job title not specified';
+    const keywords   = Array.isArray(r.missing_keywords) ? r.missing_keywords.length : 0;
+
+    return `
+    <div class="resume-item" onclick="viewDetail(${r.id})">
+        <div class="resume-item-left">
+            <div class="resume-item-icon">${icon}</div>
+            <div class="resume-item-info">
+                <div class="resume-item-title">${escHtml(title)}</div>
+                <div class="resume-item-meta">
+                    <span>${escHtml(jobTitle)}</span>
+                    <span class="meta-dot"></span>
+                    <span>${date}</span>
+                    ${keywords ? `<span class="meta-dot"></span><span>${keywords} keyword${keywords !== 1 ? 's' : ''} missing</span>` : ''}
+                </div>
+            </div>
+        </div>
+        <div class="resume-item-right">
+            ${statusHtml}
+            ${scoreHtml}
+        </div>
+    </div>`;
+}
+
+// ─── PAGINATION ───────────────────────────────────────────
+function renderPagination(totalPages) {
+    const pagination = document.getElementById('pagination');
+    const makeBtn = (label, page, disabled = false, active = false) => {
+        const cls = ['page-btn', active ? 'active' : '', disabled ? '' : ''].join(' ').trim();
+        return `<button class="${cls}" onclick="goToPage(${page})" ${disabled ? 'disabled' : ''}>${label}</button>`;
+    };
+
+    pagination.insertAdjacentHTML('beforeend', makeBtn('← Prev', currentPage - 1, currentPage === 1));
+
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+            pagination.insertAdjacentHTML('beforeend', makeBtn(i, i, false, i === currentPage));
+        } else if (Math.abs(i - currentPage) === 2) {
+            pagination.insertAdjacentHTML('beforeend', `<span style="color:var(--muted);padding:0 4px;">…</span>`);
+        }
+    }
+
+    pagination.insertAdjacentHTML('beforeend', makeBtn('Next →', currentPage + 1, currentPage === totalPages));
+}
+
+function goToPage(page) {
+    currentPage = page;
+    renderPage();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── NAVIGATE TO DETAIL ───────────────────────────────────
+function viewDetail(id) {
+    window.location.href = `optimize.html?id=${id}`;
+}
+
+// ─── HELPERS ──────────────────────────────────────────────
+function fileIcon(format) {
+    const map = { pdf: '📄', docx: '📝', txt: '📃' };
+    return map[format] || '📄';
+}
+
+function scoreTag(score) {
+    if (score == null) return `<span class="score-badge score-none">No score</span>`;
+    const cls = score >= 80 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+    return `<span class="score-badge ${cls}">${score}%</span>`;
+}
+
+function statusTag(status) {
+    const cls = `status-${status}`;
+    return `<span class="status-badge ${cls}">${status}</span>`;
+}
+
+function formatDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric'
+    });
+}
+
+function escHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function showError(msg) {
+    const el = document.getElementById('errorBanner');
+    document.getElementById('errorMsg').textContent = msg;
+    el.classList.add('show');
+}
+</script>
+</body>
+</html>

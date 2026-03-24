@@ -24,7 +24,7 @@ from app.routers.auth import router as auth_router
 from app.routers.resume import router as resume_router
 
 from app.routers.payment import router as payment_router
-
+from app.routers.resume_history import router as resume_history_router
 
 import app.models.user  # noqa: F401 – registers ORM models with SQLAlchemy
 
@@ -88,7 +88,8 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(resume_router)
 # payment gateway router
 app.include_router(payment_router, prefix="/api/payments", tags=["payments"])
-
+# resume optimiser history
+app.include_router(resume_history_router)
 # ── Health check ──────────────────────────────────────────────────────────────
 @app.get("/health", tags=["health"])
 async def health():

@@ -77,7 +77,7 @@ services:
     image: stripe/stripe-cli:latest
     container_name: resume-optimizer-stripe-cli
     env_file:
-      - ./backend/.env          # ← adjust path to where your .env lives
+      - .env          # ← adjust path to where your .env lives
     command: >
       listen
       --api-key ${STRIPE_SECRET_KEY}

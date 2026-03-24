@@ -1,17 +1,103 @@
-
 const API_BASE = '/api';
 let currentResults = null;
 
 // ── INIT ───────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem('authToken');
   if (!token) {
-    // Not logged in — redirect to home and open login modal
     window.location.href = 'index.html?action=login';
     return;
   }
-  syncUsage();
+
+  // If ?id= is in the URL, load that history record and skip to results
+  const loadedFromHistory = await maybeLoadFromHistory();
+  if (!loadedFromHistory) {
+    // Normal new-optimisation flow
+    syncUsage();
+  }
 });
+
+// ── HISTORY PREFILL ────────────────────────────────────────────────
+async function maybeLoadFromHistory() {
+  const params   = new URLSearchParams(window.location.search);
+  const resumeId = params.get('id');
+  if (!resumeId) return false;
+
+  const token = localStorage.getItem('authToken');
+  if (!token) return false;
+
+  try {
+    const res = await fetch(`${API_BASE}/resume/history/${resumeId}`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+
+    if (!res.ok) {
+      console.warn(`History record ${resumeId} not found (${res.status})`);
+      return false;
+    }
+
+    const data = await res.json();
+
+    // Pre-fill inputs so "Start over" restores them
+    if (data.original_text) {
+      const ta = document.getElementById('resumeText');
+      if (ta) { ta.value = data.original_text; updateCharCount('resumeText', 'resumeCount'); }
+    }
+    if (data.job_description) {
+      const jd = document.getElementById('jobText');
+      if (jd) { jd.value = data.job_description; updateCharCount('jobText', 'jobCount'); }
+    }
+
+    // Build result object matching showResults() expectations
+    const synthetic = {
+      ats_score:        data.ats_score        ?? 0,
+      missing_keywords: data.missing_keywords ?? [],
+      improvements:     data.improvements     ?? [],
+      optimized_text:   data.optimized_text   ?? '',
+      uses_remaining:   undefined,
+      uses_this_month:  undefined,
+    };
+
+    updateStepBar(3);
+    showResults(synthetic);
+    showHistoryBanner(data);
+    return true;
+
+  } catch (err) {
+    console.warn('Could not load history record:', err);
+    return false;
+  }
+}
+
+function showHistoryBanner(data) {
+  const resultsPanel = document.getElementById('resultsPanel');
+  if (!resultsPanel || document.getElementById('historyBanner')) return;
+
+  const date     = data.created_at
+    ? new Date(data.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : '';
+  const filename = data.original_filename || 'Resume';
+  const jobTitle = data.job_title         || 'this role';
+
+  const banner = document.createElement('div');
+  banner.id = 'historyBanner';
+  banner.style.cssText = `
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    background:#e8f5ef; border:1px solid #b2dfc7; border-radius:12px;
+    padding:12px 18px; margin-bottom:20px; font-size:0.85rem; color:#1a7a4a;
+  `;
+  banner.innerHTML = `
+    <span>
+      📂 <strong>Viewing saved result</strong> —
+      ${escHtml(filename)} optimised for <em>${escHtml(jobTitle)}</em>${date ? ` on ${date}` : ''}
+    </span>
+    <a href="optimize.html"
+       style="color:#1a7a4a;font-weight:600;text-decoration:none;white-space:nowrap;">
+      + New optimisation →
+    </a>
+  `;
+  resultsPanel.insertBefore(banner, resultsPanel.firstChild);
+}
 
 // ── USAGE (from backend) ───────────────────────────────────────────
 async function syncUsage() {
@@ -22,7 +108,6 @@ async function syncUsage() {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (res.status === 401) {
-      // Token expired
       localStorage.removeItem('authToken');
       localStorage.removeItem('userData');
       window.location.href = 'index.html?action=login';
@@ -69,7 +154,6 @@ function processFile(file) {
   zone.classList.add('has-file');
   zone.innerHTML = `<div class="upload-filename">📎 ${file.name}</div><div class="upload-formats" style="margin-top:4px;">Click to change file</div>`;
 
-  // PDFs are binary — never read as text, send to backend for extraction
   if (ext === 'pdf') {
     window._resumeFile = file;
     document.getElementById('resumeText').value = '';
@@ -79,19 +163,15 @@ function processFile(file) {
     return;
   }
 
-  // DOCX — try reading as plain text (works for simple cases)
   const reader = new FileReader();
   reader.onload = (e) => {
     const text = e.target.result;
-    // DOCX raw text will contain readable content mixed with XML
-    // Strip obvious XML tags to get something usable
     const cleaned = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     if (cleaned.length > 50) {
       document.getElementById('resumeText').value = cleaned;
       updateCharCount('resumeText', 'resumeCount');
       showToast(`"${file.name}" loaded`, 'success');
     } else {
-      // Fallback: send to backend
       window._resumeFile = file;
       document.getElementById('resumeText').placeholder = `"${file.name}" will be extracted by the server when you click Optimize.`;
       showToast(`"${file.name}" ready`, 'success');
@@ -110,9 +190,8 @@ function updateCharCount(textareaId, countId) {
 // ── VALIDATE ───────────────────────────────────────────────────────
 function validateInputs() {
   const resumeText = document.getElementById('resumeText').value.trim();
-  const jobText = document.getElementById('jobText').value.trim();
+  const jobText    = document.getElementById('jobText').value.trim();
 
-  // Accept either a pasted text OR an uploaded file
   if (!resumeText && !window._resumeFile) {
     showToast('Please upload or paste your resume.', 'error'); return false;
   }
@@ -168,8 +247,8 @@ function setStepState(stepId, state, statusId, statusText) {
 
 async function callAI() {
   const resumeText = document.getElementById('resumeText').value.trim();
-  const jobText = document.getElementById('jobText').value.trim();
-  const token = localStorage.getItem('authToken');
+  const jobText    = document.getElementById('jobText').value.trim();
+  const token      = localStorage.getItem('authToken');
 
   if (!token) {
     window.location.href = 'index.html?action=login';
@@ -216,45 +295,35 @@ async function callAI() {
   return await res.json();
 }
 
-async function pollJob(initialData) {
-  const jobId = initialData.job_id;
-  for (let i = 0; i < 30; i++) {
-    await delay(2000);
-    const res = await fetch(`${API_BASE}/jobs/${jobId}`);
-    const data = await res.json();
-    if (data.status === 'completed') return data;
-    if (data.status === 'failed') throw new Error(data.error_message || 'Processing failed.');
-  }
-  throw new Error('Processing timed out. Please try again.');
-}
-
 // ── RESULTS ────────────────────────────────────────────────────────
 function showResults(data) {
   currentResults = data;
 
-  // Update usage counter from response
   if (data.uses_remaining !== undefined) {
     updateUsageUI(data.uses_remaining, 5, data.uses_this_month);
   }
 
-  const score = data.ats_score || 0;
+  const score   = data.ats_score || 0;
   const scoreEl = document.getElementById('atsScore');
   scoreEl.textContent = score;
-  scoreEl.className = 'ats-number ' + (score >= 75 ? 'high' : score >= 50 ? 'mid' : 'low');
+  scoreEl.className   = 'ats-number ' + (score >= 75 ? 'high' : score >= 50 ? 'mid' : 'low');
 
   const keywords = data.missing_keywords || [];
   if (keywords.length > 0) {
-    document.getElementById('keywordsList').innerHTML = keywords.map(k => `<span class="keyword-tag">⚠ ${k}</span>`).join('');
+    document.getElementById('keywordsList').innerHTML =
+      keywords.map(k => `<span class="keyword-tag">⚠ ${k}</span>`).join('');
     document.getElementById('keywordsPanel').style.display = 'block';
   }
 
   const improvements = data.improvements || [];
   if (improvements.length > 0) {
-    document.getElementById('improvementsList').innerHTML = improvements.map(i => `<div class="improvement-item">${i}</div>`).join('');
+    document.getElementById('improvementsList').innerHTML =
+      improvements.map(i => `<div class="improvement-item">${i}</div>`).join('');
     document.getElementById('improvementsPanel').style.display = 'block';
   }
 
-  document.getElementById('originalContent').textContent = document.getElementById('resumeText').value.trim() || '[Extracted from uploaded file]';
+  document.getElementById('originalContent').textContent =
+    document.getElementById('resumeText').value.trim() || '[Extracted from uploaded file]';
   document.getElementById('optimizedContent').textContent = data.optimized_text || '';
 
   showPanel('results');
@@ -265,8 +334,8 @@ function showResults(data) {
 function downloadTxt() {
   if (!currentResults) return;
   const blob = new Blob([currentResults.optimized_text || ''], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
   a.href = url; a.download = 'optimized-resume.txt'; a.click();
   URL.revokeObjectURL(url);
   showToast('Downloaded!', 'success');
@@ -280,9 +349,9 @@ function copyText(elementId) {
 
 // ── PANEL UTILS ────────────────────────────────────────────────────
 function showPanel(panel) {
-  document.getElementById('inputPanel').style.display = panel === 'input' ? 'block' : 'none';
+  document.getElementById('inputPanel').style.display      = panel === 'input'      ? 'block' : 'none';
   document.getElementById('processingPanel').style.display = panel === 'processing' ? 'block' : 'none';
-  document.getElementById('resultsPanel').style.display = panel === 'results' ? 'block' : 'none';
+  document.getElementById('resultsPanel').style.display    = panel === 'results'    ? 'block' : 'none';
 }
 
 function updateStepBar(activeStep) {
@@ -295,11 +364,18 @@ function updateStepBar(activeStep) {
 }
 
 function resetPage() {
+  // Remove history banner if present
+  const banner = document.getElementById('historyBanner');
+  if (banner) banner.remove();
+
+  // Clear URL param without reload
+  window.history.replaceState({}, '', 'optimize.html');
+
   for (let i = 1; i <= 4; i++) {
     const el = document.getElementById(`pStep${i}`);
     if (el) { el.className = 'progress-step'; document.getElementById(`pStep${i}Status`).textContent = 'Waiting'; }
   }
-  currentResults = null;
+  currentResults     = null;
   window._resumeFile = null;
 
   const zone = document.getElementById('resumeUploadZone');
@@ -308,14 +384,15 @@ function resetPage() {
   zone.onclick = () => document.getElementById('resumeFile').click();
 
   document.getElementById('resumeText').value = '';
-  document.getElementById('jobText').value = '';
+  document.getElementById('jobText').value    = '';
   updateCharCount('resumeText', 'resumeCount');
-  updateCharCount('jobText', 'jobCount');
-  document.getElementById('keywordsPanel').style.display = 'none';
+  updateCharCount('jobText',    'jobCount');
+  document.getElementById('keywordsPanel').style.display    = 'none';
   document.getElementById('improvementsPanel').style.display = 'none';
 
   showPanel('input');
   updateStepBar(1);
+  syncUsage();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -328,11 +405,20 @@ function getOrCreateGuestSession() {
 
 // ── UTILS ──────────────────────────────────────────────────────────
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 let toastTimer;
 function showToast(msg, type = '') {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
-  toast.className = 'toast ' + type;
+  toast.className   = 'toast ' + type;
   clearTimeout(toastTimer);
   requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
   toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);

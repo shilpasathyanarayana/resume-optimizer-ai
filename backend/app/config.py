@@ -17,7 +17,7 @@ class Settings(BaseSettings):
 
     # ── App ────────────────────────────────────────────────────────
     APP_ENV: str = "development"
-    FRONTEND_ORIGIN: str = "http://localhost:3000"
+    FRONTEND_ORIGIN: str = "http://localhost"
 
     # ── Groq ──────────────────────────────────────────────────
     GROQ_API_KEY: str = ""   # ← "this field exists, default to empty if not in .env"

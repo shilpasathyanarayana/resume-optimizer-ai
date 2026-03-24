@@ -361,7 +361,7 @@ document.addEventListener('click', e => {
 
 function goToDashboard() { window.location.href = 'dashboard.html'; }
 function goToSettings() { window.location.href = 'settings.html'; }
-
+function goToMyResumes() { window.location.href = 'resume_history.html' }
 // ── HELPERS ───────────────────────────────────────────────────────
 function getOrCreateGuestSession() {
   let id = localStorage.getItem('guestSessionId');

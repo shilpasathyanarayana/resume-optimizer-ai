@@ -19,9 +19,9 @@
        NAV
   ══════════════════════════════════════ -->
   <nav id="navbar">
-    <a href="/index.html" class="nav-logo">Resume<span>AI</span></a>
+    <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
     <div class="nav-right">
-      <span class="nav-free-badge" id="freeCounter">5 free uses left</span>
+      <!-- <span class="nav-free-badge" id="freeCounter">5 free uses left</span> -->
 
       <!-- Guest state -->
       <div id="guestNav" style="display:flex;align-items:center;gap:8px;">
@@ -38,7 +38,10 @@
               <strong id="dropdownName">—</strong>
               <span id="dropdownEmail">—</span>
             </div>
-            <button class="dropdown-item" onclick="goToDashboard()">📄 My Resumes</button>
+            <button class="dropdown-item" onclick="goToMyResumes()">📄 History</button>
+            <button class="dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize
+              Resume</button>
+              <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job Tracker</button>
             <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
             <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
           </div>
@@ -60,8 +63,10 @@
     <div class="policy-body">
 
       <h2>1. Introduction</h2>
-      <p>Welcome to ResumeAI. This Privacy Policy explains how we collect, use, and protect your personal information when you use our website. By using this site, you agree to the practices described in this document.</p>
-      <p>This website is currently a portfolio project. As we grow, features may be added — including advertising — and this policy will be updated accordingly. We encourage you to review it periodically.</p>
+      <p>Welcome to ResumeAI. This Privacy Policy explains how we collect, use, and protect your personal information
+        when you use our website. By using this site, you agree to the practices described in this document.</p>
+      <p>This website is currently a portfolio project. As we grow, features may be added — including advertising — and
+        this policy will be updated accordingly. We encourage you to review it periodically.</p>
 
       <h2>2. Information We Collect</h2>
       <h3>Information You Provide</h3>
@@ -83,42 +88,61 @@
       </ul>
 
       <h2>3. How We Use Your Information</h2>
-      <p>We use the information we collect to provide, operate, and improve our resume optimization services, to analyze usage patterns, and to respond to any enquiries you send us. We do not currently use your personal information for advertising purposes.</p>
-      <p>When we introduce advertising features in the future, this Privacy Policy will be updated and you will be notified of any material changes.</p>
+      <p>We use the information we collect to provide, operate, and improve our resume optimization services, to analyze
+        usage patterns, and to respond to any enquiries you send us. We do not currently use your personal information
+        for advertising purposes.</p>
+      <p>When we introduce advertising features in the future, this Privacy Policy will be updated and you will be
+        notified of any material changes.</p>
 
       <h2>4. Cookies and Tracking Technologies</h2>
-      <p>Our website may use cookies and similar tracking technologies to enhance your experience and gather analytics data. Types we use include:</p>
+      <p>Our website may use cookies and similar tracking technologies to enhance your experience and gather analytics
+        data. Types we use include:</p>
       <ul>
         <li><strong>Essential Cookies</strong> — Necessary for the website to function. Cannot be disabled.</li>
         <li><strong>Analytics Cookies</strong> — Help us understand how visitors interact with the site.</li>
         <li><strong>Preference Cookies</strong> — Remember your settings and preferences for future visits.</li>
       </ul>
-      <p>When advertising is introduced, we or our advertising partners may use additional cookies to serve relevant ads. You will be given the opportunity to manage your preferences at that time. You can control cookies through your browser settings at any time.</p>
+      <p>When advertising is introduced, we or our advertising partners may use additional cookies to serve relevant
+        ads. You will be given the opportunity to manage your preferences at that time. You can control cookies through
+        your browser settings at any time.</p>
 
       <h2>5. Sharing Your Information</h2>
       <p>We share data only in the following limited circumstances:</p>
       <ul>
-        <li><strong>Service Providers</strong> — Trusted third parties (hosting, analytics, email) who help operate the website. They are contractually required to keep your data secure.</li>
+        <li><strong>Service Providers</strong> — Trusted third parties (hosting, analytics, email) who help operate the
+          website. They are contractually required to keep your data secure.</li>
         <li><strong>Legal Requirements</strong> — Where required by law, regulation, or legal process.</li>
-        <li><strong>Business Transfers</strong> — If the website or its assets are acquired, your information may be transferred. You will be notified in advance.</li>
+        <li><strong>Business Transfers</strong> — If the website or its assets are acquired, your information may be
+          transferred. You will be notified in advance.</li>
       </ul>
-      <p>We do not sell, rent, or trade your personal information to third-party advertisers at this time. If this changes, we will update this policy and seek your consent where required by law.</p>
+      <p>We do not sell, rent, or trade your personal information to third-party advertisers at this time. If this
+        changes, we will update this policy and seek your consent where required by law.</p>
 
       <h2>6. Data Retention</h2>
-      <p>We retain your personal data only for as long as necessary to fulfil the purposes outlined in this policy, or as required by law. Resume files uploaded for optimization are processed and not stored permanently unless you have explicitly saved them to an account.</p>
+      <p>We retain your personal data only for as long as necessary to fulfil the purposes outlined in this policy, or
+        as required by law. Resume files uploaded for optimization are processed and not stored permanently unless you
+        have explicitly saved them to an account.</p>
 
       <h2>7. Security</h2>
-      <p>We take reasonable technical and organisational measures to protect your personal information from unauthorised access, disclosure, alteration, or destruction, including secure server infrastructure, encrypted connections (HTTPS), and restricted access to user data.</p>
-      <p>No method of transmission over the internet is completely secure. While we strive to protect your information, we cannot guarantee absolute security.</p>
+      <p>We take reasonable technical and organisational measures to protect your personal information from unauthorised
+        access, disclosure, alteration, or destruction, including secure server infrastructure, encrypted connections
+        (HTTPS), and restricted access to user data.</p>
+      <p>No method of transmission over the internet is completely secure. While we strive to protect your information,
+        we cannot guarantee absolute security.</p>
 
       <h2>8. Your Rights</h2>
-      <p>Depending on your location, you may have rights including access to your data, correction, deletion, objection to processing, data portability, and the ability to withdraw consent. To exercise any of these rights, please contact us using the details below.</p>
+      <p>Depending on your location, you may have rights including access to your data, correction, deletion, objection
+        to processing, data portability, and the ability to withdraw consent. To exercise any of these rights, please
+        contact us using the details below.</p>
 
       <h2>9. Children's Privacy</h2>
-      <p>This website is not directed at children under the age of 13. We do not knowingly collect personal information from children. If you believe we have inadvertently collected data from a child, please contact us immediately.</p>
+      <p>This website is not directed at children under the age of 13. We do not knowingly collect personal information
+        from children. If you believe we have inadvertently collected data from a child, please contact us immediately.
+      </p>
 
       <h2>10. Changes to This Policy</h2>
-      <p>We may update this Privacy Policy from time to time. When we make significant changes, we will update the "Last Updated" date above and, where appropriate, notify you by email or a notice on the website.</p>
+      <p>We may update this Privacy Policy from time to time. When we make significant changes, we will update the "Last
+        Updated" date above and, where appropriate, notify you by email or a notice on the website.</p>
 
       <h2>11. Contact Us</h2>
       <p>If you have any questions, concerns, or requests relating to this Privacy Policy, please reach out:</p>
@@ -139,7 +163,8 @@
        FOOTER
   ══════════════════════════════════════ -->
   <footer>
-    <a href="/index.html" class="nav-logo" style="font-size:1.1rem;">Resume<span style="color:var(--accent)">AI</span></a>
+    <a href="/index.html" class="nav-logo" style="font-size:1.1rem;">Resume<span
+        style="color:var(--accent)">AI</span></a>
     <span>© <span id="footerYear"></span> ResumeAI</span>
     <div style="display:flex;gap:20px;">
       <a href="/privacy.html">Privacy</a>
@@ -169,12 +194,14 @@
         <form onsubmit="handleLogin(event)" novalidate>
           <div class="form-group">
             <label class="form-label" for="loginEmail">Email address</label>
-            <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" required />
+            <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"
+              required />
             <div class="form-error" id="loginEmailError">Please enter a valid email address.</div>
           </div>
           <div class="form-group">
             <label class="form-label" for="loginPassword">Password</label>
-            <input class="form-input" type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password" required />
+            <input class="form-input" type="password" id="loginPassword" placeholder="Your password"
+              autocomplete="current-password" required />
             <div class="form-error" id="loginPasswordError">Password is required.</div>
           </div>
           <button type="submit" class="form-submit" id="loginBtn">
@@ -185,7 +212,8 @@
         <div class="form-divider">or</div>
         <p style="text-align:center;font-size:0.84rem;color:var(--muted)">
           Don't have an account?
-          <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500" onclick="switchTab('signup');return false;">Sign up free →</a>
+          <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500"
+            onclick="switchTab('signup');return false;">Sign up free →</a>
         </p>
       </div>
 
@@ -195,18 +223,23 @@
         <form onsubmit="handleSignup(event)" novalidate>
           <div class="form-group">
             <label class="form-label" for="signupName">Full name</label>
-            <input class="form-input" type="text" id="signupName" placeholder="Alex Johnson" autocomplete="name" required />
+            <input class="form-input" type="text" id="signupName" placeholder="Alex Johnson" autocomplete="name"
+              required />
             <div class="form-error" id="signupNameError">Please enter your name.</div>
           </div>
           <div class="form-group">
             <label class="form-label" for="signupEmail">Email address</label>
-            <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" required />
+            <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email"
+              required />
             <div class="form-error" id="signupEmailError">Please enter a valid email address.</div>
           </div>
           <div class="form-group">
             <label class="form-label" for="signupPassword">Password</label>
-            <input class="form-input" type="password" id="signupPassword" placeholder="At least 8 characters" autocomplete="new-password" required oninput="checkStrength(this.value)" />
-            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            <input class="form-input" type="password" id="signupPassword" placeholder="At least 8 characters"
+              autocomplete="new-password" required oninput="checkStrength(this.value)" />
+            <div class="strength-bar">
+              <div class="strength-fill" id="strengthFill"></div>
+            </div>
             <div class="strength-label" id="strengthLabel"></div>
             <div class="form-error" id="signupPasswordError">Password must be at least 8 characters.</div>
           </div>
@@ -218,7 +251,8 @@
         <div class="form-divider">or</div>
         <p style="text-align:center;font-size:0.84rem;color:var(--muted)">
           Already have an account?
-          <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500" onclick="switchTab('login');return false;">Log in →</a>
+          <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500"
+            onclick="switchTab('login');return false;">Log in →</a>
         </p>
       </div>
     </div>
@@ -228,4 +262,5 @@
   <div class="toast" id="toast"></div>
 
 </body>
+
 </html>

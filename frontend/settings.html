@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings — ResumeAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <script src="assets/js/script.js" defer></script>
+    <style>
+        body {
+            padding-top: 80px;
+        }
+
+        .settings-wrapper {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 48px 24px 100px;
+        }
+
+        /* ── HEADER ── */
+        .settings-eyebrow {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .settings-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.4rem);
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            margin-bottom: 6px;
+        }
+
+        .settings-subtitle {
+            font-size: 0.92rem;
+            color: var(--muted);
+            margin-bottom: 48px;
+        }
+
+        /* ── SECTION ── */
+        .settings-section {
+            margin-bottom: 40px;
+        }
+
+        .settings-section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.15rem;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+            margin-bottom: 4px;
+        }
+
+        .settings-section-desc {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-bottom: 16px;
+        }
+
+        /* ── CARD ── */
+        .settings-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        /* ── FIELD ROW ── */
+        .field-row {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .field-row:last-child {
+            border-bottom: none;
+        }
+
+        .field-left {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .field-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 2px;
+        }
+
+        .field-value {
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        /* ── INLINE EDIT FORM ── */
+        .field-edit-form {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .field-edit-form.open {
+            display: flex;
+        }
+
+        .settings-input {
+            font-family: inherit;
+            font-size: 0.88rem;
+            color: var(--ink);
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 13px;
+            outline: none;
+            transition: border-color 0.15s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .settings-input:focus {
+            border-color: var(--accent);
+            background: var(--white);
+        }
+
+        .settings-input::placeholder {
+            color: #b0b0aa;
+        }
+
+        .field-edit-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ── BUTTONS ── */
+        .btn-edit {
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 7px;
+            border: 1.5px solid var(--border);
+            background: var(--white);
+            color: var(--ink);
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-edit:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-save {
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 7px 16px;
+            border-radius: 7px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-save:hover {
+            background: #155a3d;
+        }
+
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-cancel {
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 500;
+            padding: 7px 14px;
+            border-radius: 7px;
+            border: 1.5px solid var(--border);
+            background: var(--white);
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-cancel:hover {
+            border-color: var(--ink);
+            color: var(--ink);
+        }
+
+        /* ── DANGER ZONE ── */
+        .danger-card {
+            background: var(--white);
+            border: 1px solid #f5c6c2;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .danger-row {
+            padding: 20px 24px;
+            border-bottom: 1px solid #fdf0ef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .danger-row:last-child {
+            border-bottom: none;
+        }
+
+        .danger-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 2px;
+        }
+
+        .danger-desc {
+            font-size: 0.8rem;
+            color: var(--muted);
+            line-height: 1.5;
+            max-width: 380px;
+        }
+
+        .btn-danger {
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 7px 16px;
+            border-radius: 7px;
+            border: 1.5px solid #f5c6c2;
+            background: var(--white);
+            color: var(--danger);
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-danger:hover {
+            background: #fdf0ef;
+            border-color: var(--danger);
+        }
+
+        .btn-danger-solid {
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 7px 16px;
+            border-radius: 7px;
+            border: none;
+            background: var(--danger);
+            color: white;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-danger-solid:hover {
+            background: #c0392b;
+        }
+
+        .btn-danger-solid:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ── CONFIRM DIALOG ── */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .confirm-overlay.show {
+            display: flex;
+        }
+
+        .confirm-box {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: pop-in 0.2s ease;
+        }
+
+        @keyframes pop-in {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .confirm-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .confirm-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.3rem;
+            color: var(--ink);
+            margin-bottom: 8px;
+        }
+
+        .confirm-desc {
+            font-size: 0.88rem;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .confirm-desc strong {
+            color: var(--danger);
+        }
+
+        .confirm-input-wrap {
+            margin-bottom: 20px;
+        }
+
+        .confirm-input-label {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .confirm-input-label strong {
+            color: var(--ink);
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* ── SUCCESS / ERROR INLINE ── */
+        .field-feedback {
+            font-size: 0.8rem;
+            padding: 6px 0;
+            display: none;
+        }
+
+        .field-feedback.success {
+            color: var(--accent);
+            display: block;
+        }
+
+        .field-feedback.error {
+            color: var(--danger);
+            display: block;
+        }
+
+        /* ── LOADING SPINNER (inline) ── */
+        .btn-spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── DIVIDER ── */
+        .settings-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 40px 0;
+        }
+
+        @media (max-width: 600px) {
+
+            .field-row,
+            .danger-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .btn-edit,
+            .btn-danger,
+            .btn-danger-solid {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ── NAVBAR ── -->
+    <nav id="navbar">
+        <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
+        <div class="nav-right">
+            <!-- <div id="guestNav" style="display:none;">
+                <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
+                <button class="btn btn-primary" onclick="openModal('signup')">Get started free</button>
+            </div> -->
+            <div id="userNav" style="display:none;">
+                <div class="user-menu-wrap">
+                    <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">?</div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-email">
+                            <strong id="dropdownName">—</strong>
+                            <span id="dropdownEmail">—</span>
+                        </div>
+                        <button class="dropdown-item" onclick="goToMyResumes()">📄 History</button>
+                        <button class="dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize
+                            Resume</button>
+                            <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job Tracker</button>
+                        <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
+                        <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="settings-wrapper">
+
+        <!-- ── PAGE HEADER ── -->
+        <div class="settings-eyebrow">Your Account</div>
+        <h1 class="settings-title">Settings</h1>
+        <p class="settings-subtitle">Manage your account details and personal data.</p>
+
+        <!-- ════════════════════════════════════════
+         SECTION 1 — ACCOUNT
+    ════════════════════════════════════════ -->
+        <div class="settings-section">
+            <div class="settings-section-title">Account</div>
+            <div class="settings-section-desc">Update your name, email address, and password.</div>
+
+            <div class="settings-card">
+
+                <!-- Name -->
+                <div class="field-row" id="nameRow">
+                    <div class="field-left">
+                        <div class="field-label">Full Name</div>
+                        <div class="field-value" id="nameDisplay">—</div>
+                        <div class="field-edit-form" id="nameForm">
+                            <input type="text" class="settings-input" id="nameInput" placeholder="Your full name"
+                                maxlength="100" />
+                            <div class="field-feedback" id="nameFeedback"></div>
+                            <div class="field-edit-actions">
+                                <button class="btn-save" id="nameSaveBtn" onclick="saveName()">Save</button>
+                                <button class="btn-cancel" onclick="cancelEdit('name')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-edit" id="nameEditBtn" onclick="openEdit('name')">Edit</button>
+                </div>
+
+                <!-- Email -->
+                <div class="field-row" id="emailRow">
+                    <div class="field-left">
+                        <div class="field-label">Email Address</div>
+                        <div class="field-value" id="emailDisplay">—</div>
+                        <div class="field-edit-form" id="emailForm">
+                            <input type="email" class="settings-input" id="emailInput" placeholder="you@example.com" />
+                            <input type="password" class="settings-input" id="emailPasswordInput"
+                                placeholder="Confirm current password" />
+                            <div class="field-feedback" id="emailFeedback"></div>
+                            <div class="field-edit-actions">
+                                <button class="btn-save" id="emailSaveBtn" onclick="saveEmail()">Save</button>
+                                <button class="btn-cancel" onclick="cancelEdit('email')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-edit" id="emailEditBtn" onclick="openEdit('email')">Edit</button>
+                </div>
+
+                <!-- Password -->
+                <div class="field-row" id="passwordRow">
+                    <div class="field-left">
+                        <div class="field-label">Password</div>
+                        <div class="field-value">••••••••••••</div>
+                        <div class="field-edit-form" id="passwordForm">
+                            <input type="password" class="settings-input" id="currentPasswordInput"
+                                placeholder="Current password" />
+                            <input type="password" class="settings-input" id="newPasswordInput"
+                                placeholder="New password (min 8 characters)" />
+                            <input type="password" class="settings-input" id="confirmPasswordInput"
+                                placeholder="Confirm new password" />
+                            <div class="field-feedback" id="passwordFeedback"></div>
+                            <div class="field-edit-actions">
+                                <button class="btn-save" id="passwordSaveBtn" onclick="savePassword()">Save</button>
+                                <button class="btn-cancel" onclick="cancelEdit('password')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-edit" id="passwordEditBtn" onclick="openEdit('password')">Change</button>
+                </div>
+
+            </div>
+        </div>
+
+        <hr class="settings-divider" />
+
+        <!-- ════════════════════════════════════════
+         SECTION 2 — DATA & PRIVACY
+    ════════════════════════════════════════ -->
+        <div class="settings-section">
+            <div class="settings-section-title">Data &amp; Privacy</div>
+            <div class="settings-section-desc">Control your data. Export or permanently delete your information.</div>
+
+            <div class="danger-card">
+
+                <!-- Export history -->
+                <div class="danger-row">
+                    <div>
+                        <div class="danger-label">Export Optimisation History</div>
+                        <div class="danger-desc">Download all your resume optimisations as a JSON file. Includes ATS
+                            scores, keywords, improvements, and optimised text.</div>
+                    </div>
+                    <button class="btn-edit" onclick="exportHistory()">⬇ Export JSON</button>
+                </div>
+
+                <!-- Delete history -->
+                <div class="danger-row">
+                    <div>
+                        <div class="danger-label">Delete Optimisation History</div>
+                        <div class="danger-desc">Permanently delete all saved resume optimisations. This cannot be
+                            undone.</div>
+                    </div>
+                    <button class="btn-danger" onclick="openConfirm('history')">Delete History</button>
+                </div>
+
+                <!-- Delete account -->
+                <div class="danger-row">
+                    <div>
+                        <div class="danger-label">Delete Account</div>
+                        <div class="danger-desc"> All your data — resume history, account details, and active
+                            subscription — will be
+                            <strong>permanently deleted</strong> and cannot be recovered.
+                            <span id="proDeleteWarning" style="display:none;">
+                                Your Pro access will end immediately with <strong>no refund</strong>.
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn-danger-solid" onclick="openConfirm('account')">Delete Account</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ════════════════════════════════════════
+     CONFIRM DIALOG — Delete History
+════════════════════════════════════════ -->
+    <div class="confirm-overlay" id="confirmHistory">
+        <div class="confirm-box">
+            <div class="confirm-icon">🗑️</div>
+            <div class="confirm-title">Delete all history?</div>
+            <p class="confirm-desc">
+                This will permanently delete all your saved resume optimisations.
+                <strong>This cannot be undone.</strong>
+            </p>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeConfirm('history')">Cancel</button>
+                <button class="btn-danger-solid" id="confirmHistoryBtn" onclick="deleteHistory()">Yes, delete
+                    history</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+     CONFIRM DIALOG — Delete Account
+════════════════════════════════════════ -->
+    <div class="confirm-overlay" id="confirmAccount">
+        <div class="confirm-box">
+            <div class="confirm-icon">⚠️</div>
+            <div class="confirm-title">Delete your account?</div>
+            <p class="confirm-desc">
+                All your data — resume history, account details, and billing — will be
+                <strong>permanently deleted</strong> and cannot be recovered.
+            </p>
+            <div class="confirm-input-wrap">
+                <label class="confirm-input-label">
+                    Type <strong id="confirmEmailHint">your email</strong> to confirm
+                </label>
+                <input type="email" class="settings-input" id="deleteAccountEmailInput" placeholder="your@email.com"
+                    oninput="checkDeleteConfirm()" />
+                <div class="field-feedback" id="deleteAccountFeedback"></div>
+            </div>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeConfirm('account')">Cancel</button>
+                <button class="btn-danger-solid" id="confirmAccountBtn" onclick="deleteAccount()" disabled>Delete my
+                    account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+        <a href="index.html" class="nav-logo" style="font-size:1.1rem;">Resume<span
+                style="color:var(--accent)">AI</span></a>
+        <span>© <span id="footerYear"></span> ResumeAI</span>
+        <div style="display:flex;gap:20px;">
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <a href="contact_us.html">Contact</a>
+        </div>
+    </footer>
+
+    <script>
+        // const API_BASE = '/api';
+
+        // ── INIT ──────────────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = getToken();
+            if (!token) { window.location.replace('index.html'); return; }
+            document.getElementById('footerYear').textContent = new Date().getFullYear();
+            loadUserData();
+        });
+
+        function getToken() { return localStorage.getItem('authToken'); }
+
+        function loadUserData() {
+            // Populate from localStorage first (instant), then refresh from server if needed
+            const raw = localStorage.getItem('userData');
+            if (raw) {
+                try {
+                    const u = JSON.parse(raw);
+                    document.getElementById('nameDisplay').textContent = u.name || '—';
+                    document.getElementById('emailDisplay').textContent = u.email || '—';
+                    document.getElementById('nameInput').value = u.name || '';
+                    document.getElementById('emailInput').value = u.email || '';
+                    // set email hint in delete dialog
+                    document.getElementById('confirmEmailHint').textContent = u.email || 'your email';
+                } catch (e) { }
+            }
+        }
+
+        // ── EDIT TOGGLE ───────────────────────────────────────────────────────────────
+        function openEdit(field) {
+            // Close others first
+            ['name', 'email', 'password'].forEach(f => { if (f !== field) cancelEdit(f); });
+            document.getElementById(`${field}Form`).classList.add('open');
+            document.getElementById(`${field}EditBtn`).style.display = 'none';
+            // Focus first input
+            const first = document.getElementById(`${field}Form`).querySelector('input');
+            if (first) setTimeout(() => first.focus(), 50);
+        }
+
+        function cancelEdit(field) {
+            document.getElementById(`${field}Form`).classList.remove('open');
+            document.getElementById(`${field}EditBtn`).style.display = '';
+            clearFeedback(field);
+            // Reset inputs
+            if (field === 'name') {
+                const raw = localStorage.getItem('userData');
+                if (raw) document.getElementById('nameInput').value = JSON.parse(raw).name || '';
+            }
+            if (field === 'email') {
+                const raw = localStorage.getItem('userData');
+                if (raw) document.getElementById('emailInput').value = JSON.parse(raw).email || '';
+                document.getElementById('emailPasswordInput').value = '';
+            }
+            if (field === 'password') {
+                ['currentPasswordInput', 'newPasswordInput', 'confirmPasswordInput'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+            }
+        }
+
+        // ── SAVE NAME ─────────────────────────────────────────────────────────────────
+        async function saveName() {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) { setFeedback('name', 'error', 'Name cannot be empty.'); return; }
+            if (name.length < 2) { setFeedback('name', 'error', 'Name must be at least 2 characters.'); return; }
+
+            setBtnLoading('nameSaveBtn', true);
+            try {
+                const res = await fetch(`${API_BASE}/auth/update-profile`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                    body: JSON.stringify({ name })
+                });
+                const data = await res.json();
+                if (!res.ok) { setFeedback('name', 'error', data.detail || 'Failed to update name.'); return; }
+
+                // Update localStorage
+                const raw = localStorage.getItem('userData');
+                if (raw) {
+                    const u = JSON.parse(raw);
+                    u.name = name;
+                    localStorage.setItem('userData', JSON.stringify(u));
+                }
+                document.getElementById('nameDisplay').textContent = name;
+                setFeedback('name', 'success', 'Name updated successfully.');
+                setTimeout(() => cancelEdit('name'), 1200);
+
+            } catch (e) {
+                setFeedback('name', 'error', 'Network error. Please try again.');
+            } finally {
+                setBtnLoading('nameSaveBtn', false);
+            }
+        }
+
+        // ── SAVE EMAIL ────────────────────────────────────────────────────────────────
+        async function saveEmail() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('emailPasswordInput').value;
+
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                setFeedback('email', 'error', 'Please enter a valid email address.'); return;
+            }
+            if (!password) { setFeedback('email', 'error', 'Please confirm your current password.'); return; }
+
+            setBtnLoading('emailSaveBtn', true);
+            try {
+                const res = await fetch(`${API_BASE}/auth/update-profile`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                    body: JSON.stringify({ email, current_password: password })
+                });
+                const data = await res.json();
+                if (!res.ok) { setFeedback('email', 'error', data.detail || 'Failed to update email.'); return; }
+
+                const raw = localStorage.getItem('userData');
+                if (raw) {
+                    const u = JSON.parse(raw);
+                    u.email = email;
+                    localStorage.setItem('userData', JSON.stringify(u));
+                }
+                document.getElementById('emailDisplay').textContent = email;
+                document.getElementById('confirmEmailHint').textContent = email;
+                setFeedback('email', 'success', 'Email updated successfully.');
+                setTimeout(() => cancelEdit('email'), 1200);
+
+            } catch (e) {
+                setFeedback('email', 'error', 'Network error. Please try again.');
+            } finally {
+                setBtnLoading('emailSaveBtn', false);
+            }
+        }
+
+        // ── SAVE PASSWORD ─────────────────────────────────────────────────────────────
+        async function savePassword() {
+            const current = document.getElementById('currentPasswordInput').value;
+            const next = document.getElementById('newPasswordInput').value;
+            const confirm = document.getElementById('confirmPasswordInput').value;
+
+            if (!current) { setFeedback('password', 'error', 'Please enter your current password.'); return; }
+            if (next.length < 8) { setFeedback('password', 'error', 'New password must be at least 8 characters.'); return; }
+            if (next !== confirm) { setFeedback('password', 'error', 'Passwords do not match.'); return; }
+            if (current === next) { setFeedback('password', 'error', 'New password must be different from current.'); return; }
+
+            setBtnLoading('passwordSaveBtn', true);
+            try {
+                const res = await fetch(`${API_BASE}/auth/change-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                    body: JSON.stringify({ current_password: current, new_password: next })
+                });
+                const data = await res.json();
+                if (!res.ok) { setFeedback('password', 'error', data.detail || 'Failed to update password.'); return; }
+
+                setFeedback('password', 'success', 'Password changed successfully.');
+                setTimeout(() => cancelEdit('password'), 1200);
+
+            } catch (e) {
+                setFeedback('password', 'error', 'Network error. Please try again.');
+            } finally {
+                setBtnLoading('passwordSaveBtn', false);
+            }
+        }
+
+        // ── EXPORT HISTORY ────────────────────────────────────────────────────────────
+        async function exportHistory() {
+            try {
+                const res = await fetch(`${API_BASE}/resume/history`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (!res.ok) { showToast('Could not export history.', 'error'); return; }
+                const data = await res.json();
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `resumeai-history-${new Date().toISOString().slice(0, 10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('History exported!', 'success');
+            } catch (e) {
+                showToast('Export failed. Please try again.', 'error');
+            }
+        }
+
+        // ── CONFIRM DIALOGS ───────────────────────────────────────────────────────────
+        // function openConfirm(type) {
+        //     document.getElementById(`confirm${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('show');
+        // }
+        function openConfirm(type) {
+            if (type === 'account') {
+                // Show pro warning only if user is pro
+                const raw = localStorage.getItem('userData');
+                const plan = raw ? JSON.parse(raw).plan : null;
+                const proWarning = document.getElementById('proDeleteWarning');
+                if (proWarning) proWarning.style.display = plan === 'pro' ? 'inline' : 'none';
+            }
+            document.getElementById(`confirm${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('show');
+        }
+
+        function closeConfirm(type) {
+            document.getElementById(`confirm${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.remove('show');
+            if (type === 'account') {
+                document.getElementById('deleteAccountEmailInput').value = '';
+                document.getElementById('confirmAccountBtn').disabled = true;
+                clearFeedback('deleteAccount');
+            }
+        }
+
+        // Close on overlay click
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('confirm-overlay')) {
+                e.target.classList.remove('show');
+            }
+        });
+
+        // ── DELETE HISTORY ────────────────────────────────────────────────────────────
+        async function deleteHistory() {
+            const btn = document.getElementById('confirmHistoryBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="btn-spinner"></span>Deleting…';
+
+            try {
+                const res = await fetch(`${API_BASE}/resume/history`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (!res.ok) {
+                    const d = await res.json().catch(() => ({}));
+                    showToast(d.detail || 'Failed to delete history.', 'error');
+                    return;
+                }
+                closeConfirm('history');
+                showToast('All optimisation history deleted.', 'success');
+            } catch (e) {
+                showToast('Network error. Please try again.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Yes, delete history';
+            }
+        }
+
+        // ── DELETE ACCOUNT ────────────────────────────────────────────────────────────
+        function checkDeleteConfirm() {
+            const raw = localStorage.getItem('userData');
+            const email = raw ? JSON.parse(raw).email : '';
+            const input = document.getElementById('deleteAccountEmailInput').value.trim();
+            document.getElementById('confirmAccountBtn').disabled = (input !== email);
+        }
+
+        async function deleteAccount() {
+            const btn = document.getElementById('confirmAccountBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="btn-spinner"></span>Deleting…';
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/delete-account`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (!res.ok) {
+                    const d = await res.json().catch(() => ({}));
+                    document.getElementById('deleteAccountFeedback').textContent = d.detail || 'Failed to delete account.';
+                    document.getElementById('deleteAccountFeedback').className = 'field-feedback error';
+                    btn.disabled = false;
+                    btn.textContent = 'Delete my account';
+                    return;
+                }
+                // Clear everything and redirect
+                localStorage.clear();
+                window.location.replace('index.html');
+            } catch (e) {
+                document.getElementById('deleteAccountFeedback').textContent = 'Network error. Please try again.';
+                document.getElementById('deleteAccountFeedback').className = 'field-feedback error';
+                btn.disabled = false;
+                btn.textContent = 'Delete my account';
+            }
+        }
+
+        // ── HELPERS ───────────────────────────────────────────────────────────────────
+        function setFeedback(field, type, msg) {
+            const el = document.getElementById(`${field}Feedback`);
+            if (!el) return;
+            el.textContent = msg;
+            el.className = `field-feedback ${type}`;
+        }
+        function clearFeedback(field) {
+            const el = document.getElementById(`${field}Feedback`);
+            if (el) { el.textContent = ''; el.className = 'field-feedback'; }
+        }
+
+        function setBtnLoading(btnId, loading) {
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+            btn.disabled = loading;
+            btn.innerHTML = loading
+                ? '<span class="btn-spinner"></span>Saving…'
+                : 'Save';
+        }
+
+    </script>
+
+</body>
+
+</html>

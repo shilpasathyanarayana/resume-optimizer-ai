@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Optimize Resume — ResumeAI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/main.css" />
   <style>
-    /* ── OPTIMIZE PAGE SPECIFIC ─────────────────────────────────────── */
-
-    body { padding-top: 72px; }
+    body {
+      padding-top: 72px;
+    }
 
     /* STEPS BAR */
     .steps-bar {
@@ -24,28 +27,183 @@
       top: 72px;
       z-index: 90;
     }
-    .step-item { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--muted); padding: 8px 16px; }
-    .step-item.active { color: var(--ink); font-weight: 500; }
-    .step-item.done { color: var(--accent); }
-    .step-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 600; background: var(--white); }
-    .step-item.active .step-circle { border-color: var(--accent); background: var(--accent); color: white; }
-    .step-item.done .step-circle { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
-    .step-arrow { width: 48px; height: 1px; background: var(--border); }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding: 8px 16px;
+    }
+
+    .step-item.active {
+      color: var(--ink);
+      font-weight: 500;
+    }
+
+    .step-item.done {
+      color: var(--accent);
+    }
+
+    .step-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--white);
+    }
+
+    .step-item.active .step-circle {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+
+    .step-item.done .step-circle {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .step-arrow {
+      width: 48px;
+      height: 1px;
+      background: var(--border);
+    }
 
     /* MAIN */
-    .optimize-main { max-width: 1200px; margin: 0 auto; padding: 40px 24px 100px; }
-    .optimize-title { font-family: 'DM Serif Display', serif; font-size: 2rem; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 8px; }
-    .optimize-subtitle { color: var(--muted); margin-bottom: 36px; font-size: 0.95rem; }
+    .optimize-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px 100px;
+    }
+
+    .optimize-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .optimize-subtitle {
+      color: var(--muted);
+      margin-bottom: 36px;
+      font-size: 0.95rem;
+    }
+
+    /* ── USAGE BAR (free users only) ── */
+    .usage-bar-inline {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      margin-bottom: 24px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .usage-bar-inline.show {
+      display: flex;
+    }
+
+    .usage-bar-inline strong {
+      color: var(--ink);
+    }
+
+    .usage-bar-inline .track {
+      flex: 1;
+      max-width: 140px;
+      height: 5px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .usage-bar-inline .fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .usage-bar-inline a {
+      color: var(--accent);
+      font-weight: 500;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    /* ── PRO BADGE inline ── */
+    .pro-inline-badge {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: #e8f5ef;
+      border: 1px solid #b2dfc7;
+      border-radius: 10px;
+      padding: 10px 18px;
+      margin-bottom: 24px;
+      font-size: 0.85rem;
+      color: #1a7a4a;
+      font-weight: 500;
+    }
+
+    .pro-inline-badge.show {
+      display: flex;
+    }
 
     /* SPLIT GRID */
-    .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-    @media (max-width: 768px) { .split-grid { grid-template-columns: 1fr; } }
+    .split-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .split-grid {
+        grid-template-columns: 1fr;
+      }
+    }
 
     /* PANEL CARDS */
-    .panel-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
-    .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .panel-label { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.92rem; color: var(--ink); }
-    .char-count { font-size: 0.75rem; color: var(--muted); }
+    .panel-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .panel-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--ink);
+    }
+
+    .char-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
 
     /* UPLOAD ZONE */
     .upload-zone {
@@ -58,16 +216,54 @@
       margin-bottom: 12px;
       background: var(--surface);
     }
-    .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accent-light); }
-    .upload-zone.has-file { border-color: var(--accent); background: var(--accent-light); }
-    .upload-icon { font-size: 1.5rem; margin-bottom: 6px; }
-    .upload-text { font-size: 0.88rem; color: var(--muted); }
-    .upload-text strong { color: var(--ink); }
-    .upload-formats { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
-    .upload-filename { font-size: 0.88rem; color: var(--accent); font-weight: 500; }
-    input[type="file"] { display: none; }
 
-    .or-divider { text-align: center; color: var(--muted); font-size: 0.78rem; margin: 12px 0; }
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .upload-zone.has-file {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .upload-icon {
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+    }
+
+    .upload-text {
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .upload-text strong {
+      color: var(--ink);
+    }
+
+    .upload-formats {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .upload-filename {
+      font-size: 0.88rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .or-divider {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin: 12px 0;
+    }
 
     /* TEXTAREA */
     .panel-textarea {
@@ -83,15 +279,35 @@
       line-height: 1.6;
       transition: border-color 0.18s;
     }
-    .panel-textarea:focus { outline: none; border-color: var(--accent); }
-    .panel-textarea::placeholder { color: #b0b0aa; }
+
+    .panel-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .panel-textarea::placeholder {
+      color: #b0b0aa;
+    }
 
     /* ACTION BAR */
-    .action-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 0; flex-wrap: wrap; }
-    .action-bar-left { font-size: 0.85rem; color: var(--muted); }
+    .action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .action-bar-left {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
 
     .btn-optimize {
-      display: inline-flex; align-items: center; gap: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       background: var(--accent);
       color: white;
       border: none;
@@ -103,59 +319,210 @@
       cursor: pointer;
       transition: all 0.18s;
       white-space: nowrap;
-      box-shadow: 0 2px 12px rgba(26,107,74,0.22);
+      box-shadow: 0 2px 12px rgba(26, 107, 74, 0.22);
     }
-    .btn-optimize:hover { background: #155a3d; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(26,107,74,0.32); }
-    .btn-optimize:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-optimize:hover {
+      background: #155a3d;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(26, 107, 74, 0.32);
+    }
+
+    .btn-optimize:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
 
     /* PROCESSING PANEL */
-    #processingPanel { display: none; text-align: center; padding: 80px 20px; }
+    #processingPanel {
+      display: none;
+      text-align: center;
+      padding: 80px 20px;
+    }
+
     .spinner-ring {
-      width: 52px; height: 52px;
+      width: 52px;
+      height: 52px;
       border: 3px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
       animation: opt-spin 0.9s linear infinite;
       margin: 0 auto 24px;
     }
-    @keyframes opt-spin { to { transform: rotate(360deg); } }
-    .processing-title { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: var(--ink); margin-bottom: 8px; }
-    .processing-subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 36px; }
 
-    .progress-steps { max-width: 500px; margin: 0 auto; text-align: left; display: flex; flex-direction: column; gap: 10px; }
-    .progress-step { display: flex; align-items: center; gap: 16px; padding: 14px 18px; background: var(--white); border: 1px solid var(--border); border-radius: 10px; transition: all 0.3s; }
-    .progress-step.active { border-color: var(--accent); background: var(--accent-light); }
-    .progress-step.done { border-color: var(--accent); background: var(--accent-light); }
-    .progress-step-icon { font-size: 1.1rem; }
-    .progress-step-text { flex: 1; }
-    .progress-step-title { font-size: 0.88rem; font-weight: 600; color: var(--ink); }
-    .progress-step-desc { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
-    .progress-step-status { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
-    .progress-step.active .progress-step-status { color: var(--accent); font-weight: 500; }
-    .progress-step.done .progress-step-status { color: var(--accent); }
+    @keyframes opt-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .processing-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .processing-subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 36px;
+    }
+
+    .progress-steps {
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+
+    .progress-step.active {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .progress-step.done {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .progress-step-icon {
+      font-size: 1.1rem;
+    }
+
+    .progress-step-text {
+      flex: 1;
+    }
+
+    .progress-step-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .progress-step-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .progress-step-status {
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .progress-step.active .progress-step-status {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .progress-step.done .progress-step-status {
+      color: var(--accent);
+    }
 
     /* RESULTS PANEL */
-    #resultsPanel { display: none; }
-    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
-    .results-title { font-family: 'DM Serif Display', serif; font-size: 1.8rem; color: var(--ink); letter-spacing: -0.02em; }
+    #resultsPanel {
+      display: none;
+    }
 
-    .ats-score-wrap { display: flex; align-items: center; gap: 12px; background: var(--white); border: 1px solid var(--border); border-radius: 12px; padding: 14px 20px; }
-    .ats-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
-    .ats-number { font-size: 2.4rem; font-weight: 700; line-height: 1; color: var(--ink); }
-    .ats-number.high { color: var(--accent); }
-    .ats-number.mid { color: #d97706; }
-    .ats-number.low { color: var(--danger); }
-    .ats-suffix { font-size: 0.9rem; color: var(--muted); align-self: flex-end; padding-bottom: 4px; }
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
 
-    .keywords-panel, .improvements-panel {
+    .results-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+
+    .ats-score-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+    }
+
+    .ats-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+    }
+
+    .ats-number {
+      font-size: 2.4rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--ink);
+    }
+
+    .ats-number.high {
+      color: var(--accent);
+    }
+
+    .ats-number.mid {
+      color: #d97706;
+    }
+
+    .ats-number.low {
+      color: var(--danger);
+    }
+
+    .ats-suffix {
+      font-size: 0.9rem;
+      color: var(--muted);
+      align-self: flex-end;
+      padding-bottom: 4px;
+    }
+
+    .keywords-panel,
+    .improvements-panel {
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 20px 24px;
       margin-bottom: 16px;
     }
-    .keywords-title { font-size: 0.85rem; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
-    .keywords-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .keywords-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 12px;
+    }
+
+    .keywords-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
     .keyword-tag {
       background: #fdf0ef;
       border: 1px solid #f5c6c2;
@@ -165,7 +532,13 @@
       font-size: 0.78rem;
       font-weight: 500;
     }
-    .improvements-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .improvements-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     .improvement-item {
       font-size: 0.88rem;
       padding: 10px 14px;
@@ -176,68 +549,212 @@
       line-height: 1.5;
     }
 
-    .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-    @media (max-width: 768px) { .results-grid { grid-template-columns: 1fr; } }
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
 
-    .result-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-    .result-card.optimized { border-color: var(--accent); }
-    .result-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--surface); }
-    .result-card.optimized .result-card-header { background: var(--accent-light); }
-    .result-card-label { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
-    .result-content { padding: 18px; font-size: 0.82rem; line-height: 1.7; white-space: pre-wrap; color: var(--muted); max-height: 420px; overflow-y: auto; }
-    .result-card.optimized .result-content { color: var(--ink); }
+    @media (max-width: 768px) {
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .result-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .result-card.optimized {
+      border-color: var(--accent);
+    }
+
+    .result-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .result-card.optimized .result-card-header {
+      background: var(--accent-light);
+    }
+
+    .result-card-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .result-content {
+      padding: 18px;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      color: var(--muted);
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .result-card.optimized .result-content {
+      color: var(--ink);
+    }
 
     .download-bar {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 20px 24px;
       margin-bottom: 20px;
-      flex-wrap: wrap; gap: 16px;
+      flex-wrap: wrap;
+      gap: 16px;
     }
-    .download-bar-text strong { display: block; color: var(--ink); margin-bottom: 4px; }
-    .download-bar-text span { font-size: 0.82rem; color: var(--muted); }
-    .download-buttons { display: flex; gap: 10px; }
+
+    .download-bar-text strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .download-bar-text span {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .download-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
     .btn-download {
-      padding: 10px 20px; border-radius: 8px; font-family: inherit;
-      font-size: 0.88rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.18s;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.18s;
     }
-    .btn-download-txt { background: var(--white); color: var(--ink); border: 1.5px solid var(--border); }
-    .btn-download-txt:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-download-docx { background: var(--accent); color: white; box-shadow: 0 2px 8px rgba(26,107,74,0.2); }
-    .btn-download-docx:hover { background: #155a3d; }
 
-    .try-again-bar { text-align: center; font-size: 0.85rem; color: var(--muted); padding: 8px 0; }
-    .try-again-bar a { color: var(--accent); cursor: pointer; font-weight: 500; }
-    .try-again-bar a:hover { text-decoration: underline; }
+    .btn-download-txt {
+      background: var(--white);
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+    }
 
-    /* COPY BTN */
+    .btn-download-txt:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-download-docx {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 2px 8px rgba(26, 107, 74, 0.2);
+    }
+
+    .btn-download-docx:hover {
+      background: #155a3d;
+    }
+
+    .try-again-bar {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding: 8px 0;
+    }
+
+    .try-again-bar a {
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .try-again-bar a:hover {
+      text-decoration: underline;
+    }
+
     .btn-copy {
-      background: none; border: 1px solid var(--border); color: var(--muted);
-      padding: 4px 10px; border-radius: 6px; cursor: pointer;
-      font-size: 0.75rem; font-family: inherit; transition: all 0.15s;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-family: inherit;
+      transition: all 0.15s;
     }
-    .btn-copy:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-copy:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── UPGRADE WALL (shown to free users who hit limit) ── */
+    .upgrade-wall {
+      display: none;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 24px;
+      margin-top: 24px;
+    }
+
+    .upgrade-wall.show {
+      display: block;
+    }
+
+    .upgrade-wall h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+
+    .upgrade-wall p {
+      color: var(--muted);
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
+
 <body>
 
-  <!-- NAV (from main.css) -->
   <nav id="navbar">
     <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
     <div class="nav-right">
+      <!-- Pro badge shown for pro users -->
+      <span id="navProBadge"
+        style="display:none;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.3rem .75rem;border-radius:999px;background:#c9a84c;color:white;">⭐
+        Pro</span>
       <a href="dashboard.html" class="btn btn-ghost">← Back</a>
     </div>
   </nav>
 
-  <!-- STEPS BAR -->
   <div class="steps-bar">
-    <div class="step-item active" id="step1"><div class="step-circle">1</div>Upload & Input</div>
+    <div class="step-item active" id="step1">
+      <div class="step-circle">1</div>Upload & Input
+    </div>
     <div class="step-arrow"></div>
-    <div class="step-item" id="step2"><div class="step-circle">2</div>AI Analysis</div>
+    <div class="step-item" id="step2">
+      <div class="step-circle">2</div>AI Analysis
+    </div>
     <div class="step-arrow"></div>
-    <div class="step-item" id="step3"><div class="step-circle">3</div>Results</div>
+    <div class="step-item" id="step3">
+      <div class="step-circle">3</div>Results
+    </div>
   </div>
 
   <div class="optimize-main">
@@ -247,6 +764,20 @@
       <h1 class="optimize-title">Optimize your resume</h1>
       <p class="optimize-subtitle">Upload or paste your resume and job description — our AI does the rest.</p>
 
+      <!-- Pro badge (shown for pro users) -->
+      <div class="pro-inline-badge" id="proInlineBadge">
+        ⭐ Pro — unlimited optimizations active
+      </div>
+
+      <!-- Usage bar (shown for free users) -->
+      <div class="usage-bar-inline" id="usageBarInline">
+        <span id="freeText">Loading...</span>
+        <div class="track">
+          <div class="fill" id="usageFill" style="width:0%"></div>
+        </div>
+        <a href="pricing.html">Upgrade to Pro →</a>
+      </div>
+
       <div class="split-grid">
         <!-- Resume -->
         <div class="panel-card">
@@ -254,19 +785,16 @@
             <div class="panel-label">📄 Your Resume</div>
             <span class="char-count" id="resumeCount">0 characters</span>
           </div>
-          <div class="upload-zone" id="resumeUploadZone"
-            onclick="document.getElementById('resumeFile').click()"
+          <div class="upload-zone" id="resumeUploadZone" onclick="document.getElementById('resumeFile').click()"
             ondragover="handleDragOver(event,'resumeUploadZone')"
-            ondragleave="handleDragLeave(event,'resumeUploadZone')"
-            ondrop="handleDrop(event,'resume')">
+            ondragleave="handleDragLeave(event,'resumeUploadZone')" ondrop="handleDrop(event,'resume')">
             <div class="upload-icon">📎</div>
             <div class="upload-text"><strong>Click to upload</strong> or drag & drop</div>
             <div class="upload-formats">PDF or DOCX · Max 5MB</div>
           </div>
           <input type="file" id="resumeFile" accept=".pdf,.docx,.doc" onchange="handleFileSelect(event,'resume')" />
           <div class="or-divider">or paste text below</div>
-          <textarea class="panel-textarea" id="resumeText"
-            placeholder="Paste your resume text here..." rows="12"
+          <textarea class="panel-textarea" id="resumeText" placeholder="Paste your resume text here..." rows="12"
             oninput="updateCharCount('resumeText','resumeCount')"></textarea>
         </div>
 
@@ -276,14 +804,23 @@
             <div class="panel-label">💼 Job Description</div>
             <span class="char-count" id="jobCount">0 characters</span>
           </div>
-          <textarea class="panel-textarea" id="jobText"
-            placeholder="Paste the full job description here..." rows="24"
+          <textarea class="panel-textarea" id="jobText" placeholder="Paste the full job description here..." rows="24"
             oninput="updateCharCount('jobText','jobCount')" style="min-height:420px;"></textarea>
         </div>
       </div>
 
-      <div class="action-bar">
-        <span class="action-bar-left">Powered by AI — results in ~15 seconds</span>
+      <!-- Upgrade wall (shown when free limit reached) -->
+      <div class="upgrade-wall" id="upgradeWall">
+        <div style="font-size:2rem;margin-bottom:12px;">🚀</div>
+        <h3>You've used all 5 free optimizations</h3>
+        <p>Upgrade to Pro for unlimited optimizations, ATS analysis, and AI cover letters.</p>
+        <a href="pricing.html" class="btn-optimize" style="display:inline-flex;text-decoration:none;">
+          Upgrade to Pro — $9.99/mo →
+        </a>
+      </div>
+
+      <div class="action-bar" id="actionBar">
+        <span class="action-bar-left" id="actionBarLeft">Powered by AI — results in ~15 seconds</span>
         <button class="btn-optimize" id="optimizeBtn" onclick="startOptimize()">
           Optimize my Resume →
         </button>
@@ -294,7 +831,8 @@
     <div id="processingPanel">
       <div class="spinner-ring"></div>
       <h2 class="processing-title">Analyzing your resume</h2>
-      <p class="processing-subtitle">Our AI is reviewing your resume against the job description. This usually takes 15–30 seconds.</p>
+      <p class="processing-subtitle">Our AI is reviewing your resume against the job description. This usually takes
+        15–30 seconds.</p>
       <div class="progress-steps">
         <div class="progress-step" id="pStep1">
           <div class="progress-step-icon">📄</div>
@@ -388,9 +926,133 @@
 
   </div>
 
-  <!-- TOAST (uses main.css styles) -->
   <div class="toast" id="toast"></div>
+  <script>
+    // ── Load from history if ?id= is present ─────────────────────────────────
+    async function loadFromHistory() {
+      const params = new URLSearchParams(window.location.search);
+      const resumeId = params.get('id');
+      if (!resumeId) return; // normal new-optimization flow — do nothing
 
-  <script src="assets/js/script.js"></script>
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+
+      try {
+        const res = await fetch(`/api/resume/history/${resumeId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+          console.warn('Could not load resume history item:', res.status);
+          return;
+        }
+
+        const r = await res.json();
+
+        // ── Pre-fill hidden textarea values (in case user hits "Start over") ──
+        document.getElementById('resumeText').value = r.original_text || '';
+        document.getElementById('jobText').value = r.job_description || '';
+
+        // ── Show results panel directly ───────────────────────────────────────
+        showResults({
+          ats_score: r.ats_score,
+          missing_keywords: r.missing_keywords || [],
+          improvements: r.improvements || [],
+          optimized_text: r.optimized_text || '',
+          original_text: r.original_text || '',
+        });
+
+        // ── Update steps bar to show we're on step 3 ─────────────────────────
+        setStep(3);
+
+        // ── Swap "Start over" link to go back to history ──────────────────────
+        const tryAgainBar = document.querySelector('.try-again-bar');
+        if (tryAgainBar) {
+          tryAgainBar.innerHTML = `Viewing saved result · <a onclick="resetPage()">Optimize a new resume →</a> or <a href="resume_history.html">Back to history →</a>`;
+        }
+
+      } catch (err) {
+        console.error('loadFromHistory error:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadFromHistory);
+  </script>
+
+  <script>
+    // ── Check subscription on load ───────────────────────────────────
+    async function initOptimizePage() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = 'index.html?action=login';
+        return;
+      }
+
+      try {
+        const [usageRes, subRes] = await Promise.all([
+          fetch('/api/resume/usage', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/payments/status', { headers: { 'Authorization': `Bearer ${token}` } }),
+        ]);
+
+        if (usageRes.status === 401) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('userData');
+          window.location.href = 'index.html?action=login';
+          return;
+        }
+
+        const sub = subRes.ok ? await subRes.json() : {};
+        const usage = usageRes.ok ? await usageRes.json() : {};
+
+        const isPro = sub.is_pro || false;
+        const raw = localStorage.getItem('userData');
+        if (raw) {
+          const u = JSON.parse(raw);
+          u.plan = isPro ? 'pro' : 'free';
+          localStorage.setItem('userData', JSON.stringify(u));
+        }
+
+        const remaining = usage.uses_remaining ?? 5;
+        const limit = usage.limit ?? 5;
+        const used = usage.uses_this_month ?? 0;
+
+        if (isPro) {
+          // ── PRO USER ──────────────────────────────────────────────
+          document.getElementById('navProBadge').style.display = 'inline-block';
+          document.getElementById('proInlineBadge').classList.add('show');
+          document.getElementById('usageBarInline').classList.remove('show');
+          document.getElementById('actionBarLeft').textContent = '⭐ Pro — unlimited optimizations';
+
+        } else {
+          // ── FREE USER ─────────────────────────────────────────────
+          document.getElementById('usageBarInline').classList.add('show');
+
+          const pct = Math.min((used / limit) * 100, 100);
+          document.getElementById('usageFill').style.width = pct + '%';
+
+          if (remaining <= 0) {
+            // Hit limit — show upgrade wall, hide optimize button
+            document.getElementById('freeText').innerHTML =
+              '<strong style="color:var(--danger)">Monthly limit reached</strong>';
+            document.getElementById('usageFill').style.background = 'var(--danger)';
+            document.getElementById('upgradeWall').classList.add('show');
+            document.getElementById('actionBar').style.display = 'none';
+            document.getElementById('optimizeBtn').disabled = true;
+          } else {
+            document.getElementById('freeText').innerHTML =
+              `<strong>${remaining} of ${limit}</strong> optimizations left this month`;
+          }
+        }
+
+      } catch (e) {
+        console.warn('Could not load subscription status:', e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initOptimizePage);
+  </script>
+
+  <script src="assets/js/optimize.js"></script>
 </body>
+
 </html>

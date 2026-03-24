@@ -6,11 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — ResumeAI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/main.css" />
   <script src="assets/js/script.js" defer></script>
   <style>
-    body { padding-top: 80px; }
+    body {
+      padding-top: 80px;
+    }
 
     .dashboard-wrapper {
       max-width: 1100px;
@@ -22,6 +26,7 @@
     .dashboard-header {
       margin-bottom: 48px;
     }
+
     .dashboard-eyebrow {
       font-size: 0.75rem;
       font-weight: 600;
@@ -30,6 +35,7 @@
       color: var(--accent);
       margin-bottom: 8px;
     }
+
     .dashboard-title {
       font-family: 'DM Serif Display', serif;
       font-size: clamp(1.8rem, 4vw, 2.6rem);
@@ -37,9 +43,77 @@
       color: var(--ink);
       margin-bottom: 8px;
     }
+
     .dashboard-subtitle {
       font-size: 0.95rem;
       color: var(--muted);
+    }
+
+    /* ── PRO BANNER ── */
+    .pro-banner {
+      display: none;
+      background: linear-gradient(135deg, #1a7a4a 0%, #155a3d 100%);
+      border-radius: 16px;
+      padding: 20px 28px;
+      margin-bottom: 32px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .pro-banner.show {
+      display: flex;
+    }
+
+    .pro-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .pro-badge-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+
+    .pro-banner-text strong {
+      display: block;
+      color: white;
+      font-size: 1rem;
+      margin-bottom: 2px;
+    }
+
+    .pro-banner-text span {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.85rem;
+    }
+
+    .btn-manage-billing {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-manage-billing:hover {
+      background: rgba(255, 255, 255, 0.25);
     }
 
     /* ── STATS ROW ── */
@@ -49,12 +123,18 @@
       gap: 16px;
       margin-bottom: 40px;
     }
+
     .stat-card {
       background: var(--white);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 20px 24px;
     }
+
+    .stat-card.pro-highlight {
+      border-color: #1a7a4a;
+    }
+
     .stat-label {
       font-size: 0.75rem;
       font-weight: 600;
@@ -63,6 +143,7 @@
       color: var(--muted);
       margin-bottom: 8px;
     }
+
     .stat-value {
       font-family: 'DM Serif Display', serif;
       font-size: 2rem;
@@ -70,7 +151,15 @@
       color: var(--ink);
       line-height: 1;
     }
-    .stat-value.accent { color: var(--accent); }
+
+    .stat-value.accent {
+      color: var(--accent);
+    }
+
+    .stat-value.gold {
+      color: #c9a84c;
+    }
+
     .stat-desc {
       font-size: 0.78rem;
       color: var(--muted);
@@ -89,6 +178,7 @@
       margin-bottom: 40px;
       flex-wrap: wrap;
     }
+
     .cta-card-text h2 {
       font-family: 'DM Serif Display', serif;
       font-size: 1.5rem;
@@ -96,10 +186,12 @@
       margin-bottom: 6px;
       letter-spacing: -0.01em;
     }
+
     .cta-card-text p {
       font-size: 0.9rem;
-      color: rgba(255,255,255,0.75);
+      color: rgba(255, 255, 255, 0.75);
     }
+
     .btn-cta-white {
       background: white;
       color: var(--accent);
@@ -113,6 +205,7 @@
       transition: all 0.18s;
       white-space: nowrap;
     }
+
     .btn-cta-white:hover {
       background: var(--accent-light);
       transform: translateY(-1px);
@@ -125,6 +218,7 @@
       justify-content: space-between;
       margin-bottom: 16px;
     }
+
     .section-heading {
       font-family: 'DM Serif Display', serif;
       font-size: 1.3rem;
@@ -140,13 +234,19 @@
       border: 1px dashed var(--border);
       border-radius: 16px;
     }
-    .empty-icon { font-size: 2.5rem; margin-bottom: 16px; }
+
+    .empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+    }
+
     .empty-title {
       font-family: 'DM Serif Display', serif;
       font-size: 1.3rem;
       color: var(--ink);
       margin-bottom: 8px;
     }
+
     .empty-desc {
       font-size: 0.9rem;
       color: var(--muted);
@@ -163,6 +263,7 @@
       flex-direction: column;
       gap: 12px;
     }
+
     .resume-item {
       background: var(--white);
       border: 1px solid var(--border);
@@ -174,17 +275,35 @@
       gap: 16px;
       transition: border-color 0.18s;
     }
-    .resume-item:hover { border-color: var(--accent); }
-    .resume-item-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+
+    .resume-item:hover {
+      border-color: var(--accent);
+    }
+
+    .resume-item-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+
     .resume-item-icon {
-      width: 40px; height: 40px;
+      width: 40px;
+      height: 40px;
       background: var(--accent-light);
       border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1.1rem;
       flex-shrink: 0;
     }
-    .resume-item-info { min-width: 0; }
+
+    .resume-item-info {
+      min-width: 0;
+    }
+
     .resume-item-title {
       font-size: 0.92rem;
       font-weight: 600;
@@ -193,11 +312,13 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .resume-item-meta {
       font-size: 0.78rem;
       color: var(--muted);
       margin-top: 2px;
     }
+
     .resume-item-score {
       font-size: 0.85rem;
       font-weight: 700;
@@ -206,11 +327,23 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
-    .score-high { background: var(--accent-light); color: var(--accent); }
-    .score-mid  { background: #fef3c7; color: #d97706; }
-    .score-low  { background: #fdf0ef; color: var(--danger); }
 
-    /* ── USAGE BANNER ── */
+    .score-high {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .score-mid {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .score-low {
+      background: #fdf0ef;
+      color: var(--danger);
+    }
+
+    /* ── USAGE BANNER (free users only) ── */
     .usage-banner {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -223,8 +356,18 @@
       margin-bottom: 40px;
       flex-wrap: wrap;
     }
-    .usage-banner-left { display: flex; align-items: center; gap: 12px; }
-    .usage-bar-wrap { flex: 1; max-width: 200px; }
+
+    .usage-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .usage-bar-wrap {
+      flex: 1;
+      max-width: 200px;
+    }
+
     .usage-bar-track {
       height: 6px;
       background: var(--border);
@@ -232,18 +375,31 @@
       overflow: hidden;
       margin-top: 6px;
     }
+
     .usage-bar-fill {
       height: 100%;
       background: var(--accent);
       border-radius: 4px;
       transition: width 0.4s ease;
     }
-    .usage-text { font-size: 0.85rem; color: var(--muted); }
-    .usage-text strong { color: var(--ink); }
+
+    .usage-text {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .usage-text strong {
+      color: var(--ink);
+    }
 
     @media (max-width: 640px) {
-      .cta-card { padding: 24px 20px; }
-      .stats-row { grid-template-columns: 1fr 1fr; }
+      .cta-card {
+        padding: 24px 20px;
+      }
+
+      .stats-row {
+        grid-template-columns: 1fr 1fr;
+      }
     }
   </style>
 </head>
@@ -252,14 +408,13 @@
 
   <!-- ── NAV ── -->
   <nav id="navbar">
-    <a href="index.html" class="nav-logo">Resume<span>AI</span></a>
+    <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
     <div class="nav-right">
-      <span class="nav-free-badge" id="freeCounter" style="display:none;"></span>
-      <!-- required by script.js even if hidden -->
+      <!-- <span class="nav-free-badge" id="freeCounter" style="display:none;"></span>
       <div id="guestNav" style="display:none;">
         <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
         <button class="btn btn-primary" onclick="openModal('signup')">Get started free</button>
-      </div>
+      </div> -->
       <div id="userNav" style="display:none;">
         <div class="user-menu-wrap">
           <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">?</div>
@@ -268,8 +423,9 @@
               <strong id="dropdownName">—</strong>
               <span id="dropdownEmail">—</span>
             </div>
-            <button class="dropdown-item" onclick="window.location.href='dashboard.html'">📄 My Resumes</button>
-            <button class="dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize Resume</button>
+            <button class="dropdown-item" onclick="goToMyResumes()"">📄 History</button>
+            <button class=" dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize Resume</button>
+            <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job Tracker</button>
             <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
             <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
           </div>
@@ -287,8 +443,22 @@
       <p class="dashboard-subtitle">Here's an overview of your resume optimization activity.</p>
     </div>
 
-    <!-- ── USAGE BANNER ── -->
-    <div class="usage-banner" id="usageBanner">
+    <!-- ── PRO BANNER (shown for Pro users) ── -->
+    <div class="pro-banner" id="proBanner">
+      <div class="pro-banner-left">
+        <div class="pro-badge-icon">⭐</div>
+        <div class="pro-banner-text">
+          <strong>You're on Pro — unlimited optimisations active</strong>
+          <span id="proPeriodText">Your plan renews automatically</span>
+        </div>
+      </div>
+      <a href="#" class="btn-manage-billing" onclick="openBillingPortal(event)" target="_blank">
+        Manage billing →
+      </a>
+    </div>
+
+    <!-- ── USAGE BANNER (shown for Free users) ── -->
+    <div class="usage-banner" id="usageBanner" style="display:none;">
       <div class="usage-banner-left">
         <span style="font-size:1.2rem;">⚡</span>
         <div>
@@ -301,7 +471,10 @@
           <div class="usage-bar-fill" id="usageBarFill" style="width:0%"></div>
         </div>
       </div>
-      <a href="pricing.html" style="font-size:0.82rem;color:var(--accent);font-weight:500;text-decoration:none;white-space:nowrap;">Upgrade to Pro →</a>
+      <a href="pricing.html"
+        style="font-size:0.82rem;color:var(--accent);font-weight:500;text-decoration:none;white-space:nowrap;">
+        Upgrade to Pro →
+      </a>
     </div>
 
     <!-- ── STATS ── -->
@@ -314,17 +487,19 @@
       <div class="stat-card">
         <div class="stat-label">This Month</div>
         <div class="stat-value" id="statMonth">—</div>
-        <div class="stat-desc">of 5 free uses</div>
+        <div class="stat-desc" id="statMonthDesc">of 5 free uses</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Avg ATS Score</div>
         <div class="stat-value" id="statAvgScore">—</div>
         <div class="stat-desc">Across all resumes</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" id="planStatCard">
         <div class="stat-label">Plan</div>
         <div class="stat-value accent" id="statPlan">—</div>
-        <div class="stat-desc"><a href="pricing.html" style="color:var(--accent);font-size:0.78rem;">Upgrade →</a></div>
+        <div class="stat-desc" id="planStatDesc">
+          <a href="pricing.html" style="color:var(--accent);font-size:0.78rem;">Upgrade →</a>
+        </div>
       </div>
     </div>
 
@@ -344,7 +519,6 @@
       <h2 class="section-heading">Recent Optimizations</h2>
     </div>
 
-    <!-- Empty state (shown by default, hidden when history loads) -->
     <div class="empty-state" id="emptyState">
       <div class="empty-icon">📄</div>
       <h3 class="empty-title">No optimizations yet</h3>
@@ -354,14 +528,14 @@
       </button>
     </div>
 
-    <!-- Resume list (hidden until history loads) -->
     <div class="resume-list" id="resumeList" style="display:none;"></div>
 
   </div>
 
   <!-- ── FOOTER ── -->
   <footer>
-    <a href="index.html" class="nav-logo" style="font-size:1.1rem;">Resume<span style="color:var(--accent)">AI</span></a>
+    <a href="index.html" class="nav-logo" style="font-size:1.1rem;">Resume<span
+        style="color:var(--accent)">AI</span></a>
     <span>© <span id="footerYear"></span> ResumeAI</span>
     <div style="display:flex;gap:20px;">
       <a href="privacy.html">Privacy</a>
@@ -385,12 +559,14 @@
         <form onsubmit="handleLogin(event)" novalidate>
           <div class="form-group">
             <label class="form-label">Email address</label>
-            <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" required />
+            <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"
+              required />
             <div class="form-error" id="loginEmailError">Please enter a valid email address.</div>
           </div>
           <div class="form-group">
             <label class="form-label">Password</label>
-            <input class="form-input" type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password" required />
+            <input class="form-input" type="password" id="loginPassword" placeholder="Your password"
+              autocomplete="current-password" required />
             <div class="form-error" id="loginPasswordError">Password is required.</div>
           </div>
           <button type="submit" class="form-submit" id="loginBtn">Log in<div class="spinner"></div></button>
@@ -401,18 +577,23 @@
         <form onsubmit="handleSignup(event)" novalidate>
           <div class="form-group">
             <label class="form-label">Full name</label>
-            <input class="form-input" type="text" id="signupName" placeholder="Alex Johnson" autocomplete="name" required />
+            <input class="form-input" type="text" id="signupName" placeholder="Alex Johnson" autocomplete="name"
+              required />
             <div class="form-error" id="signupNameError">Please enter your name.</div>
           </div>
           <div class="form-group">
             <label class="form-label">Email address</label>
-            <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" required />
+            <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email"
+              required />
             <div class="form-error" id="signupEmailError">Please enter a valid email address.</div>
           </div>
           <div class="form-group">
             <label class="form-label">Password</label>
-            <input class="form-input" type="password" id="signupPassword" placeholder="At least 8 characters" autocomplete="new-password" required oninput="checkStrength(this.value)" />
-            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            <input class="form-input" type="password" id="signupPassword" placeholder="At least 8 characters"
+              autocomplete="new-password" required oninput="checkStrength(this.value)" />
+            <div class="strength-bar">
+              <div class="strength-fill" id="strengthFill"></div>
+            </div>
             <div class="strength-label" id="strengthLabel"></div>
             <div class="form-error" id="signupPasswordError">Password must be at least 8 characters.</div>
           </div>
@@ -422,14 +603,15 @@
     </div>
   </div>
 
-  <!-- ── TOAST ── -->
   <div class="toast" id="toast"></div>
 
   <script>
-    // Auth guard — small delay to ensure localStorage is readable
-    // and script.js has finished setting up auth state
+    function getToken() {
+      return localStorage.getItem('authToken');
+    }
+
     async function loadDashboard() {
-      const token = localStorage.getItem('authToken');
+      const token = getToken();
       const userData = localStorage.getItem('userData');
 
       if (!token || !userData) {
@@ -437,48 +619,186 @@
         return;
       }
 
+      // ── Set welcome name immediately from cached data ─────────────
       try {
-        const res = await fetch('/api/resume/usage', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const cached = JSON.parse(userData);
+        if (cached.name) {
+          document.getElementById('welcomeName').textContent = cached.name.split(' ')[0];
+        }
+      } catch (e) { }
 
-        if (res.status === 401) {
+      // ── Load usage + subscription status ──────────────────────────
+      try {
+        const [usageRes, subRes] = await Promise.all([
+          fetch('/api/resume/usage', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/payments/status', { headers: { 'Authorization': `Bearer ${token}` } }),
+        ]);
+
+        if (usageRes.status === 401) {
           localStorage.removeItem('authToken');
           localStorage.removeItem('userData');
           window.location.replace('index.html');
           return;
         }
 
-        if (res.ok) {
-          const data = await res.json();
-
-          const used = data.uses_this_month;
-          const limit = data.limit;
-          const remaining = data.uses_remaining;
-          const pct = Math.min((used / limit) * 100, 100);
-
-          document.getElementById('usageText').innerHTML =
-            `<strong>${remaining} of ${limit}</strong> optimizations remaining this month`;
-          document.getElementById('usageBarFill').style.width = pct + '%';
-
-          const resetDate = new Date(data.resets_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-          document.getElementById('usageResetText').textContent = `Resets on ${resetDate}`;
-
-          document.getElementById('statMonth').textContent = used;
-          document.getElementById('statPlan').textContent =
-            data.plan.charAt(0).toUpperCase() + data.plan.slice(1);
-
-          if (remaining <= 0) {
-            document.getElementById('usageBarFill').style.background = 'var(--danger)';
-          }
+        // ── Subscription status ──────────────────────────────────────
+        if (subRes.ok) {
+          const sub = await subRes.json();
+          applySubscriptionUI(sub);
         }
-      } catch (e) { /* silently fail */ }
+
+        // ── Usage data ───────────────────────────────────────────────
+        if (usageRes.ok) {
+          const data = await usageRes.json();
+          applyUsageUI(data);
+        }
+
+      } catch (e) {
+        console.warn('Dashboard load error:', e);
+      }
+
+      // ── Load resume history ──────────────────────────────────────
+      loadResumeHistory();
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadDashboard();
-    });
+    function applySubscriptionUI(sub) {
+      const isPro = sub.is_pro;
+      const raw = localStorage.getItem('userData');
+      if (raw) {
+        const u = JSON.parse(raw);
+        u.plan = isPro ? 'pro' : 'free';
+        localStorage.setItem('userData', JSON.stringify(u));
+      }
+
+
+      const plan = sub.plan || 'free';
+
+      // Plan stat card
+      const planEl = document.getElementById('statPlan');
+      const planDesc = document.getElementById('planStatDesc');
+      const planCard = document.getElementById('planStatCard');
+
+      if (isPro) {
+        // ── PRO UI ───────────────────────────────────────────────────
+        planEl.textContent = '⭐ Pro';
+        planEl.className = 'stat-value gold';
+        planDesc.innerHTML = '<a href="#" onclick="openBillingPortal(event)" target="_blank" style="color:var(--accent);font-size:0.78rem;">Manage billing →</a>';
+        planCard.classList.add('pro-highlight');
+
+        // Show pro banner
+        document.getElementById('proBanner').classList.add('show');
+
+        // Update pro period text
+        if (sub.current_period_end) {
+          const renewDate = new Date(sub.current_period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+          document.getElementById('proPeriodText').textContent =
+            sub.cancel_at_period_end
+              ? `Access until ${renewDate} — cancellation scheduled`
+              : `Renews on ${renewDate}`;
+        }
+
+        // Update month stat label for Pro
+        document.getElementById('statMonthDesc').textContent = 'unlimited';
+
+        // Hide usage banner, show nothing (pro has no limits)
+        document.getElementById('usageBanner').style.display = 'none';
+
+      } else {
+        // ── FREE UI ──────────────────────────────────────────────────
+        planEl.textContent = 'Free';
+        planEl.className = 'stat-value accent';
+        planDesc.innerHTML = '<a href="pricing.html" style="color:var(--accent);font-size:0.78rem;">Upgrade →</a>';
+
+        // Hide pro banner, show usage banner
+        document.getElementById('proBanner').classList.remove('show');
+        document.getElementById('usageBanner').style.display = 'flex';
+      }
+    }
+
+    function applyUsageUI(data) {
+      const used = data.uses_this_month || 0;
+      const limit = data.limit || 5;
+      const remaining = data.uses_remaining ?? (limit - used);
+      const isPro = data.plan === 'pro' || data.plan === 'pro_monthly' || data.plan === 'pro_yearly';
+      const pct = isPro ? 0 : Math.min((used / limit) * 100, 100);
+
+      document.getElementById('statMonth').textContent = used;
+      document.getElementById('statTotal').textContent = data.total_uses ?? used;
+
+      if (!isPro) {
+        document.getElementById('usageText').innerHTML =
+          remaining <= 0
+            ? `<strong style="color:var(--danger)">No optimizations left — <a href="pricing.html" style="color:var(--accent)">upgrade to Pro</a></strong>`
+            : `<strong>${remaining} of ${limit}</strong> optimizations remaining`;
+
+        document.getElementById('usageBarFill').style.width = pct + '%';
+        if (remaining <= 0) {
+          document.getElementById('usageBarFill').style.background = 'var(--danger)';
+        }
+
+        if (data.resets_at) {
+          const resetDate = new Date(data.resets_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+          document.getElementById('usageResetText').textContent = `Resets on ${resetDate}`;
+        }
+      }
+
+      // Avg ATS score placeholder — replace with real data if your API returns it
+      document.getElementById('statAvgScore').textContent = data.avg_ats_score ?? '—';
+    }
+
+    async function loadResumeHistory() {
+      const token = getToken();
+      try {
+        const res = await fetch('/api/resume/history', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const items = data.items || data.resumes || data || [];
+
+        if (items.length === 0) return;
+
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('resumeList').style.display = 'flex';
+
+        document.getElementById('resumeList').innerHTML = items.map(item => {
+          const score = item.ats_score ?? 0;
+          const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+          const date = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          return `
+            <div class="resume-item">
+              <div class="resume-item-left">
+                <div class="resume-item-icon">📄</div>
+                <div class="resume-item-info">
+                  <div class="resume-item-title">${item.job_title || 'Optimized Resume'}</div>
+                  <div class="resume-item-meta">${date}</div>
+                </div>
+              </div>
+              <span class="resume-item-score ${scoreClass}">ATS ${score}</span>
+            </div>`;
+        }).join('');
+
+      } catch (e) { /* silently fail — empty state stays */ }
+    }
+
+    async function openBillingPortal(e) {
+      if (e) e.preventDefault();
+      const token = getToken();
+      try {
+        const res = await fetch('/api/payments/portal', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (data.portal_url) window.location.href = data.portal_url;
+      } catch (err) {
+        alert('Could not open billing portal. Please try again.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDashboard);
   </script>
 
 </body>
+
 </html>
