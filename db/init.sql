@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
     is_active     TINYINT(1)       NOT NULL DEFAULT 1,
     is_verified   TINYINT(1)       NOT NULL DEFAULT 0,
     monthly_usage TINYINT UNSIGNED NOT NULL DEFAULT 0,
-    plan          ENUM('free','pro') NOT NULL DEFAULT 'free',
+    -- plan          ENUM('free','pro') NOT NULL DEFAULT 'free',
     created_at    DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     usage_reset_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -168,6 +168,10 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+ALTER TABLE subscriptions
+  ADD COLUMN monthly_usage  TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  ADD COLUMN usage_reset_at DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP;
+  
 -- JOB Tracker
 CREATE TABLE IF NOT EXISTS job_stages (
     id          INT UNSIGNED NOT NULL AUTO_INCREMENT,

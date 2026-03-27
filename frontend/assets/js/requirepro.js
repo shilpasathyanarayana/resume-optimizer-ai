@@ -1,41 +1,67 @@
-function showProRequestBanner() {
-    // Don't stack duplicates
+// ─────────────────────────────────────────────────────────────
+// GENERIC REQUIRE PRO — server-verified
+// Never trust JWT claims; always fetch is_pro from backend
+// ─────────────────────────────────────────────────────────────
+
+async function getToken() {
+    return localStorage.getItem('authToken');
+}
+
+async function getIsProFromServer() {
+    const token = await getToken();
+    if (!token) return false;
+
+    try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!res.ok) {
+            if (res.status === 401) localStorage.removeItem('authToken');
+            return false;
+        }
+
+        const user = await res.json();
+        // console.log('User data from API:', user);
+
+        return user.is_pro === true;
+    } catch (err) {
+        console.error('Fetch error:', err);
+        return false;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
+// PRO REQUEST BANNER
+// ─────────────────────────────────────────────────────────────
+function showProRequestBanner(message = "This feature is available on Pro. Upgrade to unlock.") {
     if (document.getElementById('proRequestBanner')) return;
 
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slide-down {
-            from { opacity: 0; transform: translateX(-50%) translateY(-16px); }
-            to   { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-        @keyframes slide-up {
-            from { opacity: 1; transform: translateX(-50%) translateY(0); }
-            to   { opacity: 0; transform: translateX(-50%) translateY(-16px); }
-        }
-        #proRequestBanner {
-            position: fixed;
-            top: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            background: #1a7a4a;
-            color: white;
-            padding: 14px 24px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            box-shadow: 0 8px 32px rgba(26, 107, 74, 0.35);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            max-width: 480px;
-            width: calc(100% - 48px);
-            animation: slide-down 0.3s ease;
-        }
-        #proRequestBanner.dismissing {
-            animation: slide-up 0.3s ease forwards;
-        }
-        #proRequestBanner .dismiss-btn {
+    const banner = document.createElement('div');
+    banner.id = 'proRequestBanner';
+    banner.style.cssText = `
+        position: fixed;
+        top: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        background: #1a7a4a;
+        color: white;
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        max-width: 480px;
+        width: calc(100% - 48px);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 8px 32px rgba(26, 107, 74, 0.35);
+    `;
+    banner.innerHTML = `
+        <span style="font-size:1.2rem;">🔒</span>
+        <span>${message}</span>
+        <button class="dismiss-btn" style="
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
@@ -44,202 +70,81 @@ function showProRequestBanner() {
             border-radius: 50%;
             cursor: pointer;
             font-size: 1rem;
-            line-height: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-left: auto;
-            flex-shrink: 0;
-            transition: background 0.15s;
-        }
-        #proRequestBanner .dismiss-btn:hover {
-            background: rgba(255,255,255,0.35);
-        }
-    `;
-    document.head.appendChild(style);
-
-    const banner = document.createElement('div');
-    banner.id = 'proRequestBanner';
-    banner.innerHTML = `
-        <span style="font-size:1.2rem;">🔒</span>
-        <span>This feature is available on <strong>Pro</strong>. Upgrade below to unlock it.</span>
-        <button class="dismiss-btn" aria-label="Dismiss">×</button>
+            margin-left: auto;">×</button>
     `;
     document.body.appendChild(banner);
-
-    // Dismiss with slide-up animation
-    banner.querySelector('.dismiss-btn').addEventListener('click', dismissBanner);
-
-    // Auto-dismiss after 10 seconds
-    const timer = setTimeout(dismissBanner, 10000);
-
-    function dismissBanner() {
-        clearTimeout(timer);
-        banner.classList.add('dismissing');
-        banner.addEventListener('animationend', () => banner.remove(), { once: true });
-    }
+    banner.querySelector('.dismiss-btn').addEventListener('click', () => banner.remove());
+    setTimeout(() => banner.remove(), 10000);
 }
 
-function showProBlur(redirectUrl) {
+// ─────────────────────────────────────────────────────────────
+// FREE USER TOP NAV BANNER
+// ─────────────────────────────────────────────────────────────
+function showFreeTopBanner(message = "You're on the Free plan. Upgrade for more features!") {
+    if (document.getElementById('freeTopBanner')) return;
+
+    const banner = document.createElement('div');
+    banner.id = 'freeTopBanner';
+    banner.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 10000;
+        background: #facc15;
+        color: #1f2937;
+        text-align: center;
+        padding: 12px 0;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    banner.innerText = message;
+
+    banner.addEventListener('click', () => {
+        window.location.href = 'pricing.html';
+    });
+
+    document.body.appendChild(banner);
+    document.body.style.paddingTop = banner.offsetHeight + 'px';
+}
+
+// ─────────────────────────────────────────────────────────────
+// GENERIC PRO MODAL + BLUR
+// ─────────────────────────────────────────────────────────────
+function showProBlur({ redirectUrl = 'pricing.html', title = "Pro Feature", description = "" }) {
     showProRequestBanner();
 
-    const style = document.createElement('style');
-    style.textContent = `
-        .pro-blur-backdrop {
-            position: fixed;
-            inset: 0;
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            background: rgba(255,255,255,0.55);
-            z-index: 998;
-            transition: opacity 0.3s ease;
-        }
-        .pro-blur-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-        .pro-gate-card {
-            position: relative;
-            z-index: 1000;
-            background: var(--white, #fff);
-            border: 1px solid var(--border, #e5e7eb);
-            border-radius: 20px;
-            padding: 40px 36px;
-            max-width: 420px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.12);
-            animation: gate-pop 0.25s ease;
-        }
-        @keyframes gate-pop {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
-            to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .pro-gate-close {
-            position: absolute;
-            top: 14px;
-            right: 16px;
-            background: var(--surface, #f5f5f5);
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            font-size: 1rem;
-            line-height: 1;
-            cursor: pointer;
-            color: var(--muted, #6b7280);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s;
-        }
-        .pro-gate-close:hover { background: var(--border, #e5e7eb); }
-        .pro-gate-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: #fef3c7;
-            color: #d97706;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            padding: 4px 12px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-        }
-        .pro-gate-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.7rem;
-            letter-spacing: -0.02em;
-            color: var(--ink, #111);
-            margin-bottom: 10px;
-            line-height: 1.2;
-        }
-        .pro-gate-desc {
-            font-size: 0.9rem;
-            color: var(--muted, #6b7280);
-            line-height: 1.6;
-            margin-bottom: 28px;
-        }
-        .pro-gate-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        /* Persistent top bar shown after dismissing the modal */
-        #proSoftBar {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 997;
-            background: linear-gradient(90deg, #1a7a4a, #22c55e);
-            color: white;
-            font-size: 0.85rem;
-            font-weight: 500;
-            padding: 10px 20px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            text-align: center;
-        }
-        #proSoftBar a {
-            color: white;
-            font-weight: 700;
-            text-decoration: underline;
-            white-space: nowrap;
-        }
-        #proSoftBar.visible { display: flex; }
-
-        /* Dim interactive elements to hint they're blocked */
-        .pro-content-dimmed .resume-item,
-        .pro-content-dimmed .filter-bar,
-        .pro-content-dimmed .pagination {
-            pointer-events: none;
-            opacity: 0.45;
-            user-select: none;
-        }
-    `;
-    document.head.appendChild(style);
-
-    // ── Soft bar (always visible after modal dismissed) ──
-    const softBar = document.createElement('div');
-    softBar.id = 'proSoftBar';
-    softBar.innerHTML = `
-        🔒 You're on the free plan — this feature is view-only.
-        <a href="${redirectUrl}">Upgrade to Pro →</a>
-    `;
-    document.body.appendChild(softBar);
-
-    // ── Backdrop ──
     const backdrop = document.createElement('div');
-    backdrop.className = 'pro-blur-backdrop';
+    backdrop.style.cssText = `
+        position: fixed; inset: 0; z-index: 998;
+        backdrop-filter: blur(6px); background: rgba(255,255,255,0.55);
+    `;
 
-    // ── Modal ──
     const overlay = document.createElement('div');
-    overlay.className = 'pro-blur-overlay';
+    overlay.style.cssText = `
+        position: fixed; inset: 0; z-index: 999;
+        display: flex; align-items: center; justify-content: center; padding: 24px;
+    `;
     overlay.innerHTML = `
-        <div class="pro-gate-card">
-            <button class="pro-gate-close" id="proGateClose" aria-label="Close">×</button>
-            <div class="pro-gate-badge">⭐ Pro Feature</div>
-            <div class="pro-gate-title">Upgrade to View History</div>
-            <p class="pro-gate-desc">
-                Resume optimisation history is available on the Pro plan.
-                Upgrade to track every submission, ATS score, and improvement over time.
-            </p>
-            <div class="pro-gate-actions">
-                <a href="${redirectUrl}" class="btn btn-primary" style="text-align:center;">
-                    Upgrade to Pro →
-                </a>
-                <button id="proGateDismiss" class="btn btn-ghost">
-                    Continue in view-only mode
-                </button>
+        <div style="
+            position: relative; z-index:1000;
+            background:#fff; border-radius:20px;
+            padding: 40px 36px; max-width:420px; width:100%; text-align:center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.12);">
+            <button id="proGateClose" style="
+                position:absolute; top:14px; right:16px;
+                width:28px;height:28px;border:none;border-radius:50%;cursor:pointer;">×</button>
+            <div style="background:#fef3c7;color:#d97706;font-weight:700;border-radius:20px;padding:4px 12px;margin-bottom:20px;">⭐ Pro Feature</div>
+            <div style="font-size:1.5rem;font-weight:600;margin-bottom:10px;">${title}</div>
+            <p style="color:#6b7280;font-size:0.9rem;line-height:1.6;margin-bottom:28px;">${description}</p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <a href="${redirectUrl}" style="padding:10px 16px;background:#1a7a4a;color:white;border-radius:12px;text-decoration:none;">Upgrade to Pro →</a>
+                <button id="proGateDismiss" style="padding:10px 16px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;">Continue in view-only mode</button>
             </div>
         </div>
     `;
@@ -248,42 +153,37 @@ function showProBlur(redirectUrl) {
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
 
-    // ── Dismiss logic ──
     function dismiss() {
         backdrop.remove();
         overlay.remove();
         document.body.style.overflow = '';
-
-        // Show persistent top bar
-        softBar.classList.add('visible');
-        // Push navbar + content down to make room
-        document.getElementById('navbar').style.top = '40px';
-
-        // Dim interactive elements so free user can see but not use them
-        document.querySelector('.dashboard-wrapper').classList.add('pro-content-dimmed');
-
-        // Re-intercept any clicks on blocked elements
-        document.querySelectorAll('.resume-item').forEach(el => {
-            el.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                showProRequestBanner();
-            });
-        });
     }
 
     document.getElementById('proGateClose').addEventListener('click', dismiss);
     document.getElementById('proGateDismiss').addEventListener('click', dismiss);
-    // Click backdrop to dismiss too
     backdrop.addEventListener('click', dismiss);
 }
 
-function requirePro(redirectUrl = 'pricing.html?pro_request=true') {
-    const raw = localStorage.getItem('userData');
-    const plan = raw ? JSON.parse(raw).plan : 'free';
-    if (plan !== 'pro') {
-        showProBlur(redirectUrl);
+// ─────────────────────────────────────────────────────────────
+// GENERIC REQUIRE PRO
+// pageSelector = selector of content to dim (optional)
+// ─────────────────────────────────────────────────────────────
+async function requirePro({ pageSelector = null, title = "Pro Feature", description = "", redirectUrl = 'pricing.html' } = {}) {
+    const isPro = await getIsProFromServer();
+
+    if (!isPro) {
+        showProBlur({ title, description, redirectUrl });
+        showFreeTopBanner();
+
+        if (pageSelector) {
+            document.querySelectorAll(pageSelector).forEach(el => {
+                el.style.pointerEvents = 'none';
+                el.style.opacity = 0.45;
+            });
+        }
+
         return false;
     }
+
     return true;
 }

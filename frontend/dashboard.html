@@ -676,57 +676,75 @@
       loadResumeHistory();
     }
 
-    function applySubscriptionUI(sub) {
-      const isPro = sub.is_pro;
-      const raw = localStorage.getItem('userData');
-      if (raw) {
-        const u = JSON.parse(raw);
-        u.plan = isPro ? 'pro' : 'free';
-        localStorage.setItem('userData', JSON.stringify(u));
-      }
+    async function applySubscriptionUI(sub) {
+      try {
+        let isPro = false;
 
-
-      const plan = sub.plan || 'free';
-
-      // Plan stat card
-      const planEl = document.getElementById('statPlan');
-      const planDesc = document.getElementById('planStatDesc');
-      const planCard = document.getElementById('planStatCard');
-
-      if (isPro) {
-        // ── PRO UI ───────────────────────────────────────────────────
-        planEl.textContent = '⭐ Pro';
-        planEl.className = 'stat-value gold';
-        planDesc.innerHTML = '<a href="#" onclick="openBillingPortal(event)" target="_blank" style="color:var(--accent);font-size:0.78rem;">Manage billing →</a>';
-        planCard.classList.add('pro-highlight');
-
-        // Show pro banner
-        document.getElementById('proBanner').classList.add('show');
-
-        // Update pro period text
-        if (sub.current_period_end) {
-          const renewDate = new Date(sub.current_period_end).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-          document.getElementById('proPeriodText').textContent =
-            sub.cancel_at_period_end
-              ? `Access until ${renewDate} — cancellation scheduled`
-              : `Renews on ${renewDate}`;
+        // Use subscription object if provided
+        if (sub && typeof sub.is_pro !== 'undefined') {
+          isPro = sub.is_pro === true;
+        } else {
+          // Fetch is_pro from server as fallback
+          const token = getToken();
+          if (token) {
+            const res = await fetch(`${API_BASE}/auth/me`, {
+              headers: { 'Authorization': `Bearer ${token}` },
+            });
+            if (res.ok) {
+              const user = await res.json();
+              isPro = user.is_pro === true;
+            } else if (res.status === 401) {
+              localStorage.removeItem('authToken');
+            }
+          }
         }
 
-        // Update month stat label for Pro
-        document.getElementById('statMonthDesc').textContent = 'unlimited';
+        // Update localStorage
+        const raw = localStorage.getItem('userData');
+        if (raw) {
+          const u = JSON.parse(raw);
+          u.is_pro = isPro;                   // ← was u.plan = plan
+          localStorage.setItem('userData', JSON.stringify(u));
+        }
 
-        // Hide usage banner, show nothing (pro has no limits)
-        document.getElementById('usageBanner').style.display = 'none';
+        // Update UI elements
+        const planEl = document.getElementById('statPlan');
+        const planDesc = document.getElementById('planStatDesc');
+        const planCard = document.getElementById('planStatCard');
 
-      } else {
-        // ── FREE UI ──────────────────────────────────────────────────
-        planEl.textContent = 'Free';
-        planEl.className = 'stat-value accent';
-        planDesc.innerHTML = '<a href="pricing.html" style="color:var(--accent);font-size:0.78rem;">Upgrade →</a>';
+        if (isPro) {
+          planEl.textContent = '⭐ Pro';
+          planEl.className = 'stat-value gold';
+          planDesc.innerHTML = '<a href="#" onclick="openBillingPortal(event)" style="color:var(--accent);font-size:0.78rem;">Manage billing →</a>';
+          planCard.classList.add('pro-highlight');
 
-        // Hide pro banner, show usage banner
-        document.getElementById('proBanner').classList.remove('show');
-        document.getElementById('usageBanner').style.display = 'flex';
+          document.getElementById('proBanner').classList.add('show');
+
+          if (sub && sub.current_period_end) {
+            const renewDate = new Date(sub.current_period_end).toLocaleDateString('en-US', {
+              month: 'long', day: 'numeric', year: 'numeric'
+            });
+            document.getElementById('proPeriodText').textContent = sub.cancel_at_period_end
+              ? `Access until ${renewDate} — cancellation scheduled`
+              : `Renews on ${renewDate}`;
+          }
+
+          document.getElementById('statMonthDesc').textContent = 'unlimited';
+          document.getElementById('usageBanner').style.display = 'none';
+
+        } else {
+          planEl.textContent = 'Free';
+          planEl.className = 'stat-value accent';
+          planDesc.innerHTML = '<a href="pricing.html" style="color:var(--accent);font-size:0.78rem;">Upgrade →</a>';
+
+          document.getElementById('proBanner').classList.remove('show');
+          document.getElementById('usageBanner').style.display = 'flex';
+        }
+
+        return isPro;
+      } catch (err) {
+        console.error('Error applying subscription UI:', err);
+        return false;
       }
     }
 
@@ -734,7 +752,7 @@
       const used = data.uses_this_month || 0;
       const limit = data.limit || 5;
       const remaining = data.uses_remaining ?? (limit - used);
-      const isPro = data.plan === 'pro' || data.plan === 'pro_monthly' || data.plan === 'pro_yearly';
+      const isPro = data.is_pro === true;          // ← was checking data.plan string
       const pct = isPro ? 0 : Math.min((used / limit) * 100, 100);
 
       document.getElementById('statMonth').textContent = used;
@@ -752,14 +770,16 @@
         }
 
         if (data.resets_at) {
-          const resetDate = new Date(data.resets_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+          const resetDate = new Date(data.resets_at).toLocaleDateString('en-US', {
+            month: 'long', day: 'numeric'
+          });
           document.getElementById('usageResetText').textContent = `Resets on ${resetDate}`;
         }
       }
 
-      // Avg ATS score placeholder — replace with real data if your API returns it
       document.getElementById('statAvgScore').textContent = data.avg_ats_score ?? '—';
     }
+
 
     async function loadResumeHistory() {
       const token = getToken();

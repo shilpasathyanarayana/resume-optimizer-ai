@@ -23,7 +23,6 @@ from app.database import engine, Base
 from app.routers.auth import router as auth_router
 from app.routers.resume import router as resume_router
 from app.routers.payment import router as payment_router
-from app.routers.resume_history import router as resume_history_router
 from app.routers.job_tracker import router as job_tracker_router
 from app.routers.interview import router as interview_router         # ← NEW
 
@@ -89,13 +88,13 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/api")
 
 # Resume Optimiser module
-app.include_router(resume_router)
+app.include_router(resume_router, prefix="/api")
 
 # Payment Gateway module
 app.include_router(payment_router, prefix="/api/payments", tags=["payments"])
 
 # Resume Optimiser History module
-app.include_router(resume_history_router)
+# app.include_router(resume_history_router, prefix="/api")
 
 # Job Tracker module
 app.include_router(job_tracker_router)

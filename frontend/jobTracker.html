@@ -589,12 +589,29 @@
             return localStorage.getItem('authToken');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!getToken()) { window.location.replace('index.html'); return; }
-            if (!requirePro()) return;   // ← redirects free users to pricing.html
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = getToken();
+            if (!token) {
+                window.location.replace('index.html');
+                return;
+            }
+
+            // ✅ await requirePro() — verifies plan via GET /api/auth/me
+            // Returns false (and shows blur gate) if user is not Pro.
+            // A forged JWT with plan:"pro" will fail here because the
+            // backend reads the subscriptions table, not the JWT claim.
+            if (!await requirePro()) return;
+
             document.getElementById('footerYear').textContent = new Date().getFullYear();
             loadBoard();
         });
+
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     if (!getToken()) { window.location.replace('index.html'); return; }
+        //     if (!requirePro()) return;   // ← redirects free users to pricing.html
+        //     document.getElementById('footerYear').textContent = new Date().getFullYear();
+        //     loadBoard();
+        // });
 
         // Asynchronous JavaScript function that loads data for a “job board” from an API and updates the UI.
         async function loadBoard() {

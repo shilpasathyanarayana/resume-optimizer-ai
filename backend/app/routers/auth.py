@@ -1,12 +1,18 @@
 """
 routers/auth.py
 Exposes:
-  POST /api/auth/register  – create account, return JWT
-  POST /api/auth/login     – OAuth2 password flow, return JWT
-  GET  /api/auth/me        – return current user profile (protected)
+  POST /api/auth/register       – create account, return JWT
+  POST /api/auth/login          – OAuth2 password flow, return JWT
+  GET  /api/auth/me             – return current user profile (protected)
+  PATCH /api/auth/update-profile
+  POST  /api/auth/change-password
+  DELETE /api/auth/delete-account
+  GET  /api/auth/job-profile
+  PATCH /api/auth/update-job-profile
 """
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 
@@ -48,6 +54,9 @@ async def get_current_user(
         detail="Could not validate credentials.",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    # ✅ Signature is verified here using SECRET_KEY.
+    # A tampered JWT (e.g. forged is_pro claim) will fail with JWTError → 401.
     payload = decode_access_token(token)
     if payload is None:
         raise credentials_exception
@@ -56,7 +65,40 @@ async def get_current_user(
     if user is None or not user.is_active:
         raise credentials_exception
 
-    return CurrentUser.model_validate(user)
+    # ✅ is_pro is read from the subscriptions table — the JWT claim is ignored.
+    # This means no client-side manipulation of localStorage can grant Pro access.
+    plan_result = await db.execute(
+        text("SELECT is_pro FROM subscriptions WHERE user_id = :id ORDER BY created_at DESC LIMIT 1"),
+        {"id": user.id}
+    )
+    plan_row = plan_result.fetchone()
+    is_pro = bool(plan_row.is_pro) if plan_row else False
+
+    # ✅ Construct CurrentUser directly — do NOT use model_validate(user)
+    # which would discard the DB-sourced is_pro we just fetched.
+    return CurrentUser(
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        is_pro=is_pro,
+        is_active=user.is_active,
+        is_verified=user.is_verified,
+    )
+
+
+# ✅ PROTECTION DEPENDENCY — use this on any Pro-only endpoint
+def require_pro_user(current_user: CurrentUser = Depends(get_current_user)):
+    if not current_user.is_pro:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Pro subscription required."
+        )
+    return current_user
+
+
+@router.get("/pro-only-data")
+async def get_pro_data(current_user: CurrentUser = Depends(require_pro_user)):
+    return {"secret": "This is only for Pro users"}
 
 
 # ── REGISTER ──────────────────────────────────────────────────────────────────
@@ -71,7 +113,6 @@ async def register(
     body: RegisterRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    # Check for duplicate email
     existing = await get_user_by_email(db, body.email)
     if existing:
         raise HTTPException(
@@ -110,7 +151,6 @@ async def login(
 
     user = await get_user_by_email(db, email)
 
-    # User not found
     if user is None:
         await write_login_log(
             db, email=email, status="failed",
@@ -121,7 +161,6 @@ async def login(
             detail="Invalid email or password.",
         )
 
-    # Wrong password
     if not verify_password(form.password, user.password_hash):
         await write_login_log(
             db, email=email, status="failed", user_id=user.id,
@@ -132,7 +171,6 @@ async def login(
             detail="Invalid email or password.",
         )
 
-    # Inactive account
     if not user.is_active:
         await write_login_log(
             db, email=email, status="blocked", user_id=user.id,
@@ -143,7 +181,6 @@ async def login(
             detail="Your account has been deactivated.",
         )
 
-    # Success
     await write_login_log(
         db, email=email, status="success", user_id=user.id,
         ip_address=ip, user_agent=ua,
@@ -161,14 +198,12 @@ async def login(
     summary="Return the currently logged-in user",
 )
 async def me(current_user: CurrentUser = Depends(get_current_user)):
+    # ✅ is_pro in this response comes from the DB (via get_current_user),
+    # so the frontend can trust it — no JWT payload reading needed client-side.
     return current_user
 
 
-from sqlalchemy import text
-from app.services.auth_service import hash_password   # add to existing import
- 
- 
-# ── UPDATE PROFILE (name and/or email) ────────────────────────────────────────
+# ── UPDATE PROFILE ────────────────────────────────────────────────────────────
 
 @router.patch(
     "/update-profile",
@@ -196,7 +231,6 @@ async def update_profile(
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
 
-    # ── Update name ──────────────────────────────────────────────
     if new_name:
         if len(new_name) < 2:
             raise HTTPException(status_code=422, detail="Name must be at least 2 characters.")
@@ -207,7 +241,6 @@ async def update_profile(
         await db.commit()
         return {"message": "Name updated successfully.", "name": new_name}
 
-    # ── Update email (requires password confirmation) ─────────────
     if new_email:
         if not password:
             raise HTTPException(status_code=422, detail="Current password is required to change email.")
@@ -270,10 +303,10 @@ async def change_password(
     )
     await db.commit()
     return {"message": "Password changed successfully."}
- 
- 
+
+
 # ── DELETE ACCOUNT ────────────────────────────────────────────────────────────
- 
+
 @router.delete(
     "/delete-account",
     summary="Permanently delete account and all associated data",
@@ -283,16 +316,15 @@ async def delete_account(
     db: AsyncSession = Depends(get_db),
 ):
     user_id = current_user.id
- 
-    # Delete in dependency order to respect FK constraints
-    await db.execute(text("DELETE FROM resumes       WHERE user_id = :id"), {"id": user_id})
-    await db.execute(text("DELETE FROM user_login_log WHERE user_id = :id"), {"id": user_id})
-    await db.execute(text("DELETE FROM subscriptions WHERE user_id = :id"), {"id": user_id})
-    await db.execute(text("DELETE FROM job_applications WHERE user_id = :id"), {"id": user_id})
-    await db.execute(text("DELETE FROM job_stages WHERE user_id = :id"), {"id": user_id})
-    await db.execute(text("DELETE FROM users          WHERE id      = :id"), {"id": user_id})
+
+    await db.execute(text("DELETE FROM resumes            WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM user_login_log     WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM subscriptions      WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM job_applications   WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM job_stages         WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM users              WHERE id      = :id"), {"id": user_id})
     await db.commit()
- 
+
     return {"message": "Account deleted successfully."}
 
 
@@ -332,9 +364,11 @@ async def update_job_profile(
 
     valid_levels = {"student", "fresher", "junior", "intermediate", "senior"}
     if experience_level and experience_level not in valid_levels:
-        raise HTTPException(status_code=422, detail=f"experience_level must be one of: {', '.join(valid_levels)}")
+        raise HTTPException(
+            status_code=422,
+            detail=f"experience_level must be one of: {', '.join(valid_levels)}"
+        )
 
-    # Upsert — insert if no profile exists, update if it does
     result = await db.execute(
         text("SELECT id FROM user_profiles WHERE user_id = :uid"),
         {"uid": current_user.id}
@@ -342,7 +376,6 @@ async def update_job_profile(
     exists = result.fetchone()
 
     if exists:
-        # Build dynamic update
         fields, params = [], {"uid": current_user.id}
         if job_title:        fields.append("job_title = :job_title");               params["job_title"]        = job_title
         if experience_level: fields.append("experience_level = :experience_level"); params["experience_level"] = experience_level

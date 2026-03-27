@@ -87,7 +87,7 @@ async def checkout(
     No DB session needed here — Stripe stores the state; webhook updates our DB.
     """
     # Prevent double-subscribing if already on Pro
-    if current_user.plan == "pro":
+    if current_user.is_pro:
         raise HTTPException(
             status_code=400,
             detail="You already have an active Pro subscription.",

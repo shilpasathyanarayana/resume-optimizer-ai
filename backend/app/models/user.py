@@ -12,7 +12,7 @@ class User(Base):
     password_hash = Column(String(255), nullable=False)
     is_active     = Column(Boolean, nullable=False, default=True)
     is_verified   = Column(Boolean, nullable=False, default=False)
-    plan          = Column(Enum("free", "pro"), nullable=False, default="free")
+    # plan          = Column(Enum("free", "pro"), nullable=False, default="free")
     created_at    = Column(DateTime, nullable=False, server_default=func.now())
     updated_at    = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 

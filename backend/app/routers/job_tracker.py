@@ -14,6 +14,7 @@ from jose import jwt, JWTError
 
 from app.config import settings
 from app.database import get_db
+from app.routers.auth import require_pro_user  #for blocking free user accessing from pro feature
 
 # every route is built like [prefix] + [route path]
 router   = APIRouter(prefix="/api/jobs", tags=["jobs"])
@@ -74,7 +75,7 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Invalid or expired token. Please log in again.")
 
     result = await db.execute(
-        text("SELECT id, name, email, plan FROM users WHERE (id = :user_id OR email = :email) AND is_active = 1"),
+        text("SELECT id, name, email FROM users WHERE (id = :user_id OR email = :email) AND is_active = 1"),
         {"user_id": user_id, "email": sub}
     )
     user = result.fetchone()
@@ -112,7 +113,7 @@ async def get_or_create_default_stages(db: AsyncSession, user_id: int):
 # with prefix the complete api end point is /api/jobs/board
 @router.get("/board")
 async def get_kanban_board(
-    user=Depends(get_current_user),
+    user=Depends(require_pro_user),  # ← enforce Pro plan
     db: AsyncSession = Depends(get_db),
 ):
     stages = await get_or_create_default_stages(db, user.id)

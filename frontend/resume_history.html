@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ResumeAI — Land Your Dream Job</title>
+    <title>ResumeAI — Resume History</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
@@ -443,10 +443,6 @@
     <nav id="navbar">
         <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
         <div class="nav-right">
-            <!-- <div id="guestNav" style="display:none;">
-            <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
-            <button class="btn btn-primary" onclick="openModal('signup')">Get started free</button>
-        </div> -->
             <div id="userNav" style="display:none;">
                 <div class="user-menu-wrap">
                     <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">?</div>
@@ -620,14 +616,25 @@
         }
 
         // ─── INIT ─────────────────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', () => {
+        // ✅ async so we can await the server-side plan check
+        document.addEventListener('DOMContentLoaded', async () => {
             const token = getToken();
             if (!token) {
                 window.location.replace('index.html');
                 return;
             }
-            if (!requirePro()) return;
-            // ← redirects free users to pricing.html
+
+            // ✅ Generic requirePro — dims content / shows modal if not Pro
+            const ok = await requirePro({
+                pageSelector: '.resume-item, .filter-bar, .pagination',
+                title: "Resume History",
+                description: "Resume optimisation history is only available on the Pro plan. Upgrade to track every submission and improvement.",
+                redirectUrl: 'pricing.html?pro_request=true'
+            });
+
+            if (!ok) return; // user is free, blur gate displayed
+
+            // ✅ Page functionality for Pro users
             document.getElementById('footerYear').textContent = new Date().getFullYear();
             loadHistory();
         });
@@ -647,9 +654,14 @@
                     return;
                 }
 
-                if (!res.ok) {
-                    throw new Error(`Server returned ${res.status}`);
+                // ✅ Backend now returns 403 for free users even if
+                // they bypass the frontend — double layer of protection.
+                if (res.status === 403) {
+                    window.location.replace('pricing.html?pro_request=true');
+                    return;
                 }
+
+                if (!res.ok) throw new Error(`Server returned ${res.status}`);
 
                 const data = await res.json();
                 allResumes = data.resumes || [];
@@ -676,7 +688,9 @@
             const scored = allResumes.filter(r => r.ats_score != null);
             const completed = allResumes.filter(r => r.status === 'completed').length;
             const best = scored.length ? Math.max(...scored.map(r => r.ats_score)) : null;
-            const avg = scored.length ? Math.round(scored.reduce((s, r) => s + r.ats_score, 0) / scored.length) : null;
+            const avg = scored.length
+                ? Math.round(scored.reduce((s, r) => s + r.ats_score, 0) / scored.length)
+                : null;
 
             document.getElementById('statTotal').textContent = allResumes.length;
             document.getElementById('statBest').textContent = best != null ? `${best}%` : '—';
@@ -691,14 +705,11 @@
             const scoreVal = document.getElementById('scoreFilter').value;
 
             filtered = allResumes.filter(r => {
-                // text search
                 if (query) {
                     const haystack = `${r.original_filename || ''} ${r.job_title || ''}`.toLowerCase();
                     if (!haystack.includes(query)) return false;
                 }
-                // status filter
                 if (statusVal && r.status !== statusVal) return false;
-                // score filter
                 if (scoreVal) {
                     if (r.ats_score == null) return false;
                     if (scoreVal === 'high' && r.ats_score < 80) return false;
@@ -755,10 +766,7 @@
                 list.insertAdjacentHTML('beforeend', buildResumeItem(r));
             });
 
-            // Pagination
-            if (totalPages > 1) {
-                renderPagination(totalPages);
-            }
+            if (totalPages > 1) renderPagination(totalPages);
         }
 
         // ─── BUILD RESUME ROW ─────────────────────────────────────
@@ -796,7 +804,7 @@
         function renderPagination(totalPages) {
             const pagination = document.getElementById('pagination');
             const makeBtn = (label, page, disabled = false, active = false) => {
-                const cls = ['page-btn', active ? 'active' : '', disabled ? '' : ''].join(' ').trim();
+                const cls = ['page-btn', active ? 'active' : ''].filter(Boolean).join(' ');
                 return `<button class="${cls}" onclick="goToPage(${page})" ${disabled ? 'disabled' : ''}>${label}</button>`;
             };
 
@@ -837,8 +845,7 @@
         }
 
         function statusTag(status) {
-            const cls = `status-${status}`;
-            return `<span class="status-badge ${cls}">${status}</span>`;
+            return `<span class="status-badge status-${status}">${status}</span>`;
         }
 
         function formatDate(iso) {

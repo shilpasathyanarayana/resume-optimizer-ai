@@ -57,7 +57,7 @@ class CurrentUser(BaseModel):
     id: int
     name: str
     email: EmailStr
-    plan: str
+    is_pro: bool = False
     is_active: bool
     is_verified: bool
 

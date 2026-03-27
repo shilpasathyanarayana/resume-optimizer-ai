@@ -6,13 +6,12 @@ Endpoints for interviewPrep.html (paste-only mode — no job tracker needed)
 POST /api/interview/generate-from-description   → generate questions from pasted JD
 POST /api/interview/review-answer               → get AI feedback on a single answer
 """
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
 
 from app.database import get_db
-from app.routers.auth import get_current_user
-from app.models.user import User
+from app.routers.auth import get_current_user, require_pro_user # ← Pro-only dependency
 from app.schemas.interview import (
     GenerateFromDescriptionIn,
     DirectReviewIn,
@@ -20,15 +19,14 @@ from app.schemas.interview import (
     FeedbackOut,
 )
 from app.services.interview_service import generate_questions, review_answer
-from typing import List
 
 router = APIRouter(prefix="/api/interview", tags=["interview"])
 
 
 @router.post("/generate-from-description", response_model=List[InterviewQuestionOut])
 async def generate_from_description(
-    body:         GenerateFromDescriptionIn,
-    current_user: User = Depends(get_current_user),
+    body: GenerateFromDescriptionIn,
+    current_user = Depends(require_pro_user),  # ← Pro-only
 ):
     """
     Generate tailored interview questions from a pasted job description.
@@ -47,8 +45,8 @@ async def generate_from_description(
 
 @router.post("/review-answer", response_model=FeedbackOut)
 async def review_answer_direct(
-    body:         DirectReviewIn,
-    current_user: User = Depends(get_current_user),
+    body: DirectReviewIn,
+    current_user = Depends(require_pro_user),  # ← Pro-only
 ):
     """
     Get AI feedback on a candidate's answer.

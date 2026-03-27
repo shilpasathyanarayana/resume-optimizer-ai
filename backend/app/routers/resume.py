@@ -3,7 +3,6 @@ import io
 import PyPDF2
 from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Request, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from groq import Groq
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,86 +10,109 @@ from sqlalchemy import text
 
 from app.config import settings
 from app.database import get_db
-from jose import jwt, JWTError
+from app.routers.auth import get_current_user
+from app.schemas.auth import CurrentUser
 from typing import List, Optional
 
-router = APIRouter(prefix="/api/resume", tags=["resume"])
+router = APIRouter(prefix="/resume", tags=["resume"])
 
 FREE_MONTHLY_LIMIT = 5
-PRO_MONTHLY_LIMIT = 999999
 
-security = HTTPBearer()
 
 # ── Schemas ────────────────────────────────────────────────────────────────────
 
 class AnalyzeRequest(BaseModel):
-    resume_text: str
+    resume_text:     str
     job_description: str
 
 class AnalyzeResponse(BaseModel):
-    ats_score: int
+    ats_score:        int
     missing_keywords: List[str]
-    improvements: List[str]
-    optimized_text: str
-    uses_this_month: int
-    uses_remaining: int
-    resume_id: Optional[int] = None
+    improvements:     List[str]
+    optimized_text:   str
+    uses_this_month:  int
+    uses_remaining:   int
+    resume_id:        Optional[int] = None
 
-# ── Auth ───────────────────────────────────────────────────────────────────────
+class ResumeHistoryItem(BaseModel):
+    id:                int
+    original_filename: Optional[str]       = None
+    job_title:         Optional[str]       = None
+    ats_score:         Optional[int]       = None
+    missing_keywords:  Optional[List[str]] = None
+    file_format:       Optional[str]       = None
+    status:            str
+    created_at:        datetime
 
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: AsyncSession = Depends(get_db)
-):
-    token = credentials.credentials
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        sub = payload.get("sub")
-        user_id = payload.get("user_id")
-    except (JWTError, TypeError, ValueError):
-        raise HTTPException(status_code=401, detail="Invalid or expired token. Please log in again.")
+class ResumeHistoryResponse(BaseModel):
+    resumes: List[ResumeHistoryItem]
+    total:   int
 
+class ResumeDetailResponse(BaseModel):
+    id:                int
+    original_filename: Optional[str]       = None
+    original_text:     str
+    job_title:         Optional[str]       = None
+    job_description:   str
+    ats_score:         Optional[int]       = None
+    missing_keywords:  Optional[List[str]] = None
+    improvements:      Optional[List[str]] = None
+    optimized_text:    Optional[str]       = None
+    file_format:       Optional[str]       = None
+    status:            str
+    created_at:        datetime
+
+
+# ── Usage helpers ──────────────────────────────────────────────────────────────
+
+async def get_usage_row(db: AsyncSession, user_id: int) -> dict:
     result = await db.execute(
-        text("SELECT id, name, email, plan, monthly_usage, usage_reset_at FROM users WHERE (id = :user_id OR email = :email) AND is_active = 1"),
-        {"user_id": user_id, "email": sub}
+        text("SELECT monthly_usage, usage_reset_at FROM subscriptions WHERE user_id = :id"),
+        {"id": user_id}
     )
-    user = result.fetchone()
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found.")
-    return user
+    row = result.fetchone()
+    if not row:
+        return {"monthly_usage": 0, "usage_reset_at": datetime.utcnow()}
 
-# ── Usage Helpers ──────────────────────────────────────────────────────────────
-
-async def check_and_increment_usage(user, db: AsyncSession):
-    now = datetime.utcnow()
-    reset_at = user.usage_reset_at
-    monthly_usage = user.monthly_usage
+    now           = datetime.utcnow()
+    monthly_usage = row.monthly_usage
+    reset_at      = row.usage_reset_at
 
     if (now - reset_at) > timedelta(days=30):
         monthly_usage = 0
         await db.execute(
-            text("UPDATE users SET monthly_usage = 0, usage_reset_at = :now WHERE id = :id"),
-            {"now": now, "id": user.id}
+            text("UPDATE subscriptions SET monthly_usage = 0, usage_reset_at = :now WHERE user_id = :id"),
+            {"now": now, "id": user_id}
         )
+        await db.commit()
+        reset_at = now
 
-    limit = FREE_MONTHLY_LIMIT if user.plan == 'free' else PRO_MONTHLY_LIMIT
+    return {"monthly_usage": monthly_usage, "usage_reset_at": reset_at}
 
-    if monthly_usage >= limit:
+
+async def check_and_increment_usage(current_user: CurrentUser, db: AsyncSession):
+    if current_user.is_pro:
+        return 0, 999999
+
+    usage         = await get_usage_row(db, current_user.id)
+    monthly_usage = usage["monthly_usage"]
+
+    if monthly_usage >= FREE_MONTHLY_LIMIT:
         raise HTTPException(
             status_code=429,
-            detail=f"You've used all {limit} free optimizations this month. Upgrade to Pro for unlimited access."
+            detail=f"You've used all {FREE_MONTHLY_LIMIT} free optimizations this month. Upgrade to Pro for unlimited access."
         )
 
     new_usage = monthly_usage + 1
     await db.execute(
-        text("UPDATE users SET monthly_usage = monthly_usage + 1 WHERE id = :id"),
-        {"id": user.id}
+        text("UPDATE subscriptions SET monthly_usage = monthly_usage + 1 WHERE user_id = :id"),
+        {"id": current_user.id}
     )
     await db.commit()
+    return new_usage, max(FREE_MONTHLY_LIMIT - new_usage, 0)
 
-    return new_usage, max(limit - new_usage, 0)
 
-# ── Save Resume ────────────────────────────────────────────────────────────────
+# ── Save resume ────────────────────────────────────────────────────────────────
 
 async def save_resume(
     db: AsyncSession,
@@ -119,43 +141,160 @@ async def save_resume(
             )
         """),
         {
-            "user_id": user_id,
+            "user_id":           user_id,
             "original_filename": original_filename,
-            "original_text": original_text,
-            "job_title": job_title,
-            "job_description": job_description,
-            "ats_score": ats_score,
-            "missing_keywords": json.dumps(missing_keywords),
-            "improvements": json.dumps(improvements),
-            "optimized_text": optimized_text,
-            "file_format": file_format,
+            "original_text":     original_text,
+            "job_title":         job_title,
+            "job_description":   job_description,
+            "ats_score":         ats_score,
+            "missing_keywords":  json.dumps(missing_keywords),
+            "improvements":      json.dumps(improvements),
+            "optimized_text":    optimized_text,
+            "file_format":       file_format,
         }
     )
     await db.commit()
     return result.lastrowid
 
-# ── Usage Endpoint ─────────────────────────────────────────────────────────────
+
+# ── Usage endpoint ─────────────────────────────────────────────────────────────
 
 @router.get("/usage")
 async def get_usage(
-    user=Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
-    now = datetime.utcnow()
-    monthly_usage = user.monthly_usage
-    if (now - user.usage_reset_at) > timedelta(days=30):
-        monthly_usage = 0
+    if current_user.is_pro:
+        return {
+            "is_pro":          True,
+            "uses_this_month": 0,
+            "uses_remaining":  999999,
+            "limit":           999999,
+            "resets_at":       None,
+        }
 
-    limit = FREE_MONTHLY_LIMIT if user.plan == 'free' else PRO_MONTHLY_LIMIT
+    usage         = await get_usage_row(db, current_user.id)
+    monthly_usage = usage["monthly_usage"]
+    reset_at      = usage["usage_reset_at"]
+
     return {
-        "plan": user.plan,
+        "is_pro":          False,
         "uses_this_month": monthly_usage,
-        "uses_remaining": max(limit - monthly_usage, 0),
-        "limit": limit,
-        "resets_at": (user.usage_reset_at + timedelta(days=30)).isoformat()
+        "uses_remaining":  max(FREE_MONTHLY_LIMIT - monthly_usage, 0),
+        "limit":           FREE_MONTHLY_LIMIT,
+        "resets_at":       (reset_at + timedelta(days=30)).isoformat(),
     }
 
-# ── AI Service ─────────────────────────────────────────────────────────────────
+
+# ── History endpoint ───────────────────────────────────────────────────────────
+
+@router.get("/history", response_model=ResumeHistoryResponse)
+async def get_resume_history(
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if not current_user.is_pro:
+        raise HTTPException(status_code=403, detail="Resume history is a Pro feature. Upgrade to access.")
+
+    result = await db.execute(
+        text("""
+            SELECT id, original_filename, job_title, ats_score,
+                   missing_keywords, file_format, status, created_at
+            FROM resumes
+            WHERE user_id = :user_id
+            ORDER BY created_at DESC
+        """),
+        {"user_id": current_user.id}
+    )
+    rows  = result.fetchall()
+    items = []
+
+    for row in rows:
+        keywords = row.missing_keywords
+        if isinstance(keywords, str):
+            try:
+                keywords = json.loads(keywords)
+            except (json.JSONDecodeError, TypeError):
+                keywords = []
+        items.append(ResumeHistoryItem(
+            id=row.id,
+            original_filename=row.original_filename,
+            job_title=row.job_title,
+            ats_score=row.ats_score,
+            missing_keywords=keywords or [],
+            file_format=row.file_format,
+            status=row.status,
+            created_at=row.created_at,
+        ))
+
+    return ResumeHistoryResponse(resumes=items, total=len(items))
+
+
+# ── Detail endpoint ────────────────────────────────────────────────────────────
+
+@router.get("/history/{resume_id}", response_model=ResumeDetailResponse)
+async def get_resume_detail(
+    resume_id: int,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    if not current_user.is_pro:
+        raise HTTPException(status_code=403, detail="Resume history is a Pro feature. Upgrade to access.")
+
+    result = await db.execute(
+        text("""
+            SELECT id, original_filename, original_text, job_title,
+                   job_description, ats_score, missing_keywords, improvements,
+                   optimized_text, file_format, status, created_at
+            FROM resumes
+            WHERE id = :resume_id AND user_id = :user_id
+        """),
+        {"resume_id": resume_id, "user_id": current_user.id}
+    )
+    row = result.fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Resume not found.")
+
+    def parse_json_field(val):
+        if isinstance(val, str):
+            try:
+                return json.loads(val)
+            except (json.JSONDecodeError, TypeError):
+                return []
+        return val or []
+
+    return ResumeDetailResponse(
+        id=row.id,
+        original_filename=row.original_filename,
+        original_text=row.original_text,
+        job_title=row.job_title,
+        job_description=row.job_description,
+        ats_score=row.ats_score,
+        missing_keywords=parse_json_field(row.missing_keywords),
+        improvements=parse_json_field(row.improvements),
+        optimized_text=row.optimized_text,
+        file_format=row.file_format,
+        status=row.status,
+        created_at=row.created_at,
+    )
+
+
+# ── Delete history endpoint ────────────────────────────────────────────────────
+
+@router.delete("/history")
+async def delete_resume_history(
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    await db.execute(
+        text("DELETE FROM resumes WHERE user_id = :user_id"),
+        {"user_id": current_user.id}
+    )
+    await db.commit()
+    return {"message": "Optimisation history deleted successfully."}
+
+
+# ── AI service ─────────────────────────────────────────────────────────────────
 
 def build_prompt(resume_text: str, job_description: str) -> str:
     return f"""Analyze this resume against the job description and return a JSON object with exactly these fields:
@@ -172,20 +311,15 @@ RESUME:
 JOB DESCRIPTION:
 {job_description}"""
 
+
 async def run_ai(resume_text: str, job_description: str) -> dict:
     try:
         client = Groq(api_key=settings.GROQ_API_KEY)
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
-                {
-                    "role": "system",
-                    "content": "You are an expert resume consultant. Always respond with valid JSON only — no markdown, no explanation."
-                },
-                {
-                    "role": "user",
-                    "content": build_prompt(resume_text, job_description)
-                }
+                {"role": "system", "content": "You are an expert resume consultant. Always respond with valid JSON only — no markdown, no explanation."},
+                {"role": "user",   "content": build_prompt(resume_text, job_description)}
             ],
             temperature=0.3,
             max_tokens=4000,
@@ -205,25 +339,26 @@ async def run_ai(resume_text: str, job_description: str) -> dict:
     except json.JSONDecodeError:
         raise HTTPException(status_code=502, detail="AI returned invalid JSON. Please try again.")
 
-# ── Analyze Endpoint ───────────────────────────────────────────────────────────
+
+# ── Analyze endpoint ───────────────────────────────────────────────────────────
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze_resume(
     body: AnalyzeRequest,
-    user=Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     if len(body.resume_text.strip()) < 50:
         raise HTTPException(status_code=422, detail="Resume text is too short.")
     if len(body.job_description.strip()) < 50:
         raise HTTPException(status_code=422, detail="Job description is too short.")
 
-    uses_this_month, uses_remaining = await check_and_increment_usage(user, db)
+    uses_this_month, uses_remaining = await check_and_increment_usage(current_user, db)
     result = await run_ai(body.resume_text, body.job_description)
 
     resume_id = await save_resume(
         db=db,
-        user_id=user.id,
+        user_id=current_user.id,
         original_text=body.resume_text,
         job_description=body.job_description,
         ats_score=int(result.get("ats_score", 0)),
@@ -243,15 +378,16 @@ async def analyze_resume(
         resume_id=resume_id,
     )
 
-# ── Upload Endpoint ────────────────────────────────────────────────────────────
+
+# ── Upload endpoint ────────────────────────────────────────────────────────────
 
 @router.post("/upload", response_model=AnalyzeResponse)
 async def upload_resume(
     request: Request,
     resume_file: UploadFile = File(...),
     job_description: str = Form(...),
-    user=Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     ext = resume_file.filename.split('.')[-1].lower()
     if ext not in ['pdf', 'docx', 'doc']:
@@ -273,14 +409,14 @@ async def upload_resume(
             resume_text = file_bytes.decode('utf-8', errors='ignore')
 
     if len(resume_text.strip()) < 50:
-        raise HTTPException(status_code=422, detail="Could not extract enough text from the file. Please paste your resume text instead.")
+        raise HTTPException(status_code=422, detail="Could not extract enough text. Please paste your resume text instead.")
 
-    uses_this_month, uses_remaining = await check_and_increment_usage(user, db)
+    uses_this_month, uses_remaining = await check_and_increment_usage(current_user, db)
     result = await run_ai(resume_text, job_description)
 
     resume_id = await save_resume(
         db=db,
-        user_id=user.id,
+        user_id=current_user.id,
         original_text=resume_text,
         job_description=job_description,
         ats_score=int(result.get("ats_score", 0)),
