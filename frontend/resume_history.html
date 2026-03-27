@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Resume History — ResumeAI</title>
+    <title>ResumeAI — Land Your Dream Job</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/main.css" />
-    <script src="assets/js/script.js" defer></script>
+
     <style>
         body {
             padding-top: 80px;
@@ -81,8 +81,13 @@
             line-height: 1;
         }
 
-        .stat-value.accent { color: var(--accent); }
-        .stat-value.gold   { color: #c9a84c; }
+        .stat-value.accent {
+            color: var(--accent);
+        }
+
+        .stat-value.gold {
+            color: #c9a84c;
+        }
 
         .stat-desc {
             font-size: 0.78rem;
@@ -206,7 +211,7 @@
 
         .resume-item:hover {
             border-color: var(--accent);
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
         }
 
         .resume-item-left {
@@ -276,10 +281,25 @@
             white-space: nowrap;
         }
 
-        .score-high { background: var(--accent-light); color: var(--accent); }
-        .score-mid  { background: #fef3c7; color: #d97706; }
-        .score-low  { background: #fdf0ef; color: var(--danger); }
-        .score-none { background: var(--surface); color: var(--muted); }
+        .score-high {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .score-mid {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .score-low {
+            background: #fdf0ef;
+            color: var(--danger);
+        }
+
+        .score-none {
+            background: var(--surface);
+            color: var(--muted);
+        }
 
         /* ── STATUS BADGE ── */
         .status-badge {
@@ -291,10 +311,25 @@
             white-space: nowrap;
         }
 
-        .status-completed  { background: #d1fae5; color: #065f46; }
-        .status-pending    { background: #fef3c7; color: #92400e; }
-        .status-processing { background: #dbeafe; color: #1e40af; }
-        .status-failed     { background: #fdf0ef; color: var(--danger); }
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-processing {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-failed {
+            background: #fdf0ef;
+            color: var(--danger);
+        }
 
         /* ── LOADING SKELETON ── */
         .skeleton-list {
@@ -320,9 +355,17 @@
         }
 
         @keyframes shimmer {
-            0%   { opacity: 1; }
-            50%  { opacity: 0.45; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.45;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         /* ── ERROR BANNER ── */
@@ -339,7 +382,9 @@
             margin-bottom: 20px;
         }
 
-        .error-banner.show { display: flex; }
+        .error-banner.show {
+            display: flex;
+        }
 
         /* ── PAGINATION ── */
         .pagination {
@@ -380,339 +425,353 @@
         }
 
         @media (max-width: 640px) {
-            .stats-row { grid-template-columns: 1fr 1fr; }
-            .resume-item-right { flex-direction: column; align-items: flex-end; gap: 6px; }
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .resume-item-right {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 6px;
+            }
         }
     </style>
 </head>
 
 <body>
-<!-- ── NAVBAR ── -->
-<nav id="navbar">
-    <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
-    <div class="nav-right">
-        <!-- <div id="guestNav" style="display:none;">
+    <!-- ── NAVBAR ── -->
+    <nav id="navbar">
+        <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
+        <div class="nav-right">
+            <!-- <div id="guestNav" style="display:none;">
             <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
             <button class="btn btn-primary" onclick="openModal('signup')">Get started free</button>
         </div> -->
-        <div id="userNav" style="display:none;">
-            <div class="user-menu-wrap">
-                <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">?</div>
-                <div class="user-dropdown" id="userDropdown">
-                    <div class="user-email">
-                        <strong id="dropdownName">—</strong>
-                        <span id="dropdownEmail">—</span>
+            <div id="userNav" style="display:none;">
+                <div class="user-menu-wrap">
+                    <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">?</div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-email">
+                            <strong id="dropdownName">—</strong>
+                            <span id="dropdownEmail">—</span>
+                        </div>
+                        <button class="dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize
+                            Resume</button>
+                        <button class="dropdown-item" onclick="goToMyResumes()">📄 History</button>
+                        <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job
+                            Tracker</button>
+                        <button class="dropdown-item" onclick="window.location.href='interviewPrep.html'">📖 Interview
+                            Prep</button>
+                        <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
+                        <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
                     </div>
-                    <button class="dropdown-item" onclick="goToMyResumes()">📄 History</button>
-                    <button class="dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize Resume</button>
-                    <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
-                    <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
                 </div>
             </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<div class="dashboard-wrapper">
+    <div class="dashboard-wrapper">
 
-    <!-- ── HEADER ── -->
-    <div class="dashboard-header">
-        <div class="dashboard-eyebrow">Your Account</div>
-        <h1 class="dashboard-title">Resume Optimisation History</h1>
-        <p class="dashboard-subtitle" id="headerSubtitle">Loading your optimisations…</p>
-    </div>
-
-    <!-- ── STATS ── -->
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-label">Total Optimisations</div>
-            <div class="stat-value accent" id="statTotal">—</div>
-            <div class="stat-desc">all time</div>
+        <!-- ── HEADER ── -->
+        <div class="dashboard-header">
+            <div class="dashboard-eyebrow">Your Account</div>
+            <h1 class="dashboard-title">Resume Optimisation History</h1>
+            <p class="dashboard-subtitle" id="headerSubtitle">Loading your optimisations…</p>
         </div>
-        <div class="stat-card">
-            <div class="stat-label">Best ATS Score</div>
-            <div class="stat-value gold" id="statBest">—</div>
-            <div class="stat-desc">highest achieved</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Avg ATS Score</div>
-            <div class="stat-value" id="statAvg">—</div>
-            <div class="stat-desc">across all submissions</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-label">Completed</div>
-            <div class="stat-value accent" id="statCompleted">—</div>
-            <div class="stat-desc">successfully processed</div>
-        </div>
-    </div>
 
-    <!-- ── ERROR BANNER ── -->
-    <div class="error-banner" id="errorBanner">
-        <span>⚠️</span>
-        <span id="errorMsg">Something went wrong loading your history.</span>
-    </div>
-
-    <!-- ── HISTORY SECTION ── -->
-    <div class="section-header">
-        <h2 class="section-heading">All Submissions</h2>
-        <a href="optimize.html" class="btn btn-primary" style="font-size:0.85rem;padding:8px 18px;">+ New Optimisation</a>
-    </div>
-
-    <!-- ── FILTER BAR ── -->
-    <div class="filter-bar" id="filterBar" style="display:none;">
-        <input
-            type="search"
-            class="filter-search"
-            id="searchInput"
-            placeholder="🔍  Search by filename or job title…"
-            oninput="applyFilters()"
-        />
-        <select class="filter-select" id="statusFilter" onchange="applyFilters()">
-            <option value="">All Statuses</option>
-            <option value="completed">Completed</option>
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="failed">Failed</option>
-        </select>
-        <select class="filter-select" id="scoreFilter" onchange="applyFilters()">
-            <option value="">All Scores</option>
-            <option value="high">High (80+)</option>
-            <option value="mid">Medium (50–79)</option>
-            <option value="low">Low (&lt;50)</option>
-        </select>
-    </div>
-
-    <!-- ── CONTENT AREA ── -->
-    <div id="contentArea">
-        <!-- Skeleton shown while loading -->
-        <div class="skeleton-list" id="skeletonLoader">
-            <div class="skeleton-item">
-                <div class="skeleton-block" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
-                <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
-                    <div class="skeleton-block" style="height:14px;width:55%;"></div>
-                    <div class="skeleton-block" style="height:11px;width:35%;"></div>
-                </div>
-                <div class="skeleton-block" style="height:24px;width:60px;border-radius:20px;"></div>
+        <!-- ── STATS ── -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Optimisations</div>
+                <div class="stat-value accent" id="statTotal">—</div>
+                <div class="stat-desc">all time</div>
             </div>
-            <div class="skeleton-item">
-                <div class="skeleton-block" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
-                <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
-                    <div class="skeleton-block" style="height:14px;width:45%;"></div>
-                    <div class="skeleton-block" style="height:11px;width:28%;"></div>
-                </div>
-                <div class="skeleton-block" style="height:24px;width:60px;border-radius:20px;"></div>
+            <div class="stat-card">
+                <div class="stat-label">Best ATS Score</div>
+                <div class="stat-value gold" id="statBest">—</div>
+                <div class="stat-desc">highest achieved</div>
             </div>
-            <div class="skeleton-item">
-                <div class="skeleton-block" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
-                <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
-                    <div class="skeleton-block" style="height:14px;width:60%;"></div>
-                    <div class="skeleton-block" style="height:11px;width:40%;"></div>
-                </div>
-                <div class="skeleton-block" style="height:24px;width:60px;border-radius:20px;"></div>
+            <div class="stat-card">
+                <div class="stat-label">Avg ATS Score</div>
+                <div class="stat-value" id="statAvg">—</div>
+                <div class="stat-desc">across all submissions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Completed</div>
+                <div class="stat-value accent" id="statCompleted">—</div>
+                <div class="stat-desc">successfully processed</div>
             </div>
         </div>
 
-        <!-- Populated list -->
-        <div class="resume-list" id="resumeList" style="display:none;"></div>
-
-        <!-- Empty state -->
-        <div class="empty-state" id="emptyState" style="display:none;">
-            <div class="empty-icon">📄</div>
-            <div class="empty-title">No optimisations yet</div>
-            <p class="empty-desc">Upload your resume and a job description to get an ATS score and tailored improvements.</p>
-            <a href="optimize.html" class="btn btn-primary">Start your first optimisation</a>
+        <!-- ── ERROR BANNER ── -->
+        <div class="error-banner" id="errorBanner">
+            <span>⚠️</span>
+            <span id="errorMsg">Something went wrong loading your history.</span>
         </div>
 
-        <!-- No filter results -->
-        <div class="empty-state" id="noResults" style="display:none;">
-            <div class="empty-icon">🔍</div>
-            <div class="empty-title">No matching results</div>
-            <p class="empty-desc">Try adjusting your search or filter criteria.</p>
-            <button class="btn btn-ghost" onclick="clearFilters()">Clear filters</button>
+        <!-- ── HISTORY SECTION ── -->
+        <div class="section-header">
+            <h2 class="section-heading">All Submissions</h2>
+            <a href="optimize.html" class="btn btn-primary" style="font-size:0.85rem;padding:8px 18px;">+ New
+                Optimisation</a>
         </div>
+
+        <!-- ── FILTER BAR ── -->
+        <div class="filter-bar" id="filterBar" style="display:none;">
+            <input type="search" class="filter-search" id="searchInput"
+                placeholder="🔍  Search by filename or job title…" oninput="applyFilters()" />
+            <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+                <option value="">All Statuses</option>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="failed">Failed</option>
+            </select>
+            <select class="filter-select" id="scoreFilter" onchange="applyFilters()">
+                <option value="">All Scores</option>
+                <option value="high">High (80+)</option>
+                <option value="mid">Medium (50–79)</option>
+                <option value="low">Low (&lt;50)</option>
+            </select>
+        </div>
+
+        <!-- ── CONTENT AREA ── -->
+        <div id="contentArea">
+            <!-- Skeleton shown while loading -->
+            <div class="skeleton-list" id="skeletonLoader">
+                <div class="skeleton-item">
+                    <div class="skeleton-block" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+                        <div class="skeleton-block" style="height:14px;width:55%;"></div>
+                        <div class="skeleton-block" style="height:11px;width:35%;"></div>
+                    </div>
+                    <div class="skeleton-block" style="height:24px;width:60px;border-radius:20px;"></div>
+                </div>
+                <div class="skeleton-item">
+                    <div class="skeleton-block" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+                        <div class="skeleton-block" style="height:14px;width:45%;"></div>
+                        <div class="skeleton-block" style="height:11px;width:28%;"></div>
+                    </div>
+                    <div class="skeleton-block" style="height:24px;width:60px;border-radius:20px;"></div>
+                </div>
+                <div class="skeleton-item">
+                    <div class="skeleton-block" style="width:40px;height:40px;border-radius:10px;flex-shrink:0;"></div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+                        <div class="skeleton-block" style="height:14px;width:60%;"></div>
+                        <div class="skeleton-block" style="height:11px;width:40%;"></div>
+                    </div>
+                    <div class="skeleton-block" style="height:24px;width:60px;border-radius:20px;"></div>
+                </div>
+            </div>
+
+            <!-- Populated list -->
+            <div class="resume-list" id="resumeList" style="display:none;"></div>
+
+            <!-- Empty state -->
+            <div class="empty-state" id="emptyState" style="display:none;">
+                <div class="empty-icon">📄</div>
+                <div class="empty-title">No optimisations yet</div>
+                <p class="empty-desc">Upload your resume and a job description to get an ATS score and tailored
+                    improvements.</p>
+                <a href="optimize.html" class="btn btn-primary">Start your first optimisation</a>
+            </div>
+
+            <!-- No filter results -->
+            <div class="empty-state" id="noResults" style="display:none;">
+                <div class="empty-icon">🔍</div>
+                <div class="empty-title">No matching results</div>
+                <p class="empty-desc">Try adjusting your search or filter criteria.</p>
+                <button class="btn btn-ghost" onclick="clearFilters()">Clear filters</button>
+            </div>
+        </div>
+
+        <!-- ── PAGINATION ── -->
+        <div class="pagination" id="pagination"></div>
+
     </div>
 
-    <!-- ── PAGINATION ── -->
-    <div class="pagination" id="pagination"></div>
+    <!-- ── FOOTER ── -->
+    <footer>
+        <a href="index.html" class="nav-logo" style="font-size:1.1rem;">Resume<span
+                style="color:var(--accent)">AI</span></a>
+        <span>© <span id="footerYear"></span> ResumeAI</span>
+        <div style="display:flex;gap:20px;">
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <a href="contact_us.html">Contact</a>
+        </div>
+    </footer>
 
-</div>
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/requirepro.js"></script>
+    <script>
+        // ─── CONFIG ───────────────────────────────────────────────
+        const PAGE_SIZE = 20;
 
-<!-- ── FOOTER ── -->
-<footer>
-    <a href="index.html" class="nav-logo" style="font-size:1.1rem;">Resume<span style="color:var(--accent)">AI</span></a>
-    <span>© <span id="footerYear"></span> ResumeAI</span>
-    <div style="display:flex;gap:20px;">
-        <a href="privacy.html">Privacy</a>
-        <a href="terms.html">Terms</a>
-        <a href="contact_us.html">Contact</a>
-    </div>
-</footer>
+        // ─── STATE ────────────────────────────────────────────────
+        let allResumes = [];
+        let filtered = [];
+        let currentPage = 1;
 
-<script>
-// ─── CONFIG ───────────────────────────────────────────────
-const PAGE_SIZE  = 10;
+        // ─── AUTH HELPERS ─────────────────────────────────────────
+        function getToken() {
+            return localStorage.getItem('authToken');
+        }
 
-// ─── STATE ────────────────────────────────────────────────
-let allResumes   = [];
-let filtered     = [];
-let currentPage  = 1;
-
-// ─── AUTH HELPERS ─────────────────────────────────────────
-function getToken() {
-    return localStorage.getItem('authToken');
-}
-
-// ─── INIT ─────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    const token = getToken();
-    if (!token) {
-        window.location.replace('index.html');
-        return;
-    }
-    document.getElementById('footerYear').textContent = new Date().getFullYear();
-    loadHistory();
-});
-
-// ─── FETCH HISTORY ────────────────────────────────────────
-async function loadHistory() {
-    try {
-        const res = await fetch(`${API_BASE}/resume/history`, {
-            headers: {
-                'Authorization': `Bearer ${getToken()}`,
-                'Content-Type': 'application/json',
-            },
+        // ─── INIT ─────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = getToken();
+            if (!token) {
+                window.location.replace('index.html');
+                return;
+            }
+            if (!requirePro()) return;
+            // ← redirects free users to pricing.html
+            document.getElementById('footerYear').textContent = new Date().getFullYear();
+            loadHistory();
         });
 
-        if (res.status === 401) {
-            window.location.replace('index.html');
-            return;
+        // ─── FETCH HISTORY ────────────────────────────────────────
+        async function loadHistory() {
+            try {
+                const res = await fetch(`${API_BASE}/resume/history`, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (res.status === 401) {
+                    window.location.replace('index.html');
+                    return;
+                }
+
+                if (!res.ok) {
+                    throw new Error(`Server returned ${res.status}`);
+                }
+
+                const data = await res.json();
+                allResumes = data.resumes || [];
+
+                renderStats();
+                applyFilters();
+
+                document.getElementById('skeletonLoader').style.display = 'none';
+                document.getElementById('filterBar').style.display = allResumes.length ? 'flex' : 'none';
+                document.getElementById('headerSubtitle').textContent =
+                    allResumes.length
+                        ? `${allResumes.length} optimisation${allResumes.length !== 1 ? 's' : ''} found`
+                        : 'No optimisations yet — start below!';
+
+            } catch (err) {
+                document.getElementById('skeletonLoader').style.display = 'none';
+                showError('Failed to load your history. Please refresh and try again.');
+                console.error(err);
+            }
         }
 
-        if (!res.ok) {
-            throw new Error(`Server returned ${res.status}`);
+        // ─── STATS ────────────────────────────────────────────────
+        function renderStats() {
+            const scored = allResumes.filter(r => r.ats_score != null);
+            const completed = allResumes.filter(r => r.status === 'completed').length;
+            const best = scored.length ? Math.max(...scored.map(r => r.ats_score)) : null;
+            const avg = scored.length ? Math.round(scored.reduce((s, r) => s + r.ats_score, 0) / scored.length) : null;
+
+            document.getElementById('statTotal').textContent = allResumes.length;
+            document.getElementById('statBest').textContent = best != null ? `${best}%` : '—';
+            document.getElementById('statAvg').textContent = avg != null ? `${avg}%` : '—';
+            document.getElementById('statCompleted').textContent = completed;
         }
 
-        const data = await res.json();
-        allResumes = data.resumes || [];
+        // ─── FILTERS ──────────────────────────────────────────────
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const statusVal = document.getElementById('statusFilter').value;
+            const scoreVal = document.getElementById('scoreFilter').value;
 
-        renderStats();
-        applyFilters();
+            filtered = allResumes.filter(r => {
+                // text search
+                if (query) {
+                    const haystack = `${r.original_filename || ''} ${r.job_title || ''}`.toLowerCase();
+                    if (!haystack.includes(query)) return false;
+                }
+                // status filter
+                if (statusVal && r.status !== statusVal) return false;
+                // score filter
+                if (scoreVal) {
+                    if (r.ats_score == null) return false;
+                    if (scoreVal === 'high' && r.ats_score < 80) return false;
+                    if (scoreVal === 'mid' && (r.ats_score < 50 || r.ats_score >= 80)) return false;
+                    if (scoreVal === 'low' && r.ats_score >= 50) return false;
+                }
+                return true;
+            });
 
-        document.getElementById('skeletonLoader').style.display = 'none';
-        document.getElementById('filterBar').style.display      = allResumes.length ? 'flex' : 'none';
-        document.getElementById('headerSubtitle').textContent   =
-            allResumes.length
-                ? `${allResumes.length} optimisation${allResumes.length !== 1 ? 's' : ''} found`
-                : 'No optimisations yet — start below!';
-
-    } catch (err) {
-        document.getElementById('skeletonLoader').style.display = 'none';
-        showError('Failed to load your history. Please refresh and try again.');
-        console.error(err);
-    }
-}
-
-// ─── STATS ────────────────────────────────────────────────
-function renderStats() {
-    const scored = allResumes.filter(r => r.ats_score != null);
-    const completed = allResumes.filter(r => r.status === 'completed').length;
-    const best  = scored.length ? Math.max(...scored.map(r => r.ats_score)) : null;
-    const avg   = scored.length ? Math.round(scored.reduce((s, r) => s + r.ats_score, 0) / scored.length) : null;
-
-    document.getElementById('statTotal').textContent     = allResumes.length;
-    document.getElementById('statBest').textContent      = best  != null ? `${best}%`  : '—';
-    document.getElementById('statAvg').textContent       = avg   != null ? `${avg}%`   : '—';
-    document.getElementById('statCompleted').textContent = completed;
-}
-
-// ─── FILTERS ──────────────────────────────────────────────
-function applyFilters() {
-    const query       = document.getElementById('searchInput').value.toLowerCase().trim();
-    const statusVal   = document.getElementById('statusFilter').value;
-    const scoreVal    = document.getElementById('scoreFilter').value;
-
-    filtered = allResumes.filter(r => {
-        // text search
-        if (query) {
-            const haystack = `${r.original_filename || ''} ${r.job_title || ''}`.toLowerCase();
-            if (!haystack.includes(query)) return false;
+            currentPage = 1;
+            renderPage();
         }
-        // status filter
-        if (statusVal && r.status !== statusVal) return false;
-        // score filter
-        if (scoreVal) {
-            if (r.ats_score == null) return false;
-            if (scoreVal === 'high' && r.ats_score < 80)  return false;
-            if (scoreVal === 'mid'  && (r.ats_score < 50 || r.ats_score >= 80)) return false;
-            if (scoreVal === 'low'  && r.ats_score >= 50) return false;
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('scoreFilter').value = '';
+            applyFilters();
         }
-        return true;
-    });
 
-    currentPage = 1;
-    renderPage();
-}
+        // ─── RENDER PAGE ──────────────────────────────────────────
+        function renderPage() {
+            const list = document.getElementById('resumeList');
+            const emptyState = document.getElementById('emptyState');
+            const noResults = document.getElementById('noResults');
+            const pagination = document.getElementById('pagination');
 
-function clearFilters() {
-    document.getElementById('searchInput').value    = '';
-    document.getElementById('statusFilter').value   = '';
-    document.getElementById('scoreFilter').value    = '';
-    applyFilters();
-}
+            list.innerHTML = '';
+            pagination.innerHTML = '';
 
-// ─── RENDER PAGE ──────────────────────────────────────────
-function renderPage() {
-    const list       = document.getElementById('resumeList');
-    const emptyState = document.getElementById('emptyState');
-    const noResults  = document.getElementById('noResults');
-    const pagination = document.getElementById('pagination');
+            if (allResumes.length === 0) {
+                list.style.display = 'none';
+                emptyState.style.display = 'block';
+                noResults.style.display = 'none';
+                return;
+            }
 
-    list.innerHTML = '';
-    pagination.innerHTML = '';
+            if (filtered.length === 0) {
+                list.style.display = 'none';
+                emptyState.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
 
-    if (allResumes.length === 0) {
-        list.style.display       = 'none';
-        emptyState.style.display = 'block';
-        noResults.style.display  = 'none';
-        return;
-    }
+            emptyState.style.display = 'none';
+            noResults.style.display = 'none';
+            list.style.display = 'flex';
 
-    if (filtered.length === 0) {
-        list.style.display       = 'none';
-        emptyState.style.display = 'none';
-        noResults.style.display  = 'block';
-        return;
-    }
+            const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+            const start = (currentPage - 1) * PAGE_SIZE;
+            const pageItems = filtered.slice(start, start + PAGE_SIZE);
 
-    emptyState.style.display = 'none';
-    noResults.style.display  = 'none';
-    list.style.display       = 'flex';
+            pageItems.forEach(r => {
+                list.insertAdjacentHTML('beforeend', buildResumeItem(r));
+            });
 
-    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-    const start      = (currentPage - 1) * PAGE_SIZE;
-    const pageItems  = filtered.slice(start, start + PAGE_SIZE);
+            // Pagination
+            if (totalPages > 1) {
+                renderPagination(totalPages);
+            }
+        }
 
-    pageItems.forEach(r => {
-        list.insertAdjacentHTML('beforeend', buildResumeItem(r));
-    });
+        // ─── BUILD RESUME ROW ─────────────────────────────────────
+        function buildResumeItem(r) {
+            const icon = fileIcon(r.file_format);
+            const scoreHtml = scoreTag(r.ats_score);
+            const statusHtml = statusTag(r.status);
+            const date = formatDate(r.created_at);
+            const title = r.original_filename || 'Unnamed Resume';
+            const jobTitle = r.job_title || 'Job title not specified';
+            const keywords = Array.isArray(r.missing_keywords) ? r.missing_keywords.length : 0;
 
-    // Pagination
-    if (totalPages > 1) {
-        renderPagination(totalPages);
-    }
-}
-
-// ─── BUILD RESUME ROW ─────────────────────────────────────
-function buildResumeItem(r) {
-    const icon       = fileIcon(r.file_format);
-    const scoreHtml  = scoreTag(r.ats_score);
-    const statusHtml = statusTag(r.status);
-    const date       = formatDate(r.created_at);
-    const title      = r.original_filename || 'Unnamed Resume';
-    const jobTitle   = r.job_title || 'Job title not specified';
-    const keywords   = Array.isArray(r.missing_keywords) ? r.missing_keywords.length : 0;
-
-    return `
+            return `
     <div class="resume-item" onclick="viewDetail(${r.id})">
         <div class="resume-item-left">
             <div class="resume-item-icon">${icon}</div>
@@ -731,77 +790,78 @@ function buildResumeItem(r) {
             ${scoreHtml}
         </div>
     </div>`;
-}
-
-// ─── PAGINATION ───────────────────────────────────────────
-function renderPagination(totalPages) {
-    const pagination = document.getElementById('pagination');
-    const makeBtn = (label, page, disabled = false, active = false) => {
-        const cls = ['page-btn', active ? 'active' : '', disabled ? '' : ''].join(' ').trim();
-        return `<button class="${cls}" onclick="goToPage(${page})" ${disabled ? 'disabled' : ''}>${label}</button>`;
-    };
-
-    pagination.insertAdjacentHTML('beforeend', makeBtn('← Prev', currentPage - 1, currentPage === 1));
-
-    for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
-            pagination.insertAdjacentHTML('beforeend', makeBtn(i, i, false, i === currentPage));
-        } else if (Math.abs(i - currentPage) === 2) {
-            pagination.insertAdjacentHTML('beforeend', `<span style="color:var(--muted);padding:0 4px;">…</span>`);
         }
-    }
 
-    pagination.insertAdjacentHTML('beforeend', makeBtn('Next →', currentPage + 1, currentPage === totalPages));
-}
+        // ─── PAGINATION ───────────────────────────────────────────
+        function renderPagination(totalPages) {
+            const pagination = document.getElementById('pagination');
+            const makeBtn = (label, page, disabled = false, active = false) => {
+                const cls = ['page-btn', active ? 'active' : '', disabled ? '' : ''].join(' ').trim();
+                return `<button class="${cls}" onclick="goToPage(${page})" ${disabled ? 'disabled' : ''}>${label}</button>`;
+            };
 
-function goToPage(page) {
-    currentPage = page;
-    renderPage();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+            pagination.insertAdjacentHTML('beforeend', makeBtn('← Prev', currentPage - 1, currentPage === 1));
 
-// ─── NAVIGATE TO DETAIL ───────────────────────────────────
-function viewDetail(id) {
-    window.location.href = `optimize.html?id=${id}`;
-}
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+                    pagination.insertAdjacentHTML('beforeend', makeBtn(i, i, false, i === currentPage));
+                } else if (Math.abs(i - currentPage) === 2) {
+                    pagination.insertAdjacentHTML('beforeend', `<span style="color:var(--muted);padding:0 4px;">…</span>`);
+                }
+            }
 
-// ─── HELPERS ──────────────────────────────────────────────
-function fileIcon(format) {
-    const map = { pdf: '📄', docx: '📝', txt: '📃' };
-    return map[format] || '📄';
-}
+            pagination.insertAdjacentHTML('beforeend', makeBtn('Next →', currentPage + 1, currentPage === totalPages));
+        }
 
-function scoreTag(score) {
-    if (score == null) return `<span class="score-badge score-none">No score</span>`;
-    const cls = score >= 80 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
-    return `<span class="score-badge ${cls}">${score}%</span>`;
-}
+        function goToPage(page) {
+            currentPage = page;
+            renderPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-function statusTag(status) {
-    const cls = `status-${status}`;
-    return `<span class="status-badge ${cls}">${status}</span>`;
-}
+        // ─── NAVIGATE TO DETAIL ───────────────────────────────────
+        function viewDetail(id) {
+            window.location.href = `optimize.html?id=${id}`;
+        }
 
-function formatDate(iso) {
-    if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('en-GB', {
-        day: 'numeric', month: 'short', year: 'numeric'
-    });
-}
+        // ─── HELPERS ──────────────────────────────────────────────
+        function fileIcon(format) {
+            const map = { pdf: '📄', docx: '📝', txt: '📃' };
+            return map[format] || '📄';
+        }
 
-function escHtml(str) {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-}
+        function scoreTag(score) {
+            if (score == null) return `<span class="score-badge score-none">No score</span>`;
+            const cls = score >= 80 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+            return `<span class="score-badge ${cls}">${score}%</span>`;
+        }
 
-function showError(msg) {
-    const el = document.getElementById('errorBanner');
-    document.getElementById('errorMsg').textContent = msg;
-    el.classList.add('show');
-}
-</script>
+        function statusTag(status) {
+            const cls = `status-${status}`;
+            return `<span class="status-badge ${cls}">${status}</span>`;
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '—';
+            return new Date(iso).toLocaleDateString('en-GB', {
+                day: 'numeric', month: 'short', year: 'numeric'
+            });
+        }
+
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorBanner');
+            document.getElementById('errorMsg').textContent = msg;
+            el.classList.add('show');
+        }
+    </script>
 </body>
+
 </html>

@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ResumeAI — Land Your Dream Job</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <!-- <script src="assets/js/script.js" defer></script> -->
+    <style>
+        body {
+            padding-top: 80px;
+            background: var(--surface);
+        }
+
+        .tracker-header {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 24px 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .tracker-eyebrow {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .tracker-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            letter-spacing: -0.02em;
+            color: var(--ink);
+            line-height: 1;
+        }
+
+        .tracker-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tracker-stat {
+            text-align: right;
+        }
+
+        .tracker-stat-value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.6rem;
+            color: var(--ink);
+            line-height: 1;
+        }
+
+        .tracker-stat-value.accent {
+            color: var(--accent);
+        }
+
+        .tracker-stat-label {
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+        }
+
+        .btn-add-job {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 9px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.18s;
+            box-shadow: 0 2px 10px rgba(26, 107, 74, 0.2);
+        }
+
+        .btn-add-job:hover {
+            background: #155a3d;
+            transform: translateY(-1px);
+        }
+
+        .board-scroll {
+            overflow-x: auto;
+            padding: 0 24px 60px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .board {
+            display: flex;
+            gap: 16px;
+            min-width: max-content;
+            align-items: flex-start;
+        }
+
+        .column {
+            width: 280px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .column-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+
+        .column-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .column-count {
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: var(--surface);
+            color: var(--muted);
+            padding: 2px 8px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .column-body {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-height: 100px;
+            padding: 4px 2px;
+        }
+
+        .job-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.18s;
+            position: relative;
+        }
+
+        .job-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .job-card.dragging {
+            opacity: 0.45;
+            transform: scale(0.98);
+        }
+
+        .job-card-company {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 3px;
+        }
+
+        .job-card-role {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .job-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .job-card-date {
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        .job-card-action {
+            font-size: 0.72rem;
+            color: #d97706;
+            background: #fef3c7;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .job-card-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            gap: 4px;
+        }
+
+        .job-card:hover .job-card-actions {
+            display: flex;
+        }
+
+        .card-action-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            cursor: pointer;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.12s;
+        }
+
+        .card-action-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .card-action-btn.del:hover {
+            border-color: var(--danger);
+            background: #fdf0ef;
+        }
+
+        .column-body.drag-over {
+            background: var(--accent-light);
+            border-radius: 8px;
+            border: 2px dashed var(--accent);
+        }
+
+        /* ── MODAL — uses unique class to avoid script.js conflict ── */
+        .app-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 400;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .app-modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.14);
+            animation: pop-in 0.2s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes pop-in {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.4rem;
+            color: var(--ink);
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group.span2 {
+            grid-column: span 2;
+        }
+
+        .form-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            font-family: inherit;
+            font-size: 0.88rem;
+            color: var(--ink);
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 12px;
+            outline: none;
+            transition: border-color 0.15s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: var(--accent);
+            background: var(--white);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-modal-save {
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 9px 22px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-modal-save:hover {
+            background: #155a3d;
+        }
+
+        .btn-modal-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-modal-cancel {
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 9px 18px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border);
+            background: var(--white);
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-modal-cancel:hover {
+            border-color: var(--ink);
+            color: var(--ink);
+        }
+
+        .column-empty {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-align: center;
+            padding: 20px 12px;
+            border: 1.5px dashed var(--border);
+            border-radius: 8px;
+        }
+
+        .board-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 24px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            gap: 12px;
+        }
+
+        .spin {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .board-scroll {
+                padding: 0 12px 60px;
+            }
+
+            .column {
+                width: 240px;
+            }
+
+            .tracker-stats {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav id="navbar">
+        <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
+        <div class="nav-right">
+            <div id="userNav" style="display:none;">
+                <div class="user-menu-wrap">
+                    <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">?</div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-email">
+                            <strong id="dropdownName">—</strong>
+                            <span id="dropdownEmail">—</span>
+                        </div>
+                        <button class="dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize
+                            Resume</button>
+                        <button class="dropdown-item" onclick="goToMyResumes()">📄 History</button>
+
+                        <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job
+                            Tracker</button>
+                        <button class="dropdown-item" onclick="window.location.href='interviewPrep.html'">📖 Interview
+                            Prep</button>
+                        <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
+                        <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-wrapper">
+        <div class="tracker-header">
+            <div>
+                <div class="tracker-eyebrow">Your Account</div>
+                <h1 class="tracker-title">Job Tracker</h1>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                <div class="tracker-stats">
+                    <div class="tracker-stat">
+                        <div class="tracker-stat-value accent" id="statTotal">—</div>
+                        <div class="tracker-stat-label">Total</div>
+                    </div>
+                    <div class="tracker-stat">
+                        <div class="tracker-stat-value" id="statApplied">—</div>
+                        <div class="tracker-stat-label">Applied</div>
+                    </div>
+                    <div class="tracker-stat">
+                        <div class="tracker-stat-value" id="statInterview">—</div>
+                        <div class="tracker-stat-label">Interviews</div>
+                    </div>
+                    <div class="tracker-stat">
+                        <div class="tracker-stat-value" id="statOffer">—</div>
+                        <div class="tracker-stat-label">Offers</div>
+                    </div>
+                </div>
+                <button class="btn-add-job" onclick="openAddModal()">+ Add Application</button>
+            </div>
+        </div>
+
+        <div class="board-scroll">
+            <div id="boardLoading" class="board-loading">
+                <div class="spin"></div> Loading your board…
+            </div>
+            <div class="board" id="board" style="display:none;"></div>
+        </div>
+
+        <!-- uses .app-modal-overlay NOT .modal-overlay to avoid script.js conflict -->
+        <div class="app-modal-overlay" id="appModal" onclick="handleAppModalClick(event)">
+            <div class="modal-box">
+                <div class="modal-title" id="modalTitle">Add Application</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Company *</label>
+                        <input type="text" class="form-input" id="fCompany" placeholder="e.g. Google" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Role *</label>
+                        <input type="text" class="form-input" id="fRole" placeholder="e.g. Software Engineer" />
+                    </div>
+                    <div class="form-group span2">
+                        <label class="form-label">Job URL</label>
+                        <input type="url" class="form-input" id="fUrl" placeholder="https://..." />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Stage</label>
+                        <select class="form-select" id="fStage"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Applied Date</label>
+                        <input type="date" class="form-input" id="fAppliedAt" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Next Action</label>
+                        <input type="text" class="form-input" id="fNextAction" placeholder="e.g. Follow up" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Due Date</label>
+                        <input type="date" class="form-input" id="fDueDate" />
+                    </div>
+                    <div class="form-group span2">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-textarea" id="fNotes" placeholder="Any notes about this role…"></textarea>
+                    </div>
+                </div>
+                <div id="modalError" style="font-size:0.82rem;color:var(--danger);display:none;margin-bottom:8px;">
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-modal-cancel" onclick="closeAppModal()">Cancel</button>
+                    <button class="btn-modal-save" id="modalSaveBtn" onclick="saveApplication()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <a href="dashboard.html" class="nav-logo" style="font-size:1.1rem;">Resume<span
+                style="color:var(--accent)">AI</span></a>
+        <span>© <span id="footerYear"></span> ResumeAI</span>
+        <div style="display:flex;gap:20px;">
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <a href="contact_us.html">Contact</a>
+        </div>
+    </footer>
+    <div id="toast"></div>
+
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/requirepro.js"></script>
+    <script>
+        // API_BASE comes from script.js
+
+        let boardData = null;
+        let editingId = null;
+        let dragAppId = null;
+
+        function getToken() {
+            return localStorage.getItem('authToken');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!getToken()) { window.location.replace('index.html'); return; }
+            if (!requirePro()) return;   // ← redirects free users to pricing.html
+            document.getElementById('footerYear').textContent = new Date().getFullYear();
+            loadBoard();
+        });
+
+        // Asynchronous JavaScript function that loads data for a “job board” from an API and updates the UI.
+        async function loadBoard() {
+            try {
+                const res = await fetch(`${API_BASE}/jobs/board`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (res.status === 401) { window.location.replace('index.html'); return; }
+                if (!res.ok) throw new Error('Failed to load board.');
+                boardData = await res.json();
+                renderBoard();
+                renderStats();
+            } catch (e) {
+                document.getElementById('boardLoading').innerHTML =
+                    `<span style="color:var(--danger)">⚠ ${e.message}</span>`;
+            }
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('board');
+            const loading = document.getElementById('boardLoading');
+            board.innerHTML = '';
+
+            boardData.columns.forEach(col => {
+                const { stage, applications } = col;
+                const colEl = document.createElement('div');
+                colEl.className = 'column';
+                colEl.dataset.stageId = stage.id;
+                colEl.innerHTML = `
+            <div class="column-header">
+                <span class="column-title">${escHtml(stage.name)}</span>
+                <span class="column-count" id="count-${stage.id}">${applications.length}</span>
+            </div>
+            <div class="column-body" id="col-${stage.id}"
+                 ondragover="handleDragOver(event,${stage.id})"
+                 ondragleave="handleDragLeave(event,${stage.id})"
+                 ondrop="handleDrop(event,${stage.id})">
+                ${applications.length === 0
+                        ? `<div class="column-empty">Drop cards here</div>`
+                        : applications.map(app => buildCard(app)).join('')}
+            </div>`;
+                board.appendChild(colEl);
+            });
+
+            loading.style.display = 'none';
+            board.style.display = 'flex';
+        }
+
+        function buildCard(app) {
+            const date = app.applied_at ? formatDate(app.applied_at) : '';
+            const hasAction = app.next_action && app.next_action_due;
+            const actionHtml = hasAction ? `<span class="job-card-action">⏰ ${escHtml(app.next_action)}</span>` : '';
+            return `
+    <div class="job-card" id="card-${app.id}" draggable="true" ondragstart="handleDragStart(event,${app.id})">
+        <div class="job-card-actions">
+            <button class="card-action-btn" onclick="openEditModal(${app.id},event)" title="Edit">✏️</button>
+            <button class="card-action-btn del" onclick="confirmDelete(${app.id},event)" title="Delete">🗑</button>
+        </div>
+        <div class="job-card-company">${escHtml(app.company)}</div>
+        <div class="job-card-role">${escHtml(app.role)}</div>
+        <div class="job-card-meta">
+            ${date ? `<span class="job-card-date">📅 ${date}</span>` : ''}
+            ${actionHtml}
+            ${app.job_url ? `<a href="${escHtml(app.job_url)}" target="_blank" style="font-size:0.72rem;color:var(--accent);" onclick="event.stopPropagation()">↗ Link</a>` : ''}
+        </div>
+    </div>`;
+        }
+
+        function renderStats() {
+            let total = 0, applied = 0, interview = 0, offer = 0;
+            boardData.columns.forEach(col => {
+                total += col.applications.length;
+                const name = col.stage.name.toLowerCase();
+                if (name.includes('applied')) applied += col.applications.length;
+                if (name.includes('interview')) interview += col.applications.length;
+                if (name.includes('offer')) offer += col.applications.length;
+            });
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statApplied').textContent = applied;
+            document.getElementById('statInterview').textContent = interview;
+            document.getElementById('statOffer').textContent = offer;
+        }
+
+        function populateStageSelect(selectedId) {
+            const sel = document.getElementById('fStage');
+            sel.innerHTML = '';
+            boardData.columns.forEach(col => {
+                const opt = document.createElement('option');
+                opt.value = col.stage.id;
+                opt.textContent = col.stage.name;
+                if (col.stage.id === selectedId) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('modalTitle').textContent = 'Add Application';
+            clearModalFields();
+            populateStageSelect(boardData.columns[0]?.stage.id);
+            document.getElementById('fAppliedAt').value = new Date().toISOString().slice(0, 10);
+            openAppModal();
+        }
+
+        function openEditModal(appId, e) {
+            e.stopPropagation();
+            editingId = appId;
+            let app = null;
+            boardData.columns.forEach(col => {
+                col.applications.forEach(a => { if (a.id === appId) app = a; });
+            });
+            if (!app) return;
+            document.getElementById('modalTitle').textContent = 'Edit Application';
+            document.getElementById('fCompany').value = app.company || '';
+            document.getElementById('fRole').value = app.role || '';
+            document.getElementById('fUrl').value = app.job_url || '';
+            document.getElementById('fNextAction').value = app.next_action || '';
+            document.getElementById('fNotes').value = app.notes || '';
+            document.getElementById('fAppliedAt').value = app.applied_at ? app.applied_at.slice(0, 10) : '';
+            document.getElementById('fDueDate').value = app.next_action_due ? app.next_action_due.slice(0, 10) : '';
+            populateStageSelect(app.stage_id);
+            openAppModal();
+        }
+
+        function openAppModal() { document.getElementById('appModal').classList.add('show'); }
+        function closeAppModal() { document.getElementById('appModal').classList.remove('show'); clearModalError(); }
+        function handleAppModalClick(e) { if (e.target === document.getElementById('appModal')) closeAppModal(); }
+
+        function clearModalFields() {
+            ['fCompany', 'fRole', 'fUrl', 'fNextAction', 'fNotes', 'fAppliedAt', 'fDueDate'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+        function clearModalError() {
+            const el = document.getElementById('modalError');
+            el.style.display = 'none'; el.textContent = '';
+        }
+        function showModalError(msg) {
+            const el = document.getElementById('modalError');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        async function saveApplication() {
+            const company = document.getElementById('fCompany').value.trim();
+            const role = document.getElementById('fRole').value.trim();
+            if (!company) { showModalError('Company name is required.'); return; }
+            if (!role) { showModalError('Role is required.'); return; }
+
+            const payload = {
+                company,
+                role,
+                job_url: document.getElementById('fUrl').value.trim() || null,
+                stage_id: parseInt(document.getElementById('fStage').value),
+                applied_at: document.getElementById('fAppliedAt').value || null,
+                next_action: document.getElementById('fNextAction').value.trim() || null,
+                next_action_due: document.getElementById('fDueDate').value || null,
+                notes: document.getElementById('fNotes').value.trim() || null,
+            };
+
+            const btn = document.getElementById('modalSaveBtn');
+            btn.disabled = true; btn.textContent = 'Saving…';
+
+            try {
+                const url = editingId ? `${API_BASE}/jobs/applications/${editingId}` : `${API_BASE}/jobs/applications`;
+                const method = editingId ? 'PATCH' : 'POST';
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                    body: JSON.stringify(payload)
+                });
+                if (!res.ok) {
+                    const d = await res.json().catch(() => ({}));
+                    showModalError(d.detail || 'Failed to save. Please try again.');
+                    return;
+                }
+                closeAppModal();
+                await loadBoard();
+                showToast(editingId ? 'Application updated!' : 'Application added!', 'success');
+            } catch (e) {
+                showModalError('Network error. Please try again.');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Save';
+            }
+        }
+
+        async function confirmDelete(appId, e) {
+            e.stopPropagation();
+            if (!confirm('Delete this application?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/jobs/applications/${appId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (!res.ok) throw new Error('Failed to delete.');
+                await loadBoard();
+                showToast('Application deleted.', 'success');
+            } catch (e) {
+                showToast('Could not delete. Please try again.', 'error');
+            }
+        }
+
+        function handleDragStart(e, appId) {
+            dragAppId = appId;
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => {
+                const card = document.getElementById(`card-${appId}`);
+                if (card) card.classList.add('dragging');
+            }, 0);
+        }
+        function handleDragOver(e, stageId) {
+            e.preventDefault();
+            document.getElementById(`col-${stageId}`).classList.add('drag-over');
+        }
+        function handleDragLeave(e, stageId) {
+            document.getElementById(`col-${stageId}`).classList.remove('drag-over');
+        }
+        async function handleDrop(e, stageId) {
+            e.preventDefault();
+            document.getElementById(`col-${stageId}`).classList.remove('drag-over');
+            if (!dragAppId) return;
+            const card = document.getElementById(`card-${dragAppId}`);
+            if (card) card.classList.remove('dragging');
+            try {
+                const res = await fetch(`${API_BASE}/jobs/applications/${dragAppId}/move`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                    body: JSON.stringify({ stage_id: stageId })
+                });
+                if (!res.ok) throw new Error();
+                await loadBoard();
+            } catch (e) {
+                showToast('Could not move application.', 'error');
+            } finally {
+                dragAppId = null;
+            }
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '';
+            return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+        function escHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+
+</html>

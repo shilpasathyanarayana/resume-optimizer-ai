@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resume Optimizer — Upgrade to Pro</title>
+  <title>ResumeAI — Land Your Dream Job</title>
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
@@ -35,6 +35,19 @@
       background: var(--cream);
       color: var(--ink);
       min-height: 100vh;
+    }
+
+
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+
+    .nav-logo span {
+      color: var(--accent);
     }
 
     /* ── Header ── */
@@ -470,7 +483,8 @@
 <body>
 
   <header>
-    <div class="logo">Resume<span>AI</span></div>
+    <!-- <div class="logo">Resume<span>AI</span></div> -->
+    <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
     <!-- Updated dynamically from /api/auth/me -->
     <span class="badge-plan badge-free" id="plan-badge">Free Plan</span>
   </header>
@@ -522,10 +536,10 @@
           <li><span class="icon check">✓</span> Basic ATS score</li>
           <li><span class="icon check">✓</span> Download Optimised Resume</li>
           <li><span class="icon check">✓</span> PDF &amp; DOCX download</li>
-          <li><span class="icon cross">✕</span> <span style="color:var(--muted)">Unlimited</strong> resume
-              optimisations</span></li>
           <li><span class="icon cross">✕</span> <span style="color:var(--muted)">Priority AI processing</span></li>
           <li><span class="icon cross">✕</span> <span style="color:var(--muted)">Full Resume History</span></li>
+          <li><span class="icon cross">✕</span><span style="color:var(--muted)">Job Application Tracker</span></li>
+          <li><span class="icon cross">✕</span><span style="color:var(--muted)">Interview Prep</span></li>
         </ul>
         <a class="btn btn-outline" href="/dashboard.html">Continue free</a>
       </div>
@@ -548,6 +562,8 @@
           <li><span class="icon check">✓</span> PDF &amp; DOCX download</li>
           <li><span class="icon check">✓</span> Priority AI processing</li>
           <li><span class="icon check">✓</span> Full Resume History</li>
+          <li><span class="icon check">✓</span>Job Application Tracker</li>
+          <li><span class="icon check">✓</span>Interview Prep</li>
         </ul>
         <!-- Button state is set by initPage() based on current plan -->
         <button class="btn btn-gold" id="checkout-btn" onclick="startCheckout()">
@@ -586,6 +602,66 @@
     function getToken() {
       return localStorage.getItem('authToken');
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('pro_request') === 'true') {
+        showProRequestBanner();
+        // Clean the URL without reload
+        window.history.replaceState({}, '', 'pricing.html');
+      }
+    });
+
+    // function showProRequestBanner() {
+    //   const banner = document.createElement('div');
+    //   banner.id = 'proRequestBanner';
+    //   banner.style.cssText = `
+    //     position: fixed;
+    //     top: 80px;
+    //     left: 50%;
+    //     transform: translateX(-50%);
+    //     z-index: 999;
+    //     background: #1a7a4a;
+    //     color: white;
+    //     padding: 14px 24px;
+    //     border-radius: 12px;
+    //     font-size: 0.9rem;
+    //     font-weight: 500;
+    //     box-shadow: 0 8px 32px rgba(26,107,74,0.35);
+    //     display: flex;
+    //     align-items: center;
+    //     gap: 12px;
+    //     max-width: 480px;
+    //     width: calc(100% - 48px);
+    //     animation: slide-down 0.3s ease;
+    // `;
+    //   banner.innerHTML = `
+    //     <span style="font-size:1.2rem;">🔒</span>
+    //     <span>The Requested feature is available on <strong>Pro</strong>. Upgrade below to unlock it.</span>
+    //     <button onclick="this.parentElement.remove()" style="
+    //         background: rgba(255,255,255,0.2);
+    //         border: none;
+    //         color: white;
+    //         width: 24px;
+    //         height: 24px;
+    //         border-radius: 50%;
+    //         cursor: pointer;
+    //         font-size: 1rem;
+    //         display: flex;
+    //         align-items: center;
+    //         justify-content: center;
+    //         margin-left: auto;
+    //         flex-shrink: 0;
+    //     ">×</button>
+    // `;
+    //   document.body.appendChild(banner);
+
+    //   // Auto-dismiss after 10 seconds
+    //   // setTimeout(() => {
+    //   //   if (banner.parentElement) banner.remove();
+    //   // }, 10000);
+    // }
+
 
     // Shared fetch helper — injects Bearer token and handles 401 globally
     async function apiFetch(path, options = {}) {

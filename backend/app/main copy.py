@@ -22,14 +22,14 @@ from app.config import settings
 from app.database import engine, Base
 from app.routers.auth import router as auth_router
 from app.routers.resume import router as resume_router
+
 from app.routers.payment import router as payment_router
 from app.routers.resume_history import router as resume_history_router
 from app.routers.job_tracker import router as job_tracker_router
-from app.routers.interview import router as interview_router         # ← NEW
+from app.routers.interview import router as interview_router  
 
-import app.models.user       # noqa: F401 – registers ORM models with SQLAlchemy
-import app.models.interview  # noqa: F401 – registers InterviewQuestion model   ← NEW
-
+import app.models.user  # noqa: F401 – registers ORM models with SQLAlchemy
+import app.models.interview 
 
 # ── Lifespan: create tables on startup ───────────────────────────────────────
 @asynccontextmanager
@@ -85,25 +85,40 @@ app.add_middleware(
 )
 
 # ── Routers ───────────────────────────────────────────────────────────────────
+# ──────────────────────────────────────────────────────────────────────────────
+# Register all FastAPI routers here
+# Each router handles a specific module or feature of the application.
+# Use 'prefix' to define the URL namespace, and 'tags' to group routes in Swagger docs.
+# ──────────────────────────────────────────────────────────────────────────────
+
 # Auth module
-app.include_router(auth_router, prefix="/api")
+# Handles user authentication: login, token generation, password reset, etc.
+# Global prefix '/api' is applied, so routes will appear as '/api/auth/...'
+app.include_router(auth_router, prefix="/api")  
 
 # Resume Optimiser module
-app.include_router(resume_router)
+# Handles resume parsing, optimization, and related endpoints
+# No global prefix here, so endpoints use the router's own paths (e.g., '/resume/...') 
+# Define a prefix inside the router if you plan to include it multiple times with different prefixes.
+app.include_router(resume_router)  
 
 # Payment Gateway module
-app.include_router(payment_router, prefix="/api/payments", tags=["payments"])
+# Handles payments, subscriptions, and billing
+# Prefix '/api/payments' ensures all routes appear under '/api/payments/...'
+# 'tags' parameter organizes endpoints in Swagger under 'payments'
+app.include_router(payment_router, prefix="/api/payments", tags=["payments"])  
 
 # Resume Optimiser History module
-app.include_router(resume_history_router)
+# Handles user history for resume optimization actions
+# No global prefix, routes depend on router definition (e.g., '/resume/history/...') 
+# Define a prefix inside the router if you plan to include it multiple times with different prefixes.
+app.include_router(resume_history_router)  
 
 # Job Tracker module
-app.include_router(job_tracker_router)
-
-# Interview Prep module                                                         ← NEW
-# All routes are prefixed /api/interview inside the router itself,
-# so no extra prefix is needed here.
-app.include_router(interview_router)
+# Handles job applications, Kanban board, stages, etc.
+# Routes depend on the router prefix, e.g., '/jobs/...'
+# Define a prefix inside the router if you plan to include it multiple times with different prefixes.
+app.include_router(job_tracker_router)  
 
 # ── Health check ──────────────────────────────────────────────────────────────
 @app.get("/health", tags=["health"])

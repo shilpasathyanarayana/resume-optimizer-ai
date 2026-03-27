@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Settings — ResumeAI</title>
+    <title>ResumeAI — Land Your Dream Job</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
@@ -451,7 +451,10 @@
                         <button class="dropdown-item" onclick="goToMyResumes()">📄 History</button>
                         <button class="dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize
                             Resume</button>
-                            <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job Tracker</button>
+                        <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job
+                            Tracker</button>
+                        <button class="dropdown-item" onclick="window.location.href='interviewPrep.html'">📖 Interview
+                            Prep</button>
                         <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
                         <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
                     </div>
@@ -540,9 +543,87 @@
 
         <hr class="settings-divider" />
 
+
         <!-- ════════════════════════════════════════
-         SECTION 2 — DATA & PRIVACY
-    ════════════════════════════════════════ -->
+         SECTION 2 — User Job Profile
+        ════════════════════════════════════════ -->
+        <div class="settings-section">
+            <div class="settings-section-title">Job profile</div>
+            <div class="settings-section-desc">Update your Job title and preference</div>
+
+            <div class="settings-card">
+
+                <!-- Job Title -->
+                <div class="field-row" id="JobTitleRow">
+                    <div class="field-left">
+                        <div class="field-label">Job Title</div>
+                        <div class="field-value" id="JobTitleDisplay">—</div>
+                        <div class="field-edit-form" id="JobTitleForm">
+                            <input type="text" class="settings-input" id="JobTitleInput" placeholder="Your Job Title"
+                                maxlength="100" />
+                            <div class="field-feedback" id="JobTitleFeedback"></div>
+                            <div class="field-edit-actions">
+                                <button class="btn-save" id="JobTitleSaveBtn" onclick="saveJobTitle()">Save</button>
+                                <button class="btn-cancel" onclick="cancelEdit('JobTitle')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-edit" id="JobTitleEditBtn" onclick="openEdit('JobTitle')">Edit</button>
+                </div>
+
+                <!-- Experience level -->
+                <div class="field-row" id="ExperiencelevelRow">
+                    <div class="field-left">
+                        <div class="field-label">Experience level</div>
+                        <div class="field-value" id="ExperiencelevelDisplay">—</div>
+                        <div class="field-edit-form" id="ExperiencelevelForm">
+                            <select class="settings-input" id="ExperiencelevelInput">
+                                <option value="">Select level…</option>
+                                <option value="student">Student</option>
+                                <option value="fresher">Fresher</option>
+                                <option value="junior">Junior</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="senior">Senior</option>
+                            </select>
+                            <div class="field-feedback" id="ExperiencelevelFeedback"></div>
+                            <div class="field-edit-actions">
+                                <button class="btn-save" id="ExperiencelevelSaveBtn"
+                                    onclick="saveExperiencelevel()">Save</button>
+                                <button class="btn-cancel" onclick="cancelEdit('Experiencelevel')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-edit" id="ExperiencelevelEditBtn"
+                        onclick="openEdit('Experiencelevel')">Edit</button>
+                </div>
+
+
+                <!-- Location -->
+                <div class="field-row" id="LocationRow">
+                    <div class="field-left">
+                        <div class="field-label">Location</div>
+                        <div class="field-value" id="LocationDisplay">—</div>
+                        <div class="field-edit-form" id="LocationForm">
+                            <input type="text" class="settings-input" id="LocationInput" placeholder="Your Job Title"
+                                maxlength="100" />
+                            <div class="field-feedback" id="LocationFeedback"></div>
+                            <div class="field-edit-actions">
+                                <button class="btn-save" id="LocationSaveBtn" onclick="saveLocation()">Save</button>
+                                <button class="btn-cancel" onclick="cancelEdit('Location')">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-edit" id="LocationEditBtn" onclick="openEdit('Location')">Edit</button>
+                </div>
+
+            </div>
+        </div>
+
+        <hr class="settings-divider" />
+
+        <!-- ════════════════════════════════════════
+         SECTION 3 — DATA & PRIVACY
+        ════════════════════════════════════════ -->
         <div class="settings-section">
             <div class="settings-section-title">Data &amp; Privacy</div>
             <div class="settings-section-desc">Control your data. Export or permanently delete your information.</div>
@@ -660,7 +741,7 @@
 
         function getToken() { return localStorage.getItem('authToken'); }
 
-        function loadUserData() {
+        async function loadUserData() {
             // Populate from localStorage first (instant), then refresh from server if needed
             const raw = localStorage.getItem('userData');
             if (raw) {
@@ -674,6 +755,27 @@
                     document.getElementById('confirmEmailHint').textContent = u.email || 'your email';
                 } catch (e) { }
             }
+            // Load job profile from backend
+            try {
+                const res = await fetch(`${API_BASE}/auth/job-profile`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+
+                if (data.job_title) {
+                    document.getElementById('JobTitleDisplay').textContent = data.job_title;
+                    document.getElementById('JobTitleInput').value = data.job_title;
+                }
+                if (data.experience_level) {
+                    document.getElementById('ExperiencelevelDisplay').textContent = data.experience_level;
+                    document.getElementById('ExperiencelevelInput').value = data.experience_level;
+                }
+                if (data.location) {
+                    document.getElementById('LocationDisplay').textContent = data.location;
+                    document.getElementById('LocationInput').value = data.location;
+                }
+            } catch (e) { /* silently fail */ }
         }
 
         // ── EDIT TOGGLE ───────────────────────────────────────────────────────────────
@@ -808,6 +910,91 @@
                 setFeedback('password', 'error', 'Network error. Please try again.');
             } finally {
                 setBtnLoading('passwordSaveBtn', false);
+            }
+        }
+
+        // ── SAVE Job Title ─────────────────────────────────────────────────────────────────
+        async function saveJobTitle() {
+            const JobTitle = document.getElementById('JobTitleInput').value.trim();
+            if (!JobTitle) { setFeedback('JobTitle', 'error', 'JobTitle cannot be empty.'); return; }
+            if (JobTitle.length < 2) { setFeedback('JobTitle', 'error', 'JobTitle must be at least 2 characters.'); return; }
+
+            setBtnLoading('JobTitleSaveBtn', true);
+            try {
+                const res = await fetch(`${API_BASE}/auth/update-job-profile`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                    body: JSON.stringify({ JobTitle })
+                });
+                const data = await res.json();
+                if (!res.ok) { setFeedback('JobTitle', 'error', data.detail || 'Failed to update JobTitle.'); return; }
+
+                document.getElementById('JobTitleDisplay').textContent = JobTitle;
+                setFeedback('JobTitle', 'success', 'JobTitle updated successfully.');
+                setTimeout(() => cancelEdit('JobTitle'), 1200);
+
+            } catch (e) {
+                setFeedback('JobTitle', 'error', 'Network error. Please try again.');
+            } finally {
+                setBtnLoading('JobTitleSaveBtn', false);
+            }
+        }
+
+        // ── SAVE Experience Level ──────────────────────────────────────────────────
+        async function saveExperiencelevel() {
+            const value = document.getElementById('ExperiencelevelInput').value.trim();
+            if (!value) { setFeedback('Experiencelevel', 'error', 'Please select an experience level.'); return; }
+            const valid = ['student', 'fresher', 'junior', 'intermediate', 'senior'];
+            if (!value) { setFeedback('Experiencelevel', 'error', 'Please enter an experience level.'); return; }
+            if (!valid.includes(value.toLowerCase())) {
+                setFeedback('Experiencelevel', 'error', `Must be one of: ${valid.join(', ')}.`); return;
+            }
+
+            setBtnLoading('ExperiencelevelSaveBtn', true);
+            try {
+                const res = await fetch(`${API_BASE}/auth/update-job-profile`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                    body: JSON.stringify({ experience_level: value.toLowerCase() })
+                });
+                const data = await res.json();
+                if (!res.ok) { setFeedback('Experiencelevel', 'error', data.detail || 'Failed to update.'); return; }
+
+                document.getElementById('ExperiencelevelDisplay').textContent = value;
+                setFeedback('Experiencelevel', 'success', 'Experience level updated successfully.');
+                setTimeout(() => cancelEdit('Experiencelevel'), 1200);
+
+            } catch (e) {
+                setFeedback('Experiencelevel', 'error', 'Network error. Please try again.');
+            } finally {
+                setBtnLoading('ExperiencelevelSaveBtn', false);
+            }
+        }
+
+        // ── SAVE Location ──────────────────────────────────────────────────────────
+        async function saveLocation() {
+            const value = document.getElementById('LocationInput').value.trim();
+            if (!value) { setFeedback('Location', 'error', 'Location cannot be empty.'); return; }
+            if (value.length < 2) { setFeedback('Location', 'error', 'Location must be at least 2 characters.'); return; }
+
+            setBtnLoading('LocationSaveBtn', true);
+            try {
+                const res = await fetch(`${API_BASE}/auth/update-job-profile`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                    body: JSON.stringify({ location: value })
+                });
+                const data = await res.json();
+                if (!res.ok) { setFeedback('Location', 'error', data.detail || 'Failed to update.'); return; }
+
+                document.getElementById('LocationDisplay').textContent = value;
+                setFeedback('Location', 'success', 'Location updated successfully.');
+                setTimeout(() => cancelEdit('Location'), 1200);
+
+            } catch (e) {
+                setFeedback('Location', 'error', 'Network error. Please try again.');
+            } finally {
+                setBtnLoading('LocationSaveBtn', false);
             }
         }
 

@@ -54,6 +54,26 @@ CREATE TABLE IF NOT EXISTS user_login_log (
 
 
 -- ============================================================
+--  User Profiles
+--  Stores users job title,location and experience level- 
+--  user can have multile job profiles.
+-- ============================================================
+
+CREATE TABLE user_profiles (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+
+    job_title VARCHAR(150),
+    experience_level ENUM('student','fresher','junior','intermediate','senior'),
+    location VARCHAR(150),
+
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ============================================================
 --  RESUMES
 --  Stores each resume optimization job
 -- ============================================================
@@ -146,4 +166,76 @@ CREATE TABLE IF NOT EXISTS subscriptions (
         FOREIGN KEY (user_id) REFERENCES users (id)
         ON DELETE CASCADE ON UPDATE CASCADE
 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- JOB Tracker
+CREATE TABLE IF NOT EXISTS job_stages (
+    id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    user_id     INT UNSIGNED NOT NULL,
+
+    name        VARCHAR(100) NOT NULL,       -- e.g. Applied, Interview Scheduled
+    position    INT UNSIGNED NOT NULL,       -- order in Kanban board
+
+    is_default  TINYINT(1) DEFAULT 1,
+
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+    KEY idx_stage_user (user_id),
+
+    CONSTRAINT fk_stage_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS job_applications (
+    id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    user_id         INT UNSIGNED NOT NULL,
+
+    company         VARCHAR(255) NOT NULL,
+    role            VARCHAR(255) NOT NULL,
+    job_url         VARCHAR(500) NULL,
+
+    stage_id        INT UNSIGNED NOT NULL,   -- current Kanban column
+    description TEXT NULL,
+    applied_at      DATETIME NULL,
+    next_action     VARCHAR(255) NULL,
+    next_action_due DATETIME NULL,
+
+    notes           TEXT NULL,
+
+    created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+
+    KEY idx_app_user (user_id),
+    KEY idx_app_stage (stage_id),
+
+    CONSTRAINT fk_app_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_app_stage
+        FOREIGN KEY (stage_id) REFERENCES job_stages(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS interview_questions (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    job_application_id INT UNSIGNED NOT NULL,
+    question TEXT NOT NULL,
+    user_answer TEXT NULL,
+    ai_feedback TEXT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    PRIMARY KEY (id),
+    CONSTRAINT fk_question_job_app
+        FOREIGN KEY (job_application_id) REFERENCES job_applications(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

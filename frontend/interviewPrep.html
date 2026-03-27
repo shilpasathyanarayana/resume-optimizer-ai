@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ResumeAI — Interview Prep</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    <script src="assets/js/script.js"></script>
+    <script src="assets/js/requirepro.js"></script>
+    <style>
+        body { padding-top: 80px; }
+        .page-wrapper { max-width: 1100px; margin: 0 auto; padding: 48px 24px 100px; }
+
+        /* HEADER */
+        .dashboard-header { margin-bottom: 40px; }
+        .dashboard-eyebrow { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+        .dashboard-title { font-family: 'DM Serif Display', serif; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -0.02em; color: var(--ink); margin-bottom: 8px; }
+        .dashboard-subtitle { font-size: 0.95rem; color: var(--muted); }
+
+        /* SETUP CARD */
+        .setup-card { background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 28px; }
+        .setup-card-title { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+        /* JD TEXTAREA */
+        .jd-textarea {
+            font-family: inherit; font-size: 0.875rem; color: var(--ink);
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px 14px; width: 100%;
+            min-height: 160px; resize: vertical; outline: none;
+            line-height: 1.6; box-sizing: border-box;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .jd-textarea:focus { border-color: var(--accent); background: var(--white); }
+        .jd-textarea::placeholder { color: var(--muted); }
+
+        /* GENERATE ROW */
+        .generate-row { display: flex; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+        .generate-hint { font-size: 0.82rem; color: var(--muted); flex: 1; min-width: 160px; }
+        .btn-generate {
+            font-family: inherit; font-size: 0.88rem; font-weight: 600;
+            padding: 10px 22px; border-radius: 10px; border: none;
+            background: var(--accent); color: white; cursor: pointer;
+            transition: opacity 0.15s; display: flex; align-items: center; gap: 8px; white-space: nowrap;
+        }
+        .btn-generate:hover { opacity: 0.88; }
+        .btn-generate:disabled { opacity: 0.45; cursor: not-allowed; }
+
+        /* PROGRESS */
+        .progress-bar-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 20px; margin-bottom: 28px; display: none; }
+        .progress-bar-wrap.show { display: block; }
+        .progress-label { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .progress-track { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.4s ease; }
+
+        /* SECTION HEADER */
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .section-heading { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--ink); letter-spacing: -0.01em; }
+        .question-count { font-size: 0.8rem; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; }
+
+        /* QUESTION CARD */
+        .question-list { display: flex; flex-direction: column; gap: 16px; }
+        .question-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.18s, box-shadow 0.18s; }
+        .question-card:hover { border-color: #d0d5dd; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+        .question-card.has-feedback { border-color: var(--accent); }
+        .question-header { padding: 18px 20px 16px; display: flex; align-items: flex-start; gap: 12px; }
+        .question-number { width: 28px; height: 28px; background: var(--accent-light); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+        .question-text { font-size: 0.95rem; font-weight: 600; color: var(--ink); line-height: 1.5; flex: 1; }
+        .question-body { padding: 0 20px 20px; }
+        .answer-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+        .answer-textarea {
+            font-family: inherit; font-size: 0.88rem; color: var(--ink);
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px 14px; width: 100%;
+            min-height: 100px; resize: vertical; outline: none;
+            transition: border-color 0.15s, background 0.15s;
+            box-sizing: border-box; line-height: 1.6;
+        }
+        .answer-textarea:focus { border-color: var(--accent); background: var(--white); }
+        .answer-textarea::placeholder { color: var(--muted); }
+
+        /* FEEDBACK */
+        .feedback-box { margin-top: 14px; background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border: 1px solid #a7f3d0; border-radius: 10px; padding: 14px 16px; display: none; }
+        .feedback-box.show { display: block; }
+        .feedback-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .feedback-badge { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #065f46; background: #d1fae5; padding: 2px 8px; border-radius: 20px; }
+        .feedback-text { font-size: 0.88rem; color: #065f46; line-height: 1.65; white-space: pre-wrap; }
+
+        /* SUBMIT ALL ROW */
+        .submit-all-row { display: flex; justify-content: flex-end; margin-top: 24px; }
+
+        /* SPINNER */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner { width: 13px; height: 13px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+
+        /* SKELETON */
+        .skeleton-list { display: flex; flex-direction: column; gap: 16px; }
+        .skeleton-card { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .skeleton-block { background: var(--surface); border-radius: 6px; animation: shimmer 1.4s infinite; }
+        @keyframes shimmer { 0%,100% { opacity:1; } 50% { opacity:0.45; } }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 64px 24px; background: var(--surface); border: 1px dashed var(--border); border-radius: 16px; }
+        .empty-icon { font-size: 2.5rem; margin-bottom: 16px; }
+        .empty-title { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--ink); margin-bottom: 8px; }
+        .empty-desc { font-size: 0.9rem; color: var(--muted); max-width: 360px; margin: 0 auto 24px; line-height: 1.7; }
+
+        /* ERROR BANNER */
+        .error-banner { background: #fdf0ef; border: 1px solid #f5c6c2; border-radius: 12px; padding: 16px 20px; color: var(--danger); font-size: 0.9rem; display: none; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .error-banner.show { display: flex; }
+
+        @media (max-width: 640px) {
+            .generate-row { flex-direction: column; align-items: flex-start; }
+            .submit-all-row { justify-content: stretch; }
+            .submit-all-row .btn-generate { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
+        <div class="nav-right">
+            <div id="userNav" style="display:none;">
+                <div class="user-menu-wrap">
+                    <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">?</div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <div class="user-email">
+                            <strong id="dropdownName">—</strong>
+                            <span id="dropdownEmail">—</span>
+                        </div>
+                        <button class="dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize Resume</button>
+                        <button class="dropdown-item" onclick="goToMyResumes()">📄 History</button>
+                        <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job Tracker</button>
+                        <button class="dropdown-item" onclick="window.location.href='interviewPrep.html'">📖 Interview Prep</button>
+                        <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
+                        <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-wrapper" data-pro-content>
+
+        <div class="dashboard-header">
+            <div class="dashboard-eyebrow">Pro Feature</div>
+            <h1 class="dashboard-title">Interview Prep</h1>
+            <p class="dashboard-subtitle" id="headerSubtitle">Paste a job description to generate tailored interview questions.</p>
+        </div>
+
+        <!-- SETUP CARD -->
+        <div class="setup-card">
+            <div class="setup-card-title">Job Description</div>
+            <textarea
+                class="jd-textarea"
+                id="pasteTextarea"
+                placeholder="Paste the full job description here — AI will generate tailored interview questions for this role."
+                rows="7"
+                oninput="onPasteInput()"
+            ></textarea>
+            <div class="generate-row">
+                <span class="generate-hint">Paste a job description above and click Generate to get started.</span>
+                <button class="btn-generate" id="generateBtn" onclick="generateQuestions()" disabled>
+                    ✨ Generate Questions
+                </button>
+            </div>
+        </div>
+
+        <!-- ERROR BANNER -->
+        <div class="error-banner" id="errorBanner">
+            <span>⚠️</span>
+            <span id="errorMsg">Something went wrong. Please try again.</span>
+        </div>
+
+        <!-- PROGRESS -->
+        <div class="progress-bar-wrap" id="progressWrap">
+            <div class="progress-label">
+                <span>Feedback received</span>
+                <span id="progressText">0 / 0</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width:0%"></div>
+            </div>
+        </div>
+
+        <!-- CONTENT AREA -->
+        <div id="contentArea">
+
+            <!-- SKELETON -->
+            <div class="skeleton-list" id="skeletonLoader" style="display:none;">
+                <div class="skeleton-card">
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        <div class="skeleton-block" style="width:28px;height:28px;border-radius:8px;flex-shrink:0;"></div>
+                        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+                            <div class="skeleton-block" style="height:14px;width:70%;"></div>
+                            <div class="skeleton-block" style="height:14px;width:45%;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-block" style="height:80px;border-radius:10px;"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        <div class="skeleton-block" style="width:28px;height:28px;border-radius:8px;flex-shrink:0;"></div>
+                        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+                            <div class="skeleton-block" style="height:14px;width:60%;"></div>
+                            <div class="skeleton-block" style="height:14px;width:38%;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-block" style="height:80px;border-radius:10px;"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        <div class="skeleton-block" style="width:28px;height:28px;border-radius:8px;flex-shrink:0;"></div>
+                        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+                            <div class="skeleton-block" style="height:14px;width:55%;"></div>
+                            <div class="skeleton-block" style="height:14px;width:40%;"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-block" style="height:80px;border-radius:10px;"></div>
+                </div>
+            </div>
+
+            <div id="questionList"></div>
+
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">📖</div>
+                <div class="empty-title">Ready when you are</div>
+                <p class="empty-desc">Paste a job description above and click <strong>Generate Questions</strong> to get started.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <a href="dashboard.html" class="nav-logo" style="font-size:1.1rem;">Resume<span style="color:var(--accent)">AI</span></a>
+        <span>© <span id="footerYear"></span> ResumeAI</span>
+        <div style="display:flex;gap:20px;">
+            <a href="privacy.html">Privacy</a>
+            <a href="terms.html">Terms</a>
+            <a href="contact_us.html">Contact</a>
+        </div>
+    </footer>
+
+    <script>
+        // ── STATE ─────────────────────────────────────────────────────────────
+        let questionsCache = [];  // { question, ai_feedback? }[]
+
+        function getToken()    { return localStorage.getItem('authToken'); }
+        function authHeaders() { return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }; }
+
+        // ── INIT ──────────────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = getToken();
+            if (!token) { window.location.replace('index.html'); return; }
+            if (!requirePro()) return;
+            document.getElementById('footerYear').textContent = new Date().getFullYear();
+        });
+
+        // ── PASTE INPUT ───────────────────────────────────────────────────────
+        function onPasteInput() {
+            const val = document.getElementById('pasteTextarea').value.trim();
+            document.getElementById('generateBtn').disabled = !val;
+        }
+
+        // ── GENERATE QUESTIONS ────────────────────────────────────────────────
+        async function generateQuestions() {
+            const description = document.getElementById('pasteTextarea').value.trim();
+            if (!description) return;
+
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Generating…';
+            showSkeleton();
+            clearError();
+
+            try {
+                const res = await fetch('/api/interview/generate-from-description', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: JSON.stringify({ description }),
+                });
+                if (!res.ok) {
+                    const e = await res.json().catch(() => ({}));
+                    throw new Error(e.detail || `Server error ${res.status}`);
+                }
+                const questions = await res.json();
+                questionsCache = questions;
+                hideSkeleton();
+                renderQuestions(questions);
+                document.getElementById('headerSubtitle').textContent =
+                    `${questions.length} tailored question${questions.length !== 1 ? 's' : ''} generated — answer as many as you like, then submit.`;
+            } catch (err) {
+                hideSkeleton();
+                showError(`Failed to generate questions: ${err.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '✨ Regenerate Questions';
+                onPasteInput();
+            }
+        }
+
+        // ── RENDER QUESTIONS ──────────────────────────────────────────────────
+        function renderQuestions(questions) {
+            const list = document.getElementById('questionList');
+            list.innerHTML = '';
+            document.getElementById('emptyState').style.display = 'none';
+
+            // Section header
+            const header = document.createElement('div');
+            header.className = 'section-header';
+            header.innerHTML = `
+                <h2 class="section-heading">Interview Questions</h2>
+                <span class="question-count">${questions.length} questions</span>`;
+            list.appendChild(header);
+
+            // Question cards
+            const qList = document.createElement('div');
+            qList.className = 'question-list';
+            questions.forEach((q, idx) => qList.appendChild(buildCard(q, idx)));
+            list.appendChild(qList);
+
+            // Single submit-all button at bottom
+            const submitRow = document.createElement('div');
+            submitRow.className = 'submit-all-row';
+            submitRow.innerHTML = `
+                <button class="btn-generate" id="submitAllBtn" onclick="submitAll()" disabled>
+                    ✨ Submit All &amp; Get Feedback
+                </button>`;
+            list.appendChild(submitRow);
+
+            document.getElementById('progressWrap').classList.add('show');
+            updateProgress();
+        }
+
+        // ── BUILD CARD ────────────────────────────────────────────────────────
+        function buildCard(q, idx) {
+            const card = document.createElement('div');
+            card.className = `question-card${q.ai_feedback ? ' has-feedback' : ''}`;
+            card.id = `card-${idx}`;
+
+            card.innerHTML = `
+                <div class="question-header">
+                    <div class="question-number">Q${idx + 1}</div>
+                    <div class="question-text">${escHtml(q.question)}</div>
+                </div>
+                <div class="question-body">
+                    <div class="answer-label">Your Answer</div>
+                    <textarea class="answer-textarea" id="answer-${idx}"
+                        placeholder="Write your answer here… (tip: use the STAR method)"
+                    >${escHtml(q.user_answer || '')}</textarea>
+                    <div class="feedback-box ${q.ai_feedback ? 'show' : ''}" id="feedback-${idx}">
+                        <div class="feedback-header">
+                            <span>🤖</span>
+                            <span class="feedback-badge">AI Feedback</span>
+                        </div>
+                        <div class="feedback-text">${escHtml(q.ai_feedback || '')}</div>
+                    </div>
+                </div>`;
+
+            // Enable submit-all button as soon as any textarea has content
+            card.querySelector('.answer-textarea').addEventListener('input', () => {
+                const anyAnswered = questionsCache.some((_, i) =>
+                    document.getElementById(`answer-${i}`)?.value.trim()
+                );
+                const btn = document.getElementById('submitAllBtn');
+                if (btn) btn.disabled = !anyAnswered;
+            });
+
+            return card;
+        }
+
+        // ── SUBMIT ALL ────────────────────────────────────────────────────────
+        async function submitAll() {
+            const btn = document.getElementById('submitAllBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Getting feedback…';
+            clearError();
+
+            // Fire all answered questions in parallel
+            const promises = questionsCache.map(async (q, idx) => {
+                const answer = document.getElementById(`answer-${idx}`)?.value.trim();
+                if (!answer) return; // skip unanswered questions
+
+                const feedbackBox = document.getElementById(`feedback-${idx}`);
+                const card        = document.getElementById(`card-${idx}`);
+
+                try {
+                    const res = await fetch('/api/interview/review-answer', {
+                        method: 'POST',
+                        headers: authHeaders(),
+                        body: JSON.stringify({ question: q.question, answer }),
+                    });
+                    if (!res.ok) {
+                        const e = await res.json().catch(() => ({}));
+                        throw new Error(e.detail || res.status);
+                    }
+                    const data = await res.json();
+
+                    // Update cache & UI
+                    questionsCache[idx].ai_feedback = data.ai_feedback;
+                    feedbackBox.querySelector('.feedback-text').textContent = data.ai_feedback;
+                    feedbackBox.classList.add('show');
+                    card.classList.add('has-feedback');
+                } catch (err) {
+                    feedbackBox.querySelector('.feedback-text').textContent = `⚠ Could not get feedback: ${err.message}`;
+                    feedbackBox.classList.add('show');
+                }
+            });
+
+            await Promise.all(promises);
+
+            updateProgress();
+            btn.disabled = false;
+            btn.innerHTML = '✨ Resubmit &amp; Refresh Feedback';
+        }
+
+        // ── PROGRESS ──────────────────────────────────────────────────────────
+        function updateProgress() {
+            const total    = questionsCache.length;
+            const reviewed = questionsCache.filter(q => q.ai_feedback).length;
+            const pct      = total ? Math.round((reviewed / total) * 100) : 0;
+            document.getElementById('progressText').textContent = `${reviewed} / ${total}`;
+            document.getElementById('progressFill').style.width  = `${pct}%`;
+        }
+
+        // ── SKELETON ──────────────────────────────────────────────────────────
+        function showSkeleton() {
+            document.getElementById('questionList').innerHTML = '';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('progressWrap').classList.remove('show');
+            const s = document.getElementById('skeletonLoader');
+            s.style.display = 'flex';
+            s.style.flexDirection = 'column';
+        }
+        function hideSkeleton() {
+            document.getElementById('skeletonLoader').style.display = 'none';
+        }
+
+        // ── ERROR ─────────────────────────────────────────────────────────────
+        function showError(msg) {
+            document.getElementById('errorMsg').textContent = msg;
+            document.getElementById('errorBanner').classList.add('show');
+            setTimeout(() => document.getElementById('errorBanner').classList.remove('show'), 6000);
+        }
+        function clearError() {
+            document.getElementById('errorBanner').classList.remove('show');
+        }
+
+        // ── UTILS ─────────────────────────────────────────────────────────────
+        function escHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

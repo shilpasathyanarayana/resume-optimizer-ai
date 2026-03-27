@@ -45,6 +45,7 @@ from app.services.stripe_service import (
     handle_webhook_event,
 )
 
+# No prefix is defined here since the prefix are defained at main.py
 router = APIRouter()
 
 

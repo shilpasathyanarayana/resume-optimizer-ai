@@ -1,0 +1,73 @@
+<!-- sidebar.html -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="dashboard.html" class="sidebar-logo">Resume<span>AI</span></a>
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+  </div>
+  
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Main</span>
+      <a href="dashboard.html" class="sidebar-item" data-page="dashboard">
+        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-text">Dashboard</span>
+      </a>
+      <a href="optimize.html" class="sidebar-item" data-page="optimize">
+        <span class="sidebar-icon">✨</span>
+        <span class="sidebar-text">Optimize Resume</span>
+      </a>
+      <a href="history.html" class="sidebar-item" data-page="history">
+        <span class="sidebar-icon">📄</span>
+        <span class="sidebar-text">History</span>
+      </a>
+    </div>
+    
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Tools</span>
+      <a href="jobTracker.html" class="sidebar-item" data-page="jobTracker">
+        <span class="sidebar-icon">📬</span>
+        <span class="sidebar-text">Job Tracker</span>
+      </a>
+      <a href="interviewPrep.html" class="sidebar-item" data-page="interviewPrep">
+        <span class="sidebar-icon">📖</span>
+        <span class="sidebar-text">Interview Prep</span>
+      </a>
+    </div>
+    
+    <div class="sidebar-section">
+      <span class="sidebar-section-label">Account</span>
+      <a href="settings.html" class="sidebar-item" data-page="settings">
+        <span class="sidebar-icon">⚙️</span>
+        <span class="sidebar-text">Settings</span>
+      </a>
+    </div>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <div class="sidebar-user" id="sidebarUser">
+      <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+      <div class="sidebar-user-info">
+        <span class="sidebar-user-name" id="sidebarUserName">—</span>
+        <span class="sidebar-user-plan" id="sidebarUserPlan">Free</span>
+      </div>
+    </div>
+    <button class="sidebar-item sidebar-logout" onclick="logout()">
+      <span class="sidebar-icon">↩</span>
+      <span class="sidebar-text">Log out</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Mobile hamburger button (for navbar) -->
+<button class="sidebar-hamburger" id="sidebarHamburger" onclick="toggleSidebar()" aria-label="Open menu">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M3 12h18M3 6h18M3 18h18"/>
+  </svg>
+</button>

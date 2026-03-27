@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ResumeAI — Land Your Dream Job</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/main.css" />
   <script src="assets/js/script.js" defer></script>
 </head>
@@ -17,7 +19,7 @@
   <nav id="navbar">
     <a href="#" class="nav-logo">Resume<span>AI</span></a>
     <div class="nav-right">
-      <span class="nav-free-badge" id="freeCounter" style="display:none;"></span>
+      <!-- <span class="nav-free-badge" id="freeCounter" style="display:none;"></span> -->
       <div id="guestNav" style="display:flex;align-items:center;gap:8px;">
         <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
         <button class="btn btn-primary" onclick="openModal('signup')">Get started free</button>
@@ -104,12 +106,14 @@
       <div class="feature-card">
         <div class="feature-icon">🔍</div>
         <h3>Keyword Gap Analysis</h3>
-        <p>Instantly see which keywords from the job description are missing from your resume — and where to add them.</p>
+        <p>Instantly see which keywords from the job description are missing from your resume — and where to add them.
+        </p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">✍️</div>
         <h3>AI Resume Rewriting</h3>
-        <p>Our AI rewrites your bullet points and summary to match the role's language without fabricating experience.</p>
+        <p>Our AI rewrites your bullet points and summary to match the role's language without fabricating experience.
+        </p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">📥</div>
@@ -124,7 +128,8 @@
       <div class="feature-card">
         <div class="feature-icon">⚡</div>
         <h3>Fast Processing</h3>
-        <p>Results arrive in under 30 seconds thanks to async AI processing — no waiting around on a spinning screen.</p>
+        <p>Results arrive in under 30 seconds thanks to async AI processing — no waiting around on a spinning screen.
+        </p>
       </div>
     </div>
   </section>
@@ -159,6 +164,8 @@
             <li>Priority AI processing</li>
             <li>Cover letter generator</li>
             <li>Multiple resume profiles</li>
+            <li>Job Application Tracker</li>
+            <li>Interview Prep</li>
           </ul>
           <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="openModal('signup')">
             Upgrade to Pro
@@ -171,7 +178,9 @@
   <!-- ── FOOTER ── -->
   <footer>
     <span class="nav-logo" style="font-size:1.1rem;">Resume<span style="color:var(--accent)">AI</span></span>
-    <span>© <script>document.write(new Date().getFullYear())</script> ResumeAI</span>
+    <span>©
+      <script>document.write(new Date().getFullYear())</script> ResumeAI
+    </span>
     <div style="display:flex;gap:20px;">
       <a href="/privacy.html">Privacy</a>
       <a href="terms.html">Terms</a>
@@ -196,12 +205,14 @@
         <form onsubmit="handleLogin(event)" novalidate>
           <div class="form-group">
             <label class="form-label" for="loginEmail">Email address</label>
-            <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" required />
+            <input class="form-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email"
+              required />
             <div class="form-error" id="loginEmailError">Please enter a valid email address.</div>
           </div>
           <div class="form-group">
             <label class="form-label" for="loginPassword">Password</label>
-            <input class="form-input" type="password" id="loginPassword" placeholder="Your password" autocomplete="current-password" required />
+            <input class="form-input" type="password" id="loginPassword" placeholder="Your password"
+              autocomplete="current-password" required />
             <div class="form-error" id="loginPasswordError">Password is required.</div>
           </div>
           <button type="submit" class="form-submit" id="loginBtn">
@@ -211,7 +222,8 @@
         </form>
         <div class="form-divider">or</div>
         <p style="text-align:center;font-size:0.84rem;color:var(--muted)">
-          Don't have an account? <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500" onclick="switchTab('signup');return false;">Sign up free →</a>
+          Don't have an account? <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500"
+            onclick="switchTab('signup');return false;">Sign up free →</a>
         </p>
       </div>
 
@@ -221,18 +233,23 @@
         <form onsubmit="handleSignup(event)" novalidate>
           <div class="form-group">
             <label class="form-label" for="signupName">Full name</label>
-            <input class="form-input" type="text" id="signupName" placeholder="Alex Johnson" autocomplete="name" required />
+            <input class="form-input" type="text" id="signupName" placeholder="Alex Johnson" autocomplete="name"
+              required />
             <div class="form-error" id="signupNameError">Please enter your name.</div>
           </div>
           <div class="form-group">
             <label class="form-label" for="signupEmail">Email address</label>
-            <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email" required />
+            <input class="form-input" type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email"
+              required />
             <div class="form-error" id="signupEmailError">Please enter a valid email address.</div>
           </div>
           <div class="form-group">
             <label class="form-label" for="signupPassword">Password</label>
-            <input class="form-input" type="password" id="signupPassword" placeholder="At least 8 characters" autocomplete="new-password" required oninput="checkStrength(this.value)" />
-            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            <input class="form-input" type="password" id="signupPassword" placeholder="At least 8 characters"
+              autocomplete="new-password" required oninput="checkStrength(this.value)" />
+            <div class="strength-bar">
+              <div class="strength-fill" id="strengthFill"></div>
+            </div>
             <div class="strength-label" id="strengthLabel"></div>
             <div class="form-error" id="signupPasswordError">Password must be at least 8 characters.</div>
           </div>
@@ -243,7 +260,8 @@
         </form>
         <div class="form-divider">or</div>
         <p style="text-align:center;font-size:0.84rem;color:var(--muted)">
-          Already have an account? <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500" onclick="switchTab('login');return false;">Log in →</a>
+          Already have an account? <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500"
+            onclick="switchTab('login');return false;">Log in →</a>
         </p>
       </div>
     </div>
@@ -261,4 +279,5 @@
   </script>
 
 </body>
+
 </html>

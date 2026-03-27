@@ -293,7 +293,7 @@ The AI is prompted to act as a professional resume consultant and return structu
 | `ALLOWED_ORIGINS` | CORS allowed origins |
 | `APP_ENV` | `development` or `production` |
 
-See `.env` file for full configuration. **Never commit `.env` to version control.**
+See `.env.example` file for full configuration.
 
 ---
 

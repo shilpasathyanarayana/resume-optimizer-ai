@@ -226,11 +226,11 @@ function checkStrength(val) {
   if (/[^A-Za-z0-9]/.test(val)) score++;
 
   const levels = [
-    { pct: 0,   color: 'transparent', text: '' },
-    { pct: 25,  color: '#e74c3c',     text: 'Weak' },
-    { pct: 50,  color: '#f39c12',     text: 'Fair' },
-    { pct: 75,  color: '#3498db',     text: 'Good' },
-    { pct: 100, color: '#27ae60',     text: 'Strong' },
+    { pct: 0, color: 'transparent', text: '' },
+    { pct: 25, color: '#e74c3c', text: 'Weak' },
+    { pct: 50, color: '#f39c12', text: 'Fair' },
+    { pct: 75, color: '#3498db', text: 'Good' },
+    { pct: 100, color: '#27ae60', text: 'Strong' },
   ];
 
   const lvl = val.length === 0 ? levels[0] : (levels[score] || levels[1]);
@@ -391,6 +391,46 @@ function showToast(msg, type = '') {
 }
 
 // ── CONTACT FORM ──────────────────────────────────────────────────
+// function initContactForm() {
+//   const form = document.getElementById('contactForm');
+//   if (!form) return;
+
+//   form.addEventListener('submit', async (e) => {
+//     e.preventDefault();
+//     clearFormErrors();
+
+//     const name = document.getElementById('contactName').value.trim();
+//     const email = document.getElementById('contactEmail').value.trim();
+//     const subject = document.getElementById('contactSubject').value;
+//     const message = document.getElementById('contactMessage').value.trim();
+//     let valid = true;
+
+//     if (!name) { showFieldError('contactNameError', 'Please enter your name.'); valid = false; }
+//     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showFieldError('contactEmailError', 'Please enter a valid email address.'); valid = false; }
+//     if (!subject) { showFieldError('contactSubjectError', 'Please select a subject.'); valid = false; }
+//     if (!message || message.length < 10) { showFieldError('contactMessageError', 'Please enter a message (at least 10 characters).'); valid = false; }
+//     if (!valid) return;
+
+//     setButtonLoading('contactBtn', true);
+
+//     try {
+//       const res = await fetch(`${API_BASE}/contact`, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ name, email, subject, message })
+//       });
+//       if (!res.ok) throw new Error('Failed to send message.');
+//       document.getElementById('contactFormFields').style.display = 'none';
+//       document.getElementById('contactSuccess').classList.add('visible');
+//     } catch (err) {
+//       showToast("Message sent! We'll be in touch soon. ✉️", 'success');
+//       form.reset();
+//     } finally {
+//       setButtonLoading('contactBtn', false);
+//     }
+//   });
+// }
+
 function initContactForm() {
   const form = document.getElementById('contactForm');
   if (!form) return;
@@ -414,19 +454,34 @@ function initContactForm() {
     setButtonLoading('contactBtn', true);
 
     try {
-      const res = await fetch(`${API_BASE}/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, subject, message })
+      // Make sure keys match your EmailJS template
+      await emailjs.send('service_kvpquvr', 'template_95xxlyw', {
+        contactName: name,
+        contactEmail: email,
+        contactMessage: message,
+        contactSubject: subject // optional, if you want it in the email
       });
-      if (!res.ok) throw new Error('Failed to send message.');
+
+      // Show success UI
       document.getElementById('contactFormFields').style.display = 'none';
       document.getElementById('contactSuccess').classList.add('visible');
-    } catch (err) {
-      showToast("Message sent! We'll be in touch soon. ✉️", 'success');
       form.reset();
+    } catch (error) {
+      showToast('Failed to send message. Please try again.', 'error');
+      console.error('EmailJS error:', error);
     } finally {
       setButtonLoading('contactBtn', false);
     }
   });
 }
+
+// prevent user from accesing pro feature
+// function requirePro(redirectUrl = 'pricing.html?pro_request=true') {
+//     const raw  = localStorage.getItem('userData');
+//     const plan = raw ? JSON.parse(raw).plan : 'free';
+//     if (plan !== 'pro') {
+//         window.location.replace(redirectUrl);
+//         return false;
+//     }
+//     return true;
+// }

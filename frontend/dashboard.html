@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — ResumeAI</title>
+  <title>ResumeAI — Land Your Dream Job</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
@@ -423,9 +423,10 @@
               <strong id="dropdownName">—</strong>
               <span id="dropdownEmail">—</span>
             </div>
-            <button class="dropdown-item" onclick="goToMyResumes()"">📄 History</button>
             <button class=" dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize Resume</button>
+            <button class="dropdown-item" onclick="goToMyResumes()">📄 History</button>
             <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job Tracker</button>
+            <button class="dropdown-item" onclick="window.location.href='interviewPrep.html'">📖 Interview Prep</button>
             <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
             <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
           </div>
@@ -439,7 +440,11 @@
     <!-- ── WELCOME HEADER ── -->
     <div class="dashboard-header">
       <div class="dashboard-eyebrow">Dashboard</div>
-      <h1 class="dashboard-title">Welcome back, <span id="welcomeName">—</span> 👋</h1>
+      <h1 class="dashboard-title">
+        <!-- for first time login welcome - else welcome back -->
+        <span id="welcomeText">Welcome,</span>
+        <span id="welcomeName">—</span> 👋
+      </h1>
       <p class="dashboard-subtitle">Here's an overview of your resume optimization activity.</p>
     </div>
 
@@ -492,7 +497,7 @@
       <div class="stat-card">
         <div class="stat-label">Avg ATS Score</div>
         <div class="stat-value" id="statAvgScore">—</div>
-        <div class="stat-desc">Across all resumes</div>
+        <div class="stat-desc">across all submissions</div>
       </div>
       <div class="stat-card" id="planStatCard">
         <div class="stat-label">Plan</div>
@@ -624,6 +629,16 @@
         const cached = JSON.parse(userData);
         if (cached.name) {
           document.getElementById('welcomeName').textContent = cached.name.split(' ')[0];
+        }
+        // Check first login
+        const hasLoggedInBefore = localStorage.getItem('hasLoggedInBefore');
+        const titleElement = document.querySelector('.dashboard-title');
+
+        if (hasLoggedInBefore) {
+          titleElement.innerHTML = `Welcome back, <span id="welcomeName">${cached.name.split(' ')[0]}</span> 👋`;
+        } else {
+          titleElement.innerHTML = `Welcome, <span id="welcomeName">${cached.name.split(' ')[0]}</span> 👋`;
+          localStorage.setItem('hasLoggedInBefore', 'true');
         }
       } catch (e) { }
 

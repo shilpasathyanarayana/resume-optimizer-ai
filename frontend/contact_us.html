@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contact Us — ResumeAI</title>
+  <title>ResumeAI — Land Your Dream Job</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
@@ -31,7 +31,8 @@
             <button class="dropdown-item" onclick="goToMyResumes()">📄 History</button>
             <button class="dropdown-item" onclick="window.location.href='optimize.html'">✨ Optimize
               Resume</button>
-              <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job Tracker</button>
+            <button class="dropdown-item" onclick="window.location.href='jobTracker.html'">📬 Job Tracker</button>
+            <button class="dropdown-item" onclick="window.location.href='interviewPrep.html'">📖 Interview Prep</button>
             <button class="dropdown-item" onclick="goToSettings()">⚙️ Settings</button>
             <button class="dropdown-item danger" onclick="logout()">↩ Log out</button>
           </div>
@@ -121,25 +122,25 @@
 
         <!-- Form fields -->
         <div id="contactFormFields">
-          <form id="contactForm" novalidate>
+          <form id="contactForm">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
               <div class="form-group">
                 <label class="form-label" for="contactName">Full name</label>
-                <input class="form-input" type="text" id="contactName" placeholder="Alex Johnson" autocomplete="name"
-                  required />
+                <input class="form-input" type="text" name="contactName" id="contactName" placeholder="Alex Johnson"
+                  autocomplete="name" required />
                 <div class="form-error" id="contactNameError">Please enter your name.</div>
               </div>
               <div class="form-group">
                 <label class="form-label" for="contactEmail">Email address</label>
-                <input class="form-input" type="email" id="contactEmail" placeholder="you@example.com"
-                  autocomplete="email" required />
+                <input class="form-input" type="email" name="contactEmail" id="contactEmail"
+                  placeholder="you@example.com" autocomplete="email" required />
                 <div class="form-error" id="contactEmailError">Please enter a valid email.</div>
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="contactSubject">Subject</label>
-              <select class="form-select" id="contactSubject" required>
+              <select class="form-select" name="contactSubject" id="contactSubject" required>
                 <option value="">Select a topic…</option>
                 <option value="general">General enquiry</option>
                 <option value="bug">Bug report</option>
@@ -153,8 +154,8 @@
 
             <div class="form-group">
               <label class="form-label" for="contactMessage">Message</label>
-              <textarea class="form-textarea" id="contactMessage" placeholder="Tell us what's on your mind…"
-                required></textarea>
+              <textarea class="form-textarea" name="contactMessage" id="contactMessage"
+                placeholder="Tell us what's on your mind…" required></textarea>
               <div class="form-error" id="contactMessageError">Please enter a message (at least 10 characters).</div>
             </div>
 
@@ -162,7 +163,7 @@
               Send message
               <div class="spinner"></div>
             </button>
-
+            <p id="statusMessage" style="font-weight:600; margin-top: 10px;"></p>
             <p style="font-size:0.78rem;color:var(--muted);margin-top:12px;line-height:1.6;">
               By submitting this form you agree to our
               <a href="privacy.html" style="color:var(--accent);text-decoration:none;">Privacy Policy</a>.
@@ -259,6 +260,46 @@
 
   <div class="toast" id="toast"></div>
   <script src="assets/js/script.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script>
+    (function () {
+      emailjs.init("s33D2aXAbFfvgjX_z"); // your public key
+    })();
+  </script>
+  <!-- <script>
+    const form = document.getElementById("contactForm");
+    const statusMessage = document.getElementById("statusMessage");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      console.log("sendEmail called!");
+      console.log("form:", form);
+
+      statusMessage.innerText = "Sending...";
+      statusMessage.style.color = "black";
+
+      emailjs.sendForm(
+        "service_kvpquvr",
+        "template_rr6kxrs",
+        form
+      )
+        .then(function (result) {
+          console.log("Email sent:", result.text);
+
+          statusMessage.innerText = "Email sent successfully!";
+          statusMessage.style.color = "green";
+
+          form.reset();
+        })
+        .catch(function (error) {
+          console.log("Email error:", error);
+
+          statusMessage.innerText = "Failed: " + JSON.stringify(error);
+          statusMessage.style.color = "red";
+        });
+    });
+  </script> -->
 </body>
 
 </html>

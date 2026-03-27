@@ -286,9 +286,85 @@ async def delete_account(
  
     # Delete in dependency order to respect FK constraints
     await db.execute(text("DELETE FROM resumes       WHERE user_id = :id"), {"id": user_id})
-    await db.execute(text("DELETE FROM user_login_logs WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM user_login_log WHERE user_id = :id"), {"id": user_id})
     await db.execute(text("DELETE FROM subscriptions WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM job_applications WHERE user_id = :id"), {"id": user_id})
+    await db.execute(text("DELETE FROM job_stages WHERE user_id = :id"), {"id": user_id})
     await db.execute(text("DELETE FROM users          WHERE id      = :id"), {"id": user_id})
     await db.commit()
  
     return {"message": "Account deleted successfully."}
+
+
+# ── GET JOB PROFILE ───────────────────────────────────────────────────────────
+
+@router.get("/job-profile")
+async def get_job_profile(
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        text("SELECT job_title, experience_level, location FROM user_profiles WHERE user_id = :uid"),
+        {"uid": current_user.id}
+    )
+    row = result.fetchone()
+    if not row:
+        return {"job_title": None, "experience_level": None, "location": None}
+    return {"job_title": row.job_title, "experience_level": row.experience_level, "location": row.location}
+
+
+# ── UPDATE JOB PROFILE ────────────────────────────────────────────────────────
+
+@router.patch("/update-job-profile")
+async def update_job_profile(
+    request: Request,
+    current_user: CurrentUser = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    body = await request.json()
+
+    job_title        = body.get("job_title") or body.get("JobTitle")
+    experience_level = body.get("experience_level")
+    location         = body.get("location")
+
+    if not any([job_title, experience_level, location]):
+        raise HTTPException(status_code=422, detail="Nothing to update.")
+
+    valid_levels = {"student", "fresher", "junior", "intermediate", "senior"}
+    if experience_level and experience_level not in valid_levels:
+        raise HTTPException(status_code=422, detail=f"experience_level must be one of: {', '.join(valid_levels)}")
+
+    # Upsert — insert if no profile exists, update if it does
+    result = await db.execute(
+        text("SELECT id FROM user_profiles WHERE user_id = :uid"),
+        {"uid": current_user.id}
+    )
+    exists = result.fetchone()
+
+    if exists:
+        # Build dynamic update
+        fields, params = [], {"uid": current_user.id}
+        if job_title:        fields.append("job_title = :job_title");               params["job_title"]        = job_title
+        if experience_level: fields.append("experience_level = :experience_level"); params["experience_level"] = experience_level
+        if location:         fields.append("location = :location");                 params["location"]         = location
+
+        await db.execute(
+            text(f"UPDATE user_profiles SET {', '.join(fields)} WHERE user_id = :uid"),
+            params
+        )
+    else:
+        await db.execute(
+            text("""
+                INSERT INTO user_profiles (user_id, job_title, experience_level, location)
+                VALUES (:uid, :job_title, :experience_level, :location)
+            """),
+            {
+                "uid":              current_user.id,
+                "job_title":        job_title,
+                "experience_level": experience_level,
+                "location":         location,
+            }
+        )
+
+    await db.commit()
+    return {"message": "Profile updated successfully."}
