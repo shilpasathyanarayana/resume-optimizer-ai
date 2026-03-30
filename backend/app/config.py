@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     DB_USER: str = "root"
     DB_PASSWORD: str = ""
 
+    ADMIN_EMAILS: str = "" 
     # ── JWT ────────────────────────────────────────────────────────
     SECRET_KEY: str = "change-me-in-production-please"   # override via .env
     ALGORITHM: str = "HS256"

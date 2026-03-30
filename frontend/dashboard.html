@@ -522,6 +522,9 @@
     <!-- ── RECENT OPTIMIZATIONS ── -->
     <div class="section-header">
       <h2 class="section-heading">Recent Optimizations</h2>
+      <a href="resume_history.html" style="font-size:0.85rem;color:var(--accent);font-weight:500;text-decoration:none;">
+        View all →
+      </a>
     </div>
 
     <div class="empty-state" id="emptyState">
@@ -645,8 +648,8 @@
       // ── Load usage + subscription status ──────────────────────────
       try {
         const [usageRes, subRes] = await Promise.all([
-          fetch('/api/resume/usage', { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch('/api/payments/status', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/resume/usage`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/payments/status`, { headers: { 'Authorization': `Bearer ${token}` } }),
         ]);
 
         if (usageRes.status === 401) {
@@ -749,78 +752,145 @@
     }
 
     function applyUsageUI(data) {
-      const used = data.uses_this_month || 0;
-      const limit = data.limit || 5;
-      const remaining = data.uses_remaining ?? (limit - used);
-      const isPro = data.is_pro === true;          // ← was checking data.plan string
-      const pct = isPro ? 0 : Math.min((used / limit) * 100, 100);
+  const used = data.uses_this_month ?? 0;
+  const limit = data.limit || 5;
+  const remaining = data.uses_remaining ?? (limit - used);
+  const isPro = data.is_pro === true;
+  const pct = isPro ? 0 : Math.min((used / limit) * 100, 100);
 
-      document.getElementById('statMonth').textContent = used;
-      document.getElementById('statTotal').textContent = data.total_uses ?? used;
+  // ── Stats row ────────────────────────────────────────────
+  document.getElementById('statMonth').textContent = used;
 
-      if (!isPro) {
-        document.getElementById('usageText').innerHTML =
-          remaining <= 0
-            ? `<strong style="color:var(--danger)">No optimizations left — <a href="pricing.html" style="color:var(--accent)">upgrade to Pro</a></strong>`
-            : `<strong>${remaining} of ${limit}</strong> optimizations remaining`;
+  if (data.total_uses != null) {
+    document.getElementById('statTotal').textContent = data.total_uses;
+  }
+  if (data.avg_ats_score != null) {
+    document.getElementById('statAvgScore').textContent = data.avg_ats_score + '%';
+  }
 
-        document.getElementById('usageBarFill').style.width = pct + '%';
-        if (remaining <= 0) {
-          document.getElementById('usageBarFill').style.background = 'var(--danger)';
-        }
+  // ── Usage banner (free users) ────────────────────────────
+  if (!isPro) {
+    document.getElementById('statMonthDesc').textContent = `of ${limit} free uses`;
 
-        if (data.resets_at) {
-          const resetDate = new Date(data.resets_at).toLocaleDateString('en-US', {
-            month: 'long', day: 'numeric'
-          });
-          document.getElementById('usageResetText').textContent = `Resets on ${resetDate}`;
-        }
-      }
+    document.getElementById('usageText').innerHTML =
+      remaining <= 0
+        ? `<strong style="color:var(--danger)">No optimizations left — <a href="pricing.html" style="color:var(--accent)">upgrade to Pro</a></strong>`
+        : `<strong>${remaining} of ${limit}</strong> optimizations remaining`;
 
-      document.getElementById('statAvgScore').textContent = data.avg_ats_score ?? '—';
+    document.getElementById('usageBarFill').style.width = pct + '%';
+    if (remaining <= 0) {
+      document.getElementById('usageBarFill').style.background = 'var(--danger)';
     }
 
-
-    async function loadResumeHistory() {
-      const token = getToken();
-      try {
-        const res = await fetch('/api/resume/history', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        const items = data.items || data.resumes || data || [];
-
-        if (items.length === 0) return;
-
-        document.getElementById('emptyState').style.display = 'none';
-        document.getElementById('resumeList').style.display = 'flex';
-
-        document.getElementById('resumeList').innerHTML = items.map(item => {
-          const score = item.ats_score ?? 0;
-          const scoreClass = score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
-          const date = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-          return `
-            <div class="resume-item">
-              <div class="resume-item-left">
-                <div class="resume-item-icon">📄</div>
-                <div class="resume-item-info">
-                  <div class="resume-item-title">${item.job_title || 'Optimized Resume'}</div>
-                  <div class="resume-item-meta">${date}</div>
-                </div>
-              </div>
-              <span class="resume-item-score ${scoreClass}">ATS ${score}</span>
-            </div>`;
-        }).join('');
-
-      } catch (e) { /* silently fail — empty state stays */ }
+    if (data.resets_at) {
+      const resetDate = new Date(data.resets_at).toLocaleDateString('en-US', {
+        month: 'long', day: 'numeric'
+      });
+      document.getElementById('usageResetText').textContent = `Resets on ${resetDate}`;
     }
+  } else {
+    document.getElementById('statMonthDesc').textContent = 'unlimited';
+    document.getElementById('usageBanner').style.display = 'none';
+  }
+}
+
+async function loadResumeHistory() {
+  const token = getToken();
+  try {
+    const res = await fetch(`${API_BASE}/resume/history`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (res.status === 401) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      window.location.replace('index.html');
+      return;
+    }
+
+    if (!res.ok) {
+      console.error('History fetch failed:', res.status);
+      return;
+    }
+
+    const data = await res.json();
+    const items = Array.isArray(data) ? data : data.resumes || data.items || [];
+
+    // ── Derive stats from history as fallback ─────────────
+    const totalEl = document.getElementById('statTotal');
+    if (totalEl.textContent === '—') {
+      totalEl.textContent = items.length;
+    }
+
+    const scored = items.filter(r => r.ats_score != null);
+    const avgEl = document.getElementById('statAvgScore');
+    if (avgEl.textContent === '—' && scored.length) {
+      const avg = Math.round(scored.reduce((s, r) => s + r.ats_score, 0) / scored.length);
+      avgEl.textContent = avg + '%';
+    }
+
+    // ── This month count fallback ─────────────────────────
+    const monthEl = document.getElementById('statMonth');
+    if (monthEl.textContent === '—') {
+      const now = new Date();
+      const thisMonth = items.filter(r => {
+        const d = new Date(r.created_at);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }).length;
+      monthEl.textContent = thisMonth;
+    }
+
+    if (items.length === 0) return;
+
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('resumeList').style.display = 'flex';
+
+    const recent = items.slice(0, 5);
+
+    document.getElementById('resumeList').innerHTML = recent.map(item => {
+      const score = item.ats_score;
+      const hasScore = score != null;
+      const scoreClass = !hasScore ? '' : score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+      const date = new Date(item.created_at).toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric'
+      });
+      const title = item.original_filename || item.job_title || 'Optimised Resume';
+      const jobTitle = item.job_title || 'Job title not specified';
+
+      return `
+        <div class="resume-item" style="cursor:pointer;">
+          <div class="resume-item-left">
+            <div class="resume-item-icon">📄</div>
+            <div class="resume-item-info">
+              <div class="resume-item-title">${escHtml(title)}</div>
+              <div class="resume-item-meta">${escHtml(jobTitle)} · ${date}</div>
+            </div>
+          </div>
+          ${hasScore
+            ? `<span class="resume-item-score ${scoreClass}">ATS ${score}%</span>`
+            : `<span class="resume-item-score" style="color:var(--muted);background:var(--surface);">No score</span>`
+          }
+        </div>`;
+    }).join('');
+
+  } catch (e) {
+    console.warn('Resume history load error:', e);
+  }
+}
+
+function escHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
     async function openBillingPortal(e) {
       if (e) e.preventDefault();
       const token = getToken();
       try {
-        const res = await fetch('/api/payments/portal', {
+        const res = await fetch(`${API_BASE}/payments/portal`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });

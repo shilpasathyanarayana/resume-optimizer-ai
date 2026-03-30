@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResumeAI — Users</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ── DESIGN TOKENS (mirrors main.css) ── */
+    :root {
+      --accent: #1a7a4a;
+      --accent-light: #e8f5ee;
+      --ink: #111827;
+      --muted: #6b7280;
+      --surface: #f9fafb;
+      --white: #ffffff;
+      --border: #e5e7eb;
+      --danger: #dc2626;
+      --danger-bg: #fdf0ef;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+      padding-top: 80px;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    #navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 999;
+    }
+
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+
+    .nav-logo span {
+      color: var(--accent);
+    }
+
+    .nav-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .nav-back {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s;
+    }
+
+    .nav-back:hover {
+      color: var(--ink);
+    }
+
+    /* ── WRAPPER ── */
+    .page-wrapper {
+      /* max-width: 1100px; */
+      margin: 0 auto;
+      padding: 48px 24px 100px;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 40px;
+    }
+
+    .page-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .page-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .page-subtitle {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .stat-value.accent {
+      color: var(--accent);
+    }
+
+    .stat-value.gold {
+      color: #c9a84c;
+    }
+
+    .stat-desc {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 34px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--white);
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-input::placeholder {
+      color: var(--muted);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .filter-select {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--white);
+      font-family: inherit;
+      font-size: 0.88rem;
+      color: var(--ink);
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .filter-select:focus {
+      border-color: var(--accent);
+    }
+
+    .result-count {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* ── TABLE CARD ── */
+    .table-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .users-table thead {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .users-table th {
+      padding: 12px 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+    }
+
+    .users-table th:hover {
+      color: var(--ink);
+    }
+
+    .users-table th .sort-arrow {
+      display: inline-block;
+      margin-left: 4px;
+      opacity: 0.4;
+      font-style: normal;
+      font-size: 0.65rem;
+    }
+
+    .users-table th.sorted .sort-arrow {
+      opacity: 1;
+      color: var(--accent);
+    }
+
+    .users-table td {
+      padding: 14px 20px;
+      font-size: 0.88rem;
+      color: var(--ink);
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .users-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .users-table tbody tr {
+      transition: background 0.12s;
+    }
+
+    .users-table tbody tr:hover {
+      background: var(--surface);
+    }
+
+    /* ── USER CELL ── */
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .user-avatar-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+
+    .user-name {
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .user-id {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .badge-pro {
+      background: #fef9ec;
+      color: #c9a84c;
+    }
+
+    .badge-free {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .badge-active {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .badge-inactive {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .badge-verified {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .badge-unverified {
+      background: #f3f4f6;
+      color: var(--muted);
+    }
+
+    /* ── EMAIL CELL ── */
+    .email-text {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    /* ── DATE CELL ── */
+    .date-text {
+      color: var(--muted);
+      font-size: 0.83rem;
+    }
+
+    /* ── ACTIONS ── */
+    .action-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 5px 10px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .action-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .action-btn.danger:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* ── LOADING & EMPTY ── */
+    .state-row td {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--muted);
+    }
+
+    .loading-dots span {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin: 0 3px;
+      animation: bounce 1.2s infinite ease-in-out;
+    }
+
+    .loading-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .loading-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+      }
+
+      30% {
+        transform: translateY(-8px);
+      }
+    }
+
+    .empty-icon-big {
+      font-size: 2.2rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .empty-label {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .empty-hint {
+      font-size: 0.85rem;
+    }
+
+    /* ── PAGINATION ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .page-info {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .page-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .page-btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .page-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* ── ERROR BANNER ── */
+    .error-banner {
+      background: var(--danger-bg);
+      border: 1px solid #fca5a5;
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 0.88rem;
+      color: var(--danger);
+      margin-bottom: 24px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .error-banner.show {
+      display: flex;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 0.83rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    footer a:hover {
+      color: var(--ink);
+    }
+
+    .badge-sub-active {
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .badge-sub-trial {
+      background: #ede9fe;
+      color: #7c3aed;
+    }
+
+    .badge-sub-due {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .badge-sub-cancel {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .badge-sub-inactive {
+      background: #f3f4f6;
+      color: var(--muted);
+    }
+
+    /* ── USAGE MINI BAR ── */
+    .usage-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .usage-num {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .usage-mini-track {
+      flex: 1;
+      max-width: 60px;
+      height: 5px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .usage-mini-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .hide-mobile {
+        display: none;
+      }
+
+      .stats-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .users-table th,
+      .users-table td {
+        padding: 12px 14px;
+      }
+
+      .toolbar {
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── NAV ── -->
+  <nav id="navbar">
+    <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
+    <span class="nav-pill">Admin</span>
+    <a href="dashboard.html" class="nav-back">← Back to Dashboard</a>
+  </nav>
+
+  <div class="page-wrapper">
+
+    <!-- ── HEADER ── -->
+    <div class="page-header">
+      <div class="page-eyebrow">Admin Panel</div>
+      <h1 class="page-title">Users</h1>
+      <p class="page-subtitle">Manage all registered accounts on the platform.</p>
+    </div>
+
+    <!-- ── ERROR ── -->
+    <div class="error-banner" id="errorBanner">
+      <span>⚠️</span>
+      <span id="errorMsg">Failed to load users. Please try again.</span>
+    </div>
+
+    <!-- ── STATS ── -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value accent" id="statTotal">—</div>
+        <div class="stat-desc">all time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pro Users</div>
+        <div class="stat-value gold" id="statPro">—</div>
+        <div class="stat-desc">active subscriptions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active</div>
+        <div class="stat-value accent" id="statActive">—</div>
+        <div class="stat-desc">enabled accounts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Verified</div>
+        <div class="stat-value" id="statVerified">—</div>
+        <div class="stat-desc">email confirmed</div>
+      </div>
+    </div>
+
+    <!-- ── TOOLBAR ── -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" type="text" id="searchInput" placeholder="Search by name or email…"
+          oninput="applyFilters()" />
+      </div>
+      <select class="filter-select" id="filterPlan" onchange="applyFilters()">
+        <option value="">All plans</option>
+        <option value="pro">Pro</option>
+        <option value="free">Free</option>
+      </select>
+      <select class="filter-select" id="filterStatus" onchange="applyFilters()">
+        <option value="">All statuses</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+      <select class="filter-select" id="filterVerified" onchange="applyFilters()">
+        <option value="">All verified</option>
+        <option value="yes">Verified</option>
+        <option value="no">Unverified</option>
+      </select>
+      <select class="filter-select" id="filterSubStatus" onchange="applyFilters()">
+        <option value="">All sub states</option>
+        <option value="active">Active</option>
+        <option value="trialing">Trialing</option>
+        <option value="past_due">Past Due</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="inactive">None</option>
+      </select>
+      <span class="result-count" id="resultCount"></span>
+    </div>
+
+    <!-- ── TABLE ── -->
+    <div class="table-card">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th onclick="sortBy('name')" id="th-name">
+              User <span class="sort-arrow" id="arr-name">▼</span>
+            </th>
+            <th onclick="sortBy('email')" id="th-email" class="hide-mobile">
+              Email <span class="sort-arrow" id="arr-email">▼</span>
+            </th>
+            <th onclick="sortBy('plan')" id="th-plan">
+              Plan <span class="sort-arrow" id="arr-plan">▼</span>
+            </th>
+            <th onclick="sortBy('is_active')" id="th-is_active" class="hide-mobile">
+              Status <span class="sort-arrow" id="arr-is_active">▼</span>
+            </th>
+            <th onclick="sortBy('is_verified')" id="th-is_verified" class="hide-mobile">
+              Verified <span class="sort-arrow" id="arr-is_verified">▼</span>
+            </th>
+            <th onclick="sortBy('monthly_usage')" id="th-monthly_usage" class="hide-mobile">
+              Usage <span class="sort-arrow" id="arr-monthly_usage">▼</span>
+            </th>
+            <th onclick="sortBy('subscription_status')" id="th-subscription_status" class="hide-mobile">
+              Sub Status <span class="sort-arrow" id="arr-subscription_status">▼</span>
+            </th>
+            <th onclick="sortBy('created_at')" id="th-created_at">
+              Joined <span class="sort-arrow" id="arr-created_at">▼</span>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr class="state-row">
+            <td colspan="9">
+              <div class="loading-dots">
+                <span></span><span></span><span></span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination" id="paginationBar" style="display:none;">
+        <span class="page-info" id="pageInfo"></span>
+        <div class="page-btns" id="pageBtns"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <a href="dashboard.html" class="nav-logo" style="font-size:1.1rem;">Resume<span
+        style="color:var(--accent)">AI</span></a>
+    <span>© <span id="footerYear"></span> ResumeAI — Admin</span>
+    <div style="display:flex;gap:20px;">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+    </div>
+  </footer>
+
+  <script src="assets/js/script.js"></script>
+  <script>
+    /* ── CONFIG ── */
+    // // Matches your FastAPI prefix: app.include_router(admin_router) → /api/admin/users
+    // const API_BASE = typeof window.API_BASE !== 'undefined'
+    //   ? window.API_BASE
+    //   : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    //       ? 'http://localhost:8000/api'
+    //       : '/api');
+
+    const PAGE_SIZE = 20;
+
+    /* ── STATE ── */
+    let allUsers = [];
+    let filteredUsers = [];
+    let currentPage = 1;
+    let sortKey = 'created_at';
+    let sortAsc = false;
+
+    /* ── AVATAR COLOURS ── */
+    const AVATAR_COLORS = [
+      ['#e8f5ee', '#1a7a4a'], ['#fef9ec', '#c9a84c'],
+      ['#ede9fe', '#7c3aed'], ['#fdf0ef', '#dc2626'],
+      ['#e0f2fe', '#0369a1'], ['#fce7f3', '#be185d'],
+    ];
+
+    function avatarColors(name) {
+      let h = 0;
+      for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffffffff;
+      return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+    }
+
+    function initials(name) {
+      return (name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    }
+
+    /* ── FETCH ── */
+    function getToken() {
+      return localStorage.getItem('authToken');
+    }
+
+    async function loadUsers() {
+      const token = getToken();
+      if (!token) {
+        window.location.replace('index.html');
+        return;
+      }
+
+      try {
+        // GET /api/admin/users → AdminUsersResponse { total, users: AdminUserRow[] }
+        // Router guards: 401 = not logged in, 403 = not in ADMIN_EMAILS
+        const res = await fetch(`${API_BASE}/admin/users?limit=500`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.status === 401) {
+          window.location.replace('index.html');
+          return;
+        }
+
+        if (res.status === 403) {
+          showError('Access denied. Your account is not in the admin list.');
+          renderEmpty('🔒', 'Access Denied', 'You do not have permission to view this page.');
+          return;
+        }
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.detail || `HTTP ${res.status}`);
+        }
+
+        // AdminUsersResponse: { total: int, users: AdminUserRow[] }
+        // AdminUserRow fields are already flat — no nesting to unwrap.
+        const data = await res.json();
+        allUsers = (data.users || []).map(u => ({
+          ...u,
+          // TINYINT(1) comes back as 0/1 from MySQL — coerce to bool
+          is_active: Boolean(u.is_active),
+          is_verified: Boolean(u.is_verified),
+          is_pro: Boolean(u.is_pro),
+          cancel_at_period_end: Boolean(u.cancel_at_period_end),
+          monthly_usage: u.monthly_usage ?? 0,
+          // Guarantee subscription fields have a fallback
+          subscription_plan: u.subscription_plan || 'free',
+          subscription_status: u.subscription_status || 'inactive',
+        }));
+
+        computeStats();
+        applyFilters();
+
+      } catch (err) {
+        console.error('Admin load error:', err);
+        showError('Failed to load users: ' + err.message);
+        renderEmpty('⚠️', 'Load Failed', 'Check your connection and try again.');
+      }
+    }
+
+    /* ── STATS ── */
+    function computeStats() {
+      const pro = allUsers.filter(u => u.is_pro).length;
+      const active = allUsers.filter(u => u.is_active).length;
+      const verified = allUsers.filter(u => u.is_verified).length;
+
+      document.getElementById('statTotal').textContent = allUsers.length;
+      document.getElementById('statPro').textContent = pro;
+      document.getElementById('statActive').textContent = active;
+      document.getElementById('statVerified').textContent = verified;
+    }
+
+    /* ── FILTERS ── */
+    function applyFilters() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      const plan = document.getElementById('filterPlan').value;
+      const status = document.getElementById('filterStatus').value;
+      const verified = document.getElementById('filterVerified').value;
+      const subSt = document.getElementById('filterSubStatus').value;
+
+      filteredUsers = allUsers.filter(u => {
+        if (q && !u.name?.toLowerCase().includes(q) && !u.email?.toLowerCase().includes(q)) return false;
+        if (plan === 'pro' && !u.is_pro) return false;
+        if (plan === 'free' && u.is_pro) return false;
+        if (status === 'active' && !u.is_active) return false;
+        if (status === 'inactive' && u.is_active) return false;
+        if (verified === 'yes' && !u.is_verified) return false;
+        if (verified === 'no' && u.is_verified) return false;
+        if (subSt && u.subscription_status !== subSt) return false;
+        return true;
+      });
+
+      sortFiltered();
+    }
+
+    /* ── SORT ── */
+    function sortBy(key) {
+      if (sortKey === key) sortAsc = !sortAsc;
+      else { sortKey = key; sortAsc = true; }
+      sortFiltered();
+    }
+
+    function sortFiltered() {
+      filteredUsers.sort((a, b) => {
+        let va = a[sortKey], vb = b[sortKey];
+        if (typeof va === 'boolean') va = va ? 1 : 0;
+        if (typeof vb === 'boolean') vb = vb ? 1 : 0;
+        if (va == null) va = '';
+        if (vb == null) vb = '';
+        if (va < vb) return sortAsc ? -1 : 1;
+        if (va > vb) return sortAsc ? 1 : -1;
+        return 0;
+      });
+
+      // Update sort arrow indicators
+      document.querySelectorAll('.users-table th').forEach(th => th.classList.remove('sorted'));
+      const activeTh = document.getElementById(`th-${sortKey}`);
+      if (activeTh) activeTh.classList.add('sorted');
+      document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '▼');
+      const activeArr = document.getElementById(`arr-${sortKey}`);
+      if (activeArr) activeArr.textContent = sortAsc ? '▲' : '▼';
+
+      currentPage = 1;
+      renderPage();
+    }
+
+    /* ── RENDER ── */
+    function renderPage() {
+      const total = filteredUsers.length;
+      const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      currentPage = Math.min(currentPage, pages);
+
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const slice = filteredUsers.slice(start, start + PAGE_SIZE);
+
+      const countEl = document.getElementById('resultCount');
+      countEl.textContent = total === allUsers.length
+        ? `${total} user${total !== 1 ? 's' : ''}`
+        : `${total} of ${allUsers.length} users`;
+
+      if (slice.length === 0) {
+        renderEmpty('🔍', 'No users found', 'Try adjusting your search or filters.');
+        document.getElementById('paginationBar').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('tableBody').innerHTML = slice.map(u => renderRow(u)).join('');
+      renderPagination(total, pages);
+    }
+
+    function renderRow(u) {
+      const [bg, fg] = avatarColors(u.name || '?');
+      const joined = new Date(u.created_at).toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'short', year: 'numeric'
+      });
+
+      // ── Subscription status badge ──────────────────────────────
+      const subStatus = u.subscription_status || (u.is_pro ? 'active' : 'inactive');
+      const subStatusBadge = {
+        active: `<span class="badge badge-sub-active">● Active</span>`,
+        trialing: `<span class="badge badge-sub-trial">◐ Trial</span>`,
+        past_due: `<span class="badge badge-sub-due">⚠ Past Due</span>`,
+        cancelled: `<span class="badge badge-sub-cancel">✕ Cancelled</span>`,
+        inactive: `<span class="badge badge-sub-inactive">— None</span>`,
+      }[subStatus] || `<span class="badge badge-sub-inactive">${escHtml(subStatus)}</span>`;
+
+      // Subscription plan label
+      const planLabel = {
+        pro_monthly: 'Pro Monthly',
+        pro_yearly: 'Pro Yearly',
+        free: 'Free',
+      }[u.subscription_plan] || (u.is_pro ? 'Pro' : 'Free');
+
+      // Period end tooltip
+      let periodTip = '';
+      if (u.current_period_end) {
+        const d = new Date(u.current_period_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        periodTip = u.cancel_at_period_end ? `Cancels ${d}` : `Renews ${d}`;
+      }
+
+      // ── Monthly usage bar ──────────────────────────────────────
+      const usage = u.monthly_usage ?? 0;
+      const limit = u.is_pro ? null : 5;
+      const usagePct = limit ? Math.min((usage / limit) * 100, 100) : 0;
+      const usageColor = !limit ? 'var(--accent)' : usagePct >= 100 ? 'var(--danger)' : usagePct >= 80 ? '#d97706' : 'var(--accent)';
+
+      const usageCell = limit
+        ? `<div class="usage-cell">
+             <span class="usage-num">${usage}/${limit}</span>
+             <div class="usage-mini-track"><div class="usage-mini-fill" style="width:${usagePct}%;background:${usageColor}"></div></div>
+           </div>`
+        : `<div class="usage-cell"><span class="usage-num">${usage}</span><span style="font-size:0.72rem;color:var(--muted);margin-left:4px;">∞</span></div>`;
+
+      return `
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="user-avatar-circle" style="background:${bg};color:${fg}">${initials(u.name)}</div>
+              <div>
+                <div class="user-name">${escHtml(u.name || '—')}</div>
+                <div class="user-id">#${u.id}</div>
+              </div>
+            </div>
+          </td>
+          <td class="hide-mobile">
+            <span class="email-text">${escHtml(u.email || '—')}</span>
+          </td>
+          <td>
+            ${u.is_pro
+          ? `<div><span class="badge badge-pro">⭐ Pro</span><div style="font-size:0.72rem;color:var(--muted);margin-top:3px;">${escHtml(planLabel)}</div>${periodTip ? `<div style="font-size:0.7rem;color:var(--muted);">${escHtml(periodTip)}</div>` : ''}</div>`
+          : `<span class="badge badge-free">Free</span>`}
+          </td>
+          <td class="hide-mobile">
+            ${u.is_active
+          ? `<span class="badge badge-active">● Active</span>`
+          : `<span class="badge badge-inactive">● Inactive</span>`}
+          </td>
+          <td class="hide-mobile">
+            ${u.is_verified
+          ? `<span class="badge badge-verified">✓ Verified</span>`
+          : `<span class="badge badge-unverified">Unverified</span>`}
+          </td>
+          <td class="hide-mobile">${usageCell}</td>
+          <td class="hide-mobile">${subStatusBadge}</td>
+          <td><span class="date-text">${joined}</span></td>
+          <td>
+            <button class="action-btn" onclick="viewUser(${u.id})">View</button>
+          </td>
+        </tr>`;
+    }
+
+    function renderEmpty(icon, title, hint) {
+      document.getElementById('tableBody').innerHTML = `
+        <tr class="state-row">
+          <td colspan="9">
+            <span class="empty-icon-big">${icon}</span>
+            <div class="empty-label">${title}</div>
+            <div class="empty-hint">${hint}</div>
+          </td>
+        </tr>`;
+    }
+
+    /* ── PAGINATION ── */
+    function renderPagination(total, pages) {
+      const bar = document.getElementById('paginationBar');
+      const info = document.getElementById('pageInfo');
+      const btns = document.getElementById('pageBtns');
+
+      const start = (currentPage - 1) * PAGE_SIZE + 1;
+      const end = Math.min(currentPage * PAGE_SIZE, total);
+      info.textContent = `Showing ${start}–${end} of ${total}`;
+
+      const pageNums = buildPageNums(currentPage, pages);
+      btns.innerHTML = `
+        <button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>
+        ${pageNums.map(p =>
+        p === '…'
+          ? `<span style="padding:0 4px;color:var(--muted);font-size:0.85rem;">…</span>`
+          : `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`
+      ).join('')}
+        <button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === pages ? 'disabled' : ''}>›</button>`;
+
+      bar.style.display = pages > 1 ? 'flex' : 'none';
+    }
+
+    function buildPageNums(cur, total) {
+      if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+      const pages = [];
+      pages.push(1);
+      if (cur > 3) pages.push('…');
+      for (let p = Math.max(2, cur - 1); p <= Math.min(total - 1, cur + 1); p++) pages.push(p);
+      if (cur < total - 2) pages.push('…');
+      pages.push(total);
+      return pages;
+    }
+
+    function goPage(p) {
+      const pages = Math.ceil(filteredUsers.length / PAGE_SIZE);
+      if (p < 1 || p > pages) return;
+      currentPage = p;
+      renderPage();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ── ACTIONS ── */
+    function viewUser(id) {
+      // Placeholder: navigate to a user detail page or open a modal
+      console.log('View user:', id);
+      alert(`User #${id} — detail page not yet implemented.`);
+    }
+
+    /* ── HELPERS ── */
+    function escHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorBanner');
+      document.getElementById('errorMsg').textContent = msg;
+      el.classList.add('show');
+    }
+
+    /* ── INIT ── */
+    document.getElementById('footerYear').textContent = new Date().getFullYear();
+    document.addEventListener('DOMContentLoaded', loadUsers);
+  </script>
+
+</body>
+
+</html>

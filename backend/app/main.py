@@ -25,6 +25,7 @@ from app.routers.resume import router as resume_router
 from app.routers.payment import router as payment_router
 from app.routers.job_tracker import router as job_tracker_router
 from app.routers.interview import router as interview_router         # ← NEW
+from app.routers.admin import router as admin_router   
 
 import app.models.user       # noqa: F401 – registers ORM models with SQLAlchemy
 import app.models.interview  # noqa: F401 – registers InterviewQuestion model   ← NEW
@@ -103,6 +104,10 @@ app.include_router(job_tracker_router)
 # All routes are prefixed /api/interview inside the router itself,
 # so no extra prefix is needed here.
 app.include_router(interview_router)
+
+# Admin module                                                                  ← NEW
+# Prefix is already set inside the router (/api/admin)
+app.include_router(admin_router)
 
 # ── Health check ──────────────────────────────────────────────────────────────
 @app.get("/health", tags=["health"])
