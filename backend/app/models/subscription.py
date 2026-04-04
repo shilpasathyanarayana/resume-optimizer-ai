@@ -11,15 +11,16 @@ Fix applied:
   errno 150 "Foreign key constraint is incorrectly formed"
 """
 
+"""
+models/subscription.py
+"""
 from datetime import datetime
 import enum
 
 from sqlalchemy import (
-    Column, Boolean, DateTime, ForeignKey,
+    Column, Integer, Boolean, DateTime, ForeignKey,
     String, Enum as SAEnum,
 )
-from sqlalchemy.dialects.mysql import INTEGER  # gives us UNSIGNED support
-
 from app.database import Base
 
 
@@ -40,40 +41,32 @@ class SubscriptionStatus(str, enum.Enum):
 class Subscription(Base):
     __tablename__ = "subscriptions"
 
-    # Must match users table exactly: InnoDB + utf8mb4
-    __table_args__ = {"mysql_engine": "InnoDB", "mysql_charset": "utf8mb4"}
-
-    # INTEGER(unsigned=True) matches users.id  INT UNSIGNED  exactly
-    id      = Column(INTEGER(unsigned=True), primary_key=True, autoincrement=True)
-
-    # FK -> users.id (INT UNSIGNED)
+    id      = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(
-        INTEGER(unsigned=True),
+        Integer,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
         index=True,
     )
 
-    # Stripe IDs
     stripe_customer_id     = Column(String(64), nullable=True, index=True)
     stripe_subscription_id = Column(String(64), nullable=True, index=True)
     stripe_price_id        = Column(String(64), nullable=True)
 
-    # Plan & status
-    plan   = Column(SAEnum(PlanType),           nullable=False, default=PlanType.free)
-    status = Column(SAEnum(SubscriptionStatus), nullable=False, default=SubscriptionStatus.inactive)
-    is_pro = Column(Boolean,                    nullable=False, default=False)
+    plan   = Column(SAEnum(PlanType,           name="plan_type_enum"),           nullable=False, default=PlanType.free)
+    status = Column(SAEnum(SubscriptionStatus, name="subscription_status_enum"), nullable=False, default=SubscriptionStatus.inactive)
+    is_pro = Column(Boolean, nullable=False, default=False)
 
-    # Billing period
     current_period_start = Column(DateTime, nullable=True)
     current_period_end   = Column(DateTime, nullable=True)
     cancel_at_period_end = Column(Boolean,  nullable=False, default=False)
 
-    # Audit
+    monthly_usage  = Column(Integer,  nullable=False, default=0)
+    usage_reset_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow,
-                        onupdate=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     def __repr__(self):
         return (
