@@ -17,6 +17,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 
 from app.config import settings
 from app.database import engine, Base
@@ -37,9 +38,21 @@ async def lifespan(app: FastAPI):
      # ── DEBUG: remove after confirming env vars ──
     import os
     print(">>> DB_HOST =", os.getenv("DB_HOST", "NOT SET"))
-    print(">>> DB_PORT =", os.getenv("DB_PORT", "NOT SET"))
-    print(">>> DB_USER =", os.getenv("DB_USER", "NOT SET"))
     print(">>> DATABASE_URL =", settings.DATABASE_URL)
+    
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all, checkfirst=True)
+    print("✅ Database connected and tables created.")
+    
+    yield
+    await engine.dispose()
+    
+    async with engine.connect() as conn:
+        await conn.execute(text("SELECT 1"))
+    print("✅ Database connected.")
+    yield
+    await engine.dispose()
+    
     import asyncio
     max_retries = 10
     for attempt in range(max_retries):

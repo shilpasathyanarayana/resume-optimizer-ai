@@ -36,10 +36,11 @@ class Settings(BaseSettings):
 
     @property
     def DATABASE_URL(self) -> str:                        # ← changed
-        return (
-            f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}"
-            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-        )
+         return (
+        f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASSWORD}"
+        f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        f"?ssl=require"
+    )
 
     @property
     def SYNC_DATABASE_URL(self) -> str:                   # ← new (for Alembic)
