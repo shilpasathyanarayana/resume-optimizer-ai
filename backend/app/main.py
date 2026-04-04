@@ -30,7 +30,8 @@ from app.routers.admin import router as admin_router
 
 import app.models.user       # noqa: F401 – registers ORM models with SQLAlchemy
 import app.models.interview  # noqa: F401 – registers InterviewQuestion model   ← NEW
-
+import app.models.job_tracker 
+import app.models.subscription 
 
 # ── Lifespan: create tables on startup ───────────────────────────────────────
 @asynccontextmanager
