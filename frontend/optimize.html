@@ -938,7 +938,7 @@
       if (!token) return;
 
       try {
-        const res = await fetch(`/api/resume/history/${resumeId}`, {
+        const res = await fetch(`${API_BASE}/resume/history/${resumeId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -990,8 +990,8 @@
 
       try {
         const [usageRes, subRes] = await Promise.all([
-          fetch('/api/resume/usage', { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch('/api/payments/status', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/resume/usage`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/payments/status`, { headers: { 'Authorization': `Bearer ${token}` } }),
         ]);
 
         if (usageRes.status === 401) {

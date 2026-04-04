@@ -446,7 +446,7 @@
     async function pollUntilPro(attempts = 0) {
       const MAX = 8;   // ~8 seconds total
       try {
-        const res = await apiFetch('/payments/status');
+        const res = await apiFetch(`${API_BASE}/payments/status`);
         const data = await res.json();
 
         if (data.is_pro) {
@@ -497,7 +497,7 @@
     async function openPortal(e) {
       e.preventDefault();
       try {
-        const res = await apiFetch('/payments/portal', { method: 'POST' });
+        const res = await apiFetch(`${API_BASE}/payments/portal`, { method: 'POST' });
         const data = await res.json();
         window.location.href = data.portal_url;
       } catch (err) {

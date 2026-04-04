@@ -630,7 +630,7 @@
             clearError();
 
             try {
-                const res = await fetch('/api/interview/generate-from-description', {
+                const res = await fetch(`${API_BASE}/interview/generate-from-description`, {
                     method: 'POST',
                     headers: authHeaders(),
                     body: JSON.stringify({ description }),
@@ -755,7 +755,7 @@
                 const card = document.getElementById(`card-${idx}`);
 
                 try {
-                    const res = await fetch('/api/interview/review-answer', {
+                    const res = await fetch(`${API_BASE}/interview/review-answer`, {
                         method: 'POST',
                         headers: authHeaders(),
                         body: JSON.stringify({ question: q.question, answer }),
