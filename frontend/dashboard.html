@@ -10,6 +10,9 @@
     href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/main.css" />
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/nav.js" defer></script>
+  <script src="assets/js/login.js" defer></script>
   <script src="assets/js/script.js" defer></script>
   <style>
     body {
@@ -614,10 +617,7 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    function getToken() {
-      return localStorage.getItem('authToken');
-    }
-
+   
     async function loadDashboard() {
       const token = getToken();
       const userData = localStorage.getItem('userData');
@@ -752,112 +752,112 @@
     }
 
     function applyUsageUI(data) {
-  const used = data.uses_this_month ?? 0;
-  const limit = data.limit || 5;
-  const remaining = data.uses_remaining ?? (limit - used);
-  const isPro = data.is_pro === true;
-  const pct = isPro ? 0 : Math.min((used / limit) * 100, 100);
+      const used = data.uses_this_month ?? 0;
+      const limit = data.limit || 5;
+      const remaining = data.uses_remaining ?? (limit - used);
+      const isPro = data.is_pro === true;
+      const pct = isPro ? 0 : Math.min((used / limit) * 100, 100);
 
-  // ── Stats row ────────────────────────────────────────────
-  document.getElementById('statMonth').textContent = used;
+      // ── Stats row ────────────────────────────────────────────
+      document.getElementById('statMonth').textContent = used;
 
-  if (data.total_uses != null) {
-    document.getElementById('statTotal').textContent = data.total_uses;
-  }
-  if (data.avg_ats_score != null) {
-    document.getElementById('statAvgScore').textContent = data.avg_ats_score + '%';
-  }
+      if (data.total_uses != null) {
+        document.getElementById('statTotal').textContent = data.total_uses;
+      }
+      if (data.avg_ats_score != null) {
+        document.getElementById('statAvgScore').textContent = data.avg_ats_score + '%';
+      }
 
-  // ── Usage banner (free users) ────────────────────────────
-  if (!isPro) {
-    document.getElementById('statMonthDesc').textContent = `of ${limit} free uses`;
+      // ── Usage banner (free users) ────────────────────────────
+      if (!isPro) {
+        document.getElementById('statMonthDesc').textContent = `of ${limit} free uses`;
 
-    document.getElementById('usageText').innerHTML =
-      remaining <= 0
-        ? `<strong style="color:var(--danger)">No optimizations left — <a href="pricing.html" style="color:var(--accent)">upgrade to Pro</a></strong>`
-        : `<strong>${remaining} of ${limit}</strong> optimizations remaining`;
+        document.getElementById('usageText').innerHTML =
+          remaining <= 0
+            ? `<strong style="color:var(--danger)">No optimizations left — <a href="pricing.html" style="color:var(--accent)">upgrade to Pro</a></strong>`
+            : `<strong>${remaining} of ${limit}</strong> optimizations remaining`;
 
-    document.getElementById('usageBarFill').style.width = pct + '%';
-    if (remaining <= 0) {
-      document.getElementById('usageBarFill').style.background = 'var(--danger)';
+        document.getElementById('usageBarFill').style.width = pct + '%';
+        if (remaining <= 0) {
+          document.getElementById('usageBarFill').style.background = 'var(--danger)';
+        }
+
+        if (data.resets_at) {
+          const resetDate = new Date(data.resets_at).toLocaleDateString('en-US', {
+            month: 'long', day: 'numeric'
+          });
+          document.getElementById('usageResetText').textContent = `Resets on ${resetDate}`;
+        }
+      } else {
+        document.getElementById('statMonthDesc').textContent = 'unlimited';
+        document.getElementById('usageBanner').style.display = 'none';
+      }
     }
 
-    if (data.resets_at) {
-      const resetDate = new Date(data.resets_at).toLocaleDateString('en-US', {
-        month: 'long', day: 'numeric'
-      });
-      document.getElementById('usageResetText').textContent = `Resets on ${resetDate}`;
-    }
-  } else {
-    document.getElementById('statMonthDesc').textContent = 'unlimited';
-    document.getElementById('usageBanner').style.display = 'none';
-  }
-}
+    async function loadResumeHistory() {
+      const token = getToken();
+      try {
+        const res = await fetch(`${API_BASE}/resume/history`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-async function loadResumeHistory() {
-  const token = getToken();
-  try {
-    const res = await fetch(`${API_BASE}/resume/history`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+        if (res.status === 401) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('userData');
+          window.location.replace('index.html');
+          return;
+        }
 
-    if (res.status === 401) {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
-      window.location.replace('index.html');
-      return;
-    }
+        if (!res.ok) {
+          console.error('History fetch failed:', res.status);
+          return;
+        }
 
-    if (!res.ok) {
-      console.error('History fetch failed:', res.status);
-      return;
-    }
+        const data = await res.json();
+        const items = Array.isArray(data) ? data : data.resumes || data.items || [];
 
-    const data = await res.json();
-    const items = Array.isArray(data) ? data : data.resumes || data.items || [];
+        // ── Derive stats from history as fallback ─────────────
+        const totalEl = document.getElementById('statTotal');
+        if (totalEl.textContent === '—') {
+          totalEl.textContent = items.length;
+        }
 
-    // ── Derive stats from history as fallback ─────────────
-    const totalEl = document.getElementById('statTotal');
-    if (totalEl.textContent === '—') {
-      totalEl.textContent = items.length;
-    }
+        const scored = items.filter(r => r.ats_score != null);
+        const avgEl = document.getElementById('statAvgScore');
+        if (avgEl.textContent === '—' && scored.length) {
+          const avg = Math.round(scored.reduce((s, r) => s + r.ats_score, 0) / scored.length);
+          avgEl.textContent = avg + '%';
+        }
 
-    const scored = items.filter(r => r.ats_score != null);
-    const avgEl = document.getElementById('statAvgScore');
-    if (avgEl.textContent === '—' && scored.length) {
-      const avg = Math.round(scored.reduce((s, r) => s + r.ats_score, 0) / scored.length);
-      avgEl.textContent = avg + '%';
-    }
+        // ── This month count fallback ─────────────────────────
+        const monthEl = document.getElementById('statMonth');
+        if (monthEl.textContent === '—') {
+          const now = new Date();
+          const thisMonth = items.filter(r => {
+            const d = new Date(r.created_at);
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+          }).length;
+          monthEl.textContent = thisMonth;
+        }
 
-    // ── This month count fallback ─────────────────────────
-    const monthEl = document.getElementById('statMonth');
-    if (monthEl.textContent === '—') {
-      const now = new Date();
-      const thisMonth = items.filter(r => {
-        const d = new Date(r.created_at);
-        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-      }).length;
-      monthEl.textContent = thisMonth;
-    }
+        if (items.length === 0) return;
 
-    if (items.length === 0) return;
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('resumeList').style.display = 'flex';
 
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('resumeList').style.display = 'flex';
+        const recent = items.slice(0, 5);
 
-    const recent = items.slice(0, 5);
+        document.getElementById('resumeList').innerHTML = recent.map(item => {
+          const score = item.ats_score;
+          const hasScore = score != null;
+          const scoreClass = !hasScore ? '' : score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+          const date = new Date(item.created_at).toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'short', year: 'numeric'
+          });
+          const title = item.original_filename || item.job_title || 'Optimised Resume';
+          const jobTitle = item.job_title || 'Job title not specified';
 
-    document.getElementById('resumeList').innerHTML = recent.map(item => {
-      const score = item.ats_score;
-      const hasScore = score != null;
-      const scoreClass = !hasScore ? '' : score >= 75 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
-      const date = new Date(item.created_at).toLocaleDateString('en-GB', {
-        day: 'numeric', month: 'short', year: 'numeric'
-      });
-      const title = item.original_filename || item.job_title || 'Optimised Resume';
-      const jobTitle = item.job_title || 'Job title not specified';
-
-      return `
+          return `
         <div class="resume-item" style="cursor:pointer;">
           <div class="resume-item-left">
             <div class="resume-item-icon">📄</div>
@@ -867,24 +867,16 @@ async function loadResumeHistory() {
             </div>
           </div>
           ${hasScore
-            ? `<span class="resume-item-score ${scoreClass}">ATS ${score}%</span>`
-            : `<span class="resume-item-score" style="color:var(--muted);background:var(--surface);">No score</span>`
-          }
+              ? `<span class="resume-item-score ${scoreClass}">ATS ${score}%</span>`
+              : `<span class="resume-item-score" style="color:var(--muted);background:var(--surface);">No score</span>`
+            }
         </div>`;
-    }).join('');
+        }).join('');
 
-  } catch (e) {
-    console.warn('Resume history load error:', e);
-  }
-}
-
-function escHtml(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
+      } catch (e) {
+        console.warn('Resume history load error:', e);
+      }
+    }
 
     async function openBillingPortal(e) {
       if (e) e.preventDefault();

@@ -3,18 +3,23 @@ schemas/payment.py
 ==================
 Pydantic v2 request / response models for all payment endpoints.
 Matches the style of schemas/auth.py in your project.
+
+Changes from v1:
+  - CheckoutRequest: added `currency` field ("usd" | "inr")
+  - PlanInfo: added `currency` field so frontend knows which symbol to show
 """
 
 from datetime import datetime
-from typing import Optional
-from pydantic import BaseModel, EmailStr
+from typing import Optional, Literal
+from pydantic import BaseModel
 
 
 # ── Checkout ──────────────────────────────────────────────────────────────────
 
 class CheckoutRequest(BaseModel):
     """POST /api/payments/checkout"""
-    plan: str  # "pro_monthly" | "pro_yearly"
+    plan: str                                    # "pro_monthly" | "pro_yearly"
+    currency: Literal["usd", "inr"] = "usd"     # region-based; detected on frontend
 
 
 class CheckoutResponse(BaseModel):
@@ -32,10 +37,10 @@ class PortalResponse(BaseModel):
 
 class SubscriptionStatusResponse(BaseModel):
     is_pro:               bool
-    plan:                 Optional[str]    = None
-    status:               Optional[str]    = None
+    plan:                 Optional[str]      = None
+    status:               Optional[str]      = None
     current_period_end:   Optional[datetime] = None
-    cancel_at_period_end: bool             = False
+    cancel_at_period_end: bool               = False
 
     model_config = {"from_attributes": True}
 
@@ -45,7 +50,8 @@ class SubscriptionStatusResponse(BaseModel):
 class PlanInfo(BaseModel):
     key:      str
     name:     str
-    amount:   int    # cents
+    amount:   int       # cents (USD) or paise (INR)
+    currency: str       # "usd" | "inr"
     interval: str
     features: list[str]
 

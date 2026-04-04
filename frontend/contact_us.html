@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ResumeAI — Land Your Dream Job</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
@@ -259,6 +258,8 @@
   </div>
 
   <div class="toast" id="toast"></div>
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/nav.js" defer></script>
   <script src="assets/js/script.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script>
@@ -266,40 +267,6 @@
       emailjs.init("s33D2aXAbFfvgjX_z"); // your public key
     })();
   </script>
-  <!-- <script>
-    const form = document.getElementById("contactForm");
-    const statusMessage = document.getElementById("statusMessage");
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      console.log("sendEmail called!");
-      console.log("form:", form);
-
-      statusMessage.innerText = "Sending...";
-      statusMessage.style.color = "black";
-
-      emailjs.sendForm(
-        "service_kvpquvr",
-        "template_rr6kxrs",
-        form
-      )
-        .then(function (result) {
-          console.log("Email sent:", result.text);
-
-          statusMessage.innerText = "Email sent successfully!";
-          statusMessage.style.color = "green";
-
-          form.reset();
-        })
-        .catch(function (error) {
-          console.log("Email error:", error);
-
-          statusMessage.innerText = "Failed: " + JSON.stringify(error);
-          statusMessage.style.color = "red";
-        });
-    });
-  </script> -->
 </body>
 
 </html>

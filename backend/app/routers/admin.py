@@ -67,8 +67,7 @@ async def list_users(
     # We use a LEFT JOIN so users without a subscriptions row still appear.
     # The subquery picks the single most-recent subscription per user.
     rows_result = await db.execute(
-        text("""
-            SELECT
+        text("""SELECT
                 u.id,
                 u.name,
                 u.email,

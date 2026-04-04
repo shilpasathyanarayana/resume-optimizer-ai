@@ -790,17 +790,10 @@
       <a href="terms.html">Terms</a>
     </div>
   </footer>
-
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/nav.js"></script>
   <script src="assets/js/script.js"></script>
   <script>
-    /* ── CONFIG ── */
-    // // Matches your FastAPI prefix: app.include_router(admin_router) → /api/admin/users
-    // const API_BASE = typeof window.API_BASE !== 'undefined'
-    //   ? window.API_BASE
-    //   : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    //       ? 'http://localhost:8000/api'
-    //       : '/api');
-
     const PAGE_SIZE = 20;
 
     /* ── STATE ── */
@@ -825,11 +818,6 @@
 
     function initials(name) {
       return (name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
-    }
-
-    /* ── FETCH ── */
-    function getToken() {
-      return localStorage.getItem('authToken');
     }
 
     async function loadUsers() {
@@ -1117,11 +1105,6 @@
       // Placeholder: navigate to a user detail page or open a modal
       console.log('View user:', id);
       alert(`User #${id} — detail page not yet implemented.`);
-    }
-
-    /* ── HELPERS ── */
-    function escHtml(str) {
-      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     function showError(msg) {

@@ -7,8 +7,10 @@ Flow:
   router  →  stripe_service  →  Stripe API
                              →  DB (via SQLAlchemy async session)
 
-Webhook events update the DB so is_pro is always in sync with Stripe.
-subscriptions table is the single source of truth — users.plan is not touched.
+Changes from v1:
+  - PLANS now maps plan_key → { price_ids: { "usd": ..., "inr": ... } }
+  - create_checkout_session() accepts a `currency` param ("usd" | "inr")
+  - Webhook handler is unchanged — currency-agnostic by design
 """
 
 import stripe
@@ -22,14 +24,22 @@ from app.models.subscription import Subscription, PlanType, SubscriptionStatus
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-# ── Plan catalogue ────────────────────────────────────────────────────────────
+# ── Plan catalogue (multi-currency) ───────────────────────────────────────────
+#
+#  price_ids maps  currency_code → stripe_price_id
+#  Add more currencies here in the future without touching any other file.
 
 PLANS: dict[str, dict] = {
     "pro_monthly": {
         "name":     "Resume Optimizer Pro (Monthly)",
-        "price_id": settings.STRIPE_PRICE_ID_PRO_MONTHLY,
-        "amount":   999,
         "interval": "month",
+        "price_ids": {
+            "usd": settings.STRIPE_PRICE_ID_PRO_MONTHLY,       # $9.99 / mo
+            "inr": settings.STRIPE_PRICE_ID_PRO_MONTHLY_INR,   # ₹129  / mo
+        },
+        # amount / currency below are the USD defaults used by /api/payments/plans
+        "amount":   999,
+        "currency": "usd",
         "features": [
             "Unlimited resume optimisations",
             "ATS keyword gap analysis",
@@ -40,9 +50,13 @@ PLANS: dict[str, dict] = {
     },
     "pro_yearly": {
         "name":     "Resume Optimizer Pro (Yearly)",
-        "price_id": settings.STRIPE_PRICE_ID_PRO_YEARLY,
-        "amount":   7999,
         "interval": "year",
+        "price_ids": {
+            "usd": settings.STRIPE_PRICE_ID_PRO_YEARLY,        # $79.99 / yr
+            "inr": settings.STRIPE_PRICE_ID_PRO_YEARLY_INR,    # ₹999   / yr
+        },
+        "amount":   7999,
+        "currency": "usd",
         "features": [
             "Everything in Monthly",
             "2 months free",
@@ -53,14 +67,14 @@ PLANS: dict[str, dict] = {
 }
 
 
-# ── Shared status map ─────────────────────────────────────────────────────────
+# ── Shared Stripe status → DB status map ──────────────────────────────────────
 
 _STATUS_MAP: dict[str, SubscriptionStatus] = {
-    "active":    SubscriptionStatus.active,
-    "trialing":  SubscriptionStatus.trialing,
-    "past_due":  SubscriptionStatus.past_due,
-    "canceled":  SubscriptionStatus.cancelled,
-    "cancelled": SubscriptionStatus.cancelled,
+    "active":     SubscriptionStatus.active,
+    "trialing":   SubscriptionStatus.trialing,
+    "past_due":   SubscriptionStatus.past_due,
+    "canceled":   SubscriptionStatus.cancelled,
+    "cancelled":  SubscriptionStatus.cancelled,
     "incomplete": SubscriptionStatus.inactive,
 }
 
@@ -71,22 +85,45 @@ async def create_checkout_session(
     plan_key:   str,
     user_id:    int,
     user_email: str,
+    currency:   str = "usd",        # "usd" | "inr" — detected on the frontend
 ) -> stripe.checkout.Session:
+    """
+    Creates a Stripe Checkout session for the given plan and currency.
+
+    The correct Stripe price ID is selected from PLANS[plan_key]["price_ids"][currency].
+    Falls back to USD if the requested currency has no price ID configured.
+    """
     plan = PLANS.get(plan_key)
     if not plan:
         raise ValueError(f"Unknown plan '{plan_key}'. Choose: {list(PLANS)}")
+
+    currency = currency.lower()
+
+    # Resolve price ID — fall back to USD if INR not configured yet
+    price_id = plan["price_ids"].get(currency) or plan["price_ids"].get("usd")
+
+    if not price_id:
+        raise ValueError(
+            f"No Stripe price ID configured for plan='{plan_key}' "
+            f"currency='{currency}'. Check your .env file."
+        )
 
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
         mode="subscription",
         customer_email=user_email,
-        line_items=[{"price": plan["price_id"], "quantity": 1}],
+        line_items=[{"price": price_id, "quantity": 1}],
         metadata={
-            "user_id": str(user_id),
-            "plan":    plan_key,
+            "user_id":  str(user_id),
+            "plan":     plan_key,
+            "currency": currency,       # stored for reference; not used in webhook logic
         },
         subscription_data={
-            "metadata": {"user_id": str(user_id), "plan": plan_key},
+            "metadata": {
+                "user_id":  str(user_id),
+                "plan":     plan_key,
+                "currency": currency,
+            },
         },
         success_url=(
             f"{settings.FRONTEND_ORIGIN}/payment-success.html"
@@ -169,7 +206,7 @@ async def handle_webhook_event(
 ) -> dict:
     """
     Routes each Stripe event type to the right DB update.
-    subscriptions table is the single source of truth — users.plan is never touched.
+    Currency-agnostic — is_pro is determined purely by subscription status.
 
     checkout.session.completed  → PRIMARY upgrade path
     customer.subscription.*     → secondary sync
@@ -222,7 +259,6 @@ async def handle_webhook_event(
         sub.updated_at             = datetime.utcnow()
         await db.commit()
 
-        # ✅ No users.plan sync — subscriptions is the single source of truth
         result["action"] = (
             f"user={user_id} upgraded → plan={plan_key} "
             f"is_pro={is_pro} status={db_status}"
@@ -247,7 +283,6 @@ async def handle_webhook_event(
             sub.plan       = PlanType.free
             sub.updated_at = datetime.utcnow()
             await db.commit()
-            # ✅ No users.plan sync needed
         result["action"] = "subscription cancelled → is_pro=False"
 
     # ── Payment succeeded ─────────────────────────────────────────────────────
@@ -324,8 +359,6 @@ async def _sync_subscription(
     sub.cancel_at_period_end   = stripe_sub.get("cancel_at_period_end", False)
     sub.updated_at             = datetime.utcnow()
     await db.commit()
-
-    # ✅ No _sync_user_plan call — subscriptions is the single source of truth
 
 
 # ── Timestamp helper ──────────────────────────────────────────────────────────

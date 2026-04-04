@@ -10,6 +10,8 @@
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/main.css" />
+    <script src="assets/js/config.js" defer></script>
+    <script src="assets/js/nav.js" defer></script>
     <script src="assets/js/script.js"></script>
     <script src="assets/js/requirepro.js"></script>
     <style>
@@ -592,7 +594,6 @@
         // ── STATE ─────────────────────────────────────────────────────────────
         let questionsCache = [];  // { question, ai_feedback? }[]
 
-        function getToken() { return localStorage.getItem('authToken'); }
         function authHeaders() { return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }; }
 
         // ── INIT ──────────────────────────────────────────────────────────────
@@ -610,7 +611,7 @@
             document.getElementById('generateBtn').disabled = false;
             document.getElementById('pasteTextarea').disabled = false;
         });
-        
+
         // ── PASTE INPUT ───────────────────────────────────────────────────────
         function onPasteInput() {
             const val = document.getElementById('pasteTextarea').value.trim();
@@ -815,15 +816,6 @@
         }
         function clearError() {
             document.getElementById('errorBanner').classList.remove('show');
-        }
-
-        // ── UTILS ─────────────────────────────────────────────────────────────
-        function escHtml(str) {
-            return String(str || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
         }
     </script>
 </body>

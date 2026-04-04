@@ -4,12 +4,63 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ResumeAI — Land Your Dream Job</title>
+  <title>AI Resume Optimizer & ATS Checker | ResumeAI Job Assistant</title>
+
+  <!-- SEO Meta -->
+  <meta name="description"
+    content="Free AI resume optimizer and ATS checker. Improve your resume, generate cover letters, track job applications, and prepare for interviews. Get hired faster with ResumeAI." />
+  <meta name="keywords"
+    content="resume optimizer, ATS checker, AI resume builder, cover letter generator, job tracker, interview preparation, AI job assistant" />
+  <meta name="author" content="ResumeAI" />
+  <meta name="robots" content="index, follow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://yourdomain.com/" />
+
+  <!-- Open Graph (for LinkedIn, Facebook) -->
+  <meta property="og:title" content="ResumeAI | Land Your Dream Job Faster" />
+  <meta property="og:description"
+    content="AI-powered resume optimization, ATS scoring, cover letters, and interview prep—all in one platform." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/" />
+  <meta property="og:image" content="https://yourdomain.com/assets/images/preview.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ResumeAI | AI Job Search Assistant" />
+  <meta name="twitter:description" content="Boost your resume, track jobs, and prepare for interviews with AI." />
+  <meta name="twitter:image" content="https://yourdomain.com/assets/images/preview.png" />
+
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
     href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/main.css" />
+
+  <!-- Structured Data (SEO Boost 🚀) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ResumeAI",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "description": "AI-powered resume optimizer, ATS checker, cover letter generator, job tracker, and interview preparation tool.",
+    "url": "https://yourdomain.com/",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <script src="assets/js/config.js" defer></script>
+  <script src="assets/js/nav.js" defer></script>
+  <script src="assets/js/login.js" defer></script>
   <script src="assets/js/script.js" defer></script>
 </head>
 
@@ -43,10 +94,14 @@
     <div class="hero-bg"></div>
     <div class="hero-content">
       <div class="hero-eyebrow">AI-powered resume optimization</div>
-      <h1>Your resume,<br /><em>perfectly tailored</em><br />to every role</h1>
+      <h1>
+        AI Resume Optimizer & ATS Checker<br />
+        <em>Perfectly tailored</em> for every job
+      </h1>
       <p class="hero-sub">
-        Upload your resume and a job description. Our AI scores your fit,
-        identifies gaps, and rewrites your resume to get past ATS filters.
+        Use our AI resume optimizer to improve your ATS score, fix keyword gaps,
+        generate tailored resumes,track your job application, interview praparation, get AI feedback and increase your
+        chances of getting interviews.
       </p>
       <div class="hero-cta">
         <button class="btn btn-primary" onclick="openModal('signup')">
@@ -175,6 +230,24 @@
     </div>
   </section>
 
+  <!-- FAQ -->
+  <section class="section">
+    <div class="section-label">FAQ</div>
+    <h2 class="section-title">Frequently Asked Questions</h2>
+
+    <div class="faq">
+      <h3>What is an ATS resume checker?</h3>
+      <p>An ATS resume checker analyzes your resume against job descriptions to ensure it passes applicant tracking
+        systems used by employers.</p>
+
+      <h3>Is ResumeAI free?</h3>
+      <p>Yes, ResumeAI offers a free plan with 5 resume optimizations per month.</p>
+
+      <h3>How does AI improve my resume?</h3>
+      <p>Our AI identifies missing keywords, rewrites content, and improves formatting to match job requirements.</p>
+    </div>
+  </section>
+
   <!-- ── FOOTER ── -->
   <footer>
     <span class="nav-logo" style="font-size:1.1rem;">Resume<span style="color:var(--accent)">AI</span></span>
@@ -269,15 +342,6 @@
 
   <!-- ── TOAST ── -->
   <div class="toast" id="toast"></div>
-
-  <script>
-    // Handle ?action=login redirect from optimize.html
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('action') === 'login') {
-      history.replaceState({}, '', 'dashbiard.html');
-    }
-  </script>
-
 </body>
 
 </html>

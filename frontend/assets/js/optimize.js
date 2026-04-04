@@ -1,4 +1,3 @@
-const API_BASE = '/api';
 let currentResults = null;
 
 // ── INIT ───────────────────────────────────────────────────────────
@@ -19,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ── HISTORY PREFILL ────────────────────────────────────────────────
 async function maybeLoadFromHistory() {
-  const params   = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(window.location.search);
   const resumeId = params.get('id');
   if (!resumeId) return false;
 
@@ -50,12 +49,12 @@ async function maybeLoadFromHistory() {
 
     // Build result object matching showResults() expectations
     const synthetic = {
-      ats_score:        data.ats_score        ?? 0,
+      ats_score: data.ats_score ?? 0,
       missing_keywords: data.missing_keywords ?? [],
-      improvements:     data.improvements     ?? [],
-      optimized_text:   data.optimized_text   ?? '',
-      uses_remaining:   undefined,
-      uses_this_month:  undefined,
+      improvements: data.improvements ?? [],
+      optimized_text: data.optimized_text ?? '',
+      uses_remaining: undefined,
+      uses_this_month: undefined,
     };
 
     updateStepBar(3);
@@ -73,11 +72,11 @@ function showHistoryBanner(data) {
   const resultsPanel = document.getElementById('resultsPanel');
   if (!resultsPanel || document.getElementById('historyBanner')) return;
 
-  const date     = data.created_at
+  const date = data.created_at
     ? new Date(data.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
     : '';
   const filename = data.original_filename || 'Resume';
-  const jobTitle = data.job_title         || 'this role';
+  const jobTitle = data.job_title || 'this role';
 
   const banner = document.createElement('div');
   banner.id = 'historyBanner';
@@ -190,7 +189,7 @@ function updateCharCount(textareaId, countId) {
 // ── VALIDATE ───────────────────────────────────────────────────────
 function validateInputs() {
   const resumeText = document.getElementById('resumeText').value.trim();
-  const jobText    = document.getElementById('jobText').value.trim();
+  const jobText = document.getElementById('jobText').value.trim();
 
   if (!resumeText && !window._resumeFile) {
     showToast('Please upload or paste your resume.', 'error'); return false;
@@ -247,8 +246,8 @@ function setStepState(stepId, state, statusId, statusText) {
 
 async function callAI() {
   const resumeText = document.getElementById('resumeText').value.trim();
-  const jobText    = document.getElementById('jobText').value.trim();
-  const token      = localStorage.getItem('authToken');
+  const jobText = document.getElementById('jobText').value.trim();
+  const token = localStorage.getItem('authToken');
 
   if (!token) {
     window.location.href = 'index.html?action=login';
@@ -303,10 +302,10 @@ function showResults(data) {
     updateUsageUI(data.uses_remaining, 5, data.uses_this_month);
   }
 
-  const score   = data.ats_score || 0;
+  const score = data.ats_score || 0;
   const scoreEl = document.getElementById('atsScore');
   scoreEl.textContent = score;
-  scoreEl.className   = 'ats-number ' + (score >= 75 ? 'high' : score >= 50 ? 'mid' : 'low');
+  scoreEl.className = 'ats-number ' + (score >= 75 ? 'high' : score >= 50 ? 'mid' : 'low');
 
   const keywords = data.missing_keywords || [];
   if (keywords.length > 0) {
@@ -334,8 +333,8 @@ function showResults(data) {
 function downloadTxt() {
   if (!currentResults) return;
   const blob = new Blob([currentResults.optimized_text || ''], { type: 'text/plain' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
   a.href = url; a.download = 'optimized-resume.txt'; a.click();
   URL.revokeObjectURL(url);
   showToast('Downloaded!', 'success');
@@ -349,9 +348,9 @@ function copyText(elementId) {
 
 // ── PANEL UTILS ────────────────────────────────────────────────────
 function showPanel(panel) {
-  document.getElementById('inputPanel').style.display      = panel === 'input'      ? 'block' : 'none';
+  document.getElementById('inputPanel').style.display = panel === 'input' ? 'block' : 'none';
   document.getElementById('processingPanel').style.display = panel === 'processing' ? 'block' : 'none';
-  document.getElementById('resultsPanel').style.display    = panel === 'results'    ? 'block' : 'none';
+  document.getElementById('resultsPanel').style.display = panel === 'results' ? 'block' : 'none';
 }
 
 function updateStepBar(activeStep) {
@@ -375,7 +374,7 @@ function resetPage() {
     const el = document.getElementById(`pStep${i}`);
     if (el) { el.className = 'progress-step'; document.getElementById(`pStep${i}Status`).textContent = 'Waiting'; }
   }
-  currentResults     = null;
+  currentResults = null;
   window._resumeFile = null;
 
   const zone = document.getElementById('resumeUploadZone');
@@ -384,10 +383,10 @@ function resetPage() {
   zone.onclick = () => document.getElementById('resumeFile').click();
 
   document.getElementById('resumeText').value = '';
-  document.getElementById('jobText').value    = '';
+  document.getElementById('jobText').value = '';
   updateCharCount('resumeText', 'resumeCount');
-  updateCharCount('jobText',    'jobCount');
-  document.getElementById('keywordsPanel').style.display    = 'none';
+  updateCharCount('jobText', 'jobCount');
+  document.getElementById('keywordsPanel').style.display = 'none';
   document.getElementById('improvementsPanel').style.display = 'none';
 
   showPanel('input');
@@ -401,25 +400,4 @@ function getOrCreateGuestSession() {
   let id = localStorage.getItem('guestSessionId');
   if (!id) { id = 'guest_' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('guestSessionId', id); }
   return id;
-}
-
-// ── UTILS ──────────────────────────────────────────────────────────
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function escHtml(str) {
-  return String(str ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-let toastTimer;
-function showToast(msg, type = '') {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className   = 'toast ' + type;
-  clearTimeout(toastTimer);
-  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
 }

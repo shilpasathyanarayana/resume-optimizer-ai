@@ -3,10 +3,6 @@
 // Never trust JWT claims; always fetch is_pro from backend
 // ─────────────────────────────────────────────────────────────
 
-async function getToken() {
-    return localStorage.getItem('authToken');
-}
-
 async function getIsProFromServer() {
     const token = await getToken();
     if (!token) return false;

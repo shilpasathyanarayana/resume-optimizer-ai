@@ -1,11 +1,17 @@
-fastapi==0.115.0            # Web framework to build APIs quickly and efficiently
+fastapi==0.115.0            # Web framework to build APIs quickly and efficiently run http://localhost:8000/docs
 uvicorn[standard]==0.30.6   # ASGI server to run FastAPI applications
 sqlalchemy==2.0.35          # ORM for interacting with the database in Pythonic way
-aiomysql==0.2.0             # Async MySQL driver for SQLAlchemy async operations
-pymysql==1.1.1              # Pure Python MySQL client for database connections
+
+# aiomysql==0.2.0             # Async MySQL driver for SQLAlchemy async operations
+# pymysql==1.1.1              # Pure Python MySQL client for database connections
+
+asyncpg==0.29.0             # Async PostgreSQL driver for SQLAlchemy async operations
+psycopg2-binary==2.9.9      # Sync PostgreSQL driver (for Alembic migrations)
 alembic==1.13.3             # Database migrations tool for SQLAlchemy
-redis==5.1.1                # In-memory database used for caching and Celery message broker
-celery==5.4.0               # Distributed task queue to run background jobs (e.g., resume AI processing)
+
+# redis==5.1.1                # In-memory database used for caching and Celery message broker
+# celery==5.4.0               # Distributed task queue to run background jobs (e.g., resume AI processing)
+
 python-dotenv==1.0.1        # Load environment variables from a .env file
 python-multipart==0.0.12    # Parse multipart/form-data, needed for file uploads
 pydantic==2.9.2             # Data validation and parsing library used for request/response models

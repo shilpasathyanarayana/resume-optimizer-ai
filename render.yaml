@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: resume-ai-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend        # ← WORKDIR /backend, so context = ./backend

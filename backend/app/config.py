@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     STRIPE_PRICE_ID_PRO_MONTHLY: str = ""   # price_...    (run stripe_setup.py to generate)
     STRIPE_PRICE_ID_PRO_YEARLY:  str = ""   # price_...    (run stripe_setup.py to generate)
     
+    STRIPE_PRICE_ID_PRO_MONTHLY_INR: str = ""
+    STRIPE_PRICE_ID_PRO_YEARLY_INR: str = ""
     @property
     def DATABASE_URL(self) -> str:
         return (

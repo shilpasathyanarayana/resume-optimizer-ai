@@ -598,10 +598,11 @@
             <a href="contact_us.html">Contact</a>
         </div>
     </footer>
-
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/nav.js"></script>
     <script src="assets/js/script.js"></script>
     <!-- add only in the page which need pro subscription -->
-    <script src="assets/js/requirepro.js"></script> 
+    <script src="assets/js/requirepro.js"></script>
     <script>
         // ─── CONFIG ───────────────────────────────────────────────
         const PAGE_SIZE = 20;
@@ -610,11 +611,6 @@
         let allResumes = [];
         let filtered = [];
         let currentPage = 1;
-
-        // ─── AUTH HELPERS ─────────────────────────────────────────
-        function getToken() {
-            return localStorage.getItem('authToken');
-        }
 
         // ─── INIT ─────────────────────────────────────────────────
         // ✅ async so we can await the server-side plan check
@@ -854,14 +850,6 @@
             return new Date(iso).toLocaleDateString('en-GB', {
                 day: 'numeric', month: 'short', year: 'numeric'
             });
-        }
-
-        function escHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
         }
 
         function showError(msg) {

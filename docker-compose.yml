@@ -17,11 +17,11 @@ services:
       - redis
       - db
 
-  redis:
-    image: redis:alpine
-    container_name: resume_ai_redis
-    ports:
-      - "6379:6379"
+  # redis:
+  #   image: redis:alpine
+  #   container_name: resume_ai_redis
+  #   ports:
+  #     - "6379:6379"
 
   db:
     image: mariadb:11
@@ -61,17 +61,17 @@ services:
     depends_on:
       - backend
 
-  worker:
-    build: ./backend
-    container_name: resume_ai_worker
-    command: celery -A app.celery_app worker --loglevel=info
-    volumes:
-      - ./backend/app:/app
-    env_file:
-      - .env
-    depends_on:
-      - redis
-      - db
+  # worker:
+  #   build: ./backend
+  #   container_name: resume_ai_worker
+  #   command: celery -A app.celery_app worker --loglevel=info
+  #   volumes:
+  #     - ./backend/app:/app
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - redis
+  #     - db
   
   stripe-cli:
     image: stripe/stripe-cli:latest

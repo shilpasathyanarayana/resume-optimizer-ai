@@ -10,7 +10,6 @@
         href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="assets/css/main.css" />
-    <!-- <script src="assets/js/script.js" defer></script> -->
     <style>
         body {
             padding-top: 80px;
@@ -575,19 +574,14 @@
         </div>
     </footer>
     <div id="toast"></div>
-
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/nav.js"></script>
     <script src="assets/js/script.js"></script>
     <script src="assets/js/requirepro.js"></script>
     <script>
-        // API_BASE comes from script.js
-
         let boardData = null;
         let editingId = null;
         let dragAppId = null;
-
-        function getToken() {
-            return localStorage.getItem('authToken');
-        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             const token = getToken();
@@ -595,7 +589,6 @@
                 window.location.replace('index.html');
                 return;
             }
-
             // ✅ await requirePro() — verifies plan via GET /api/auth/me
             // Returns false (and shows blur gate) if user is not Pro.
             // A forged JWT with plan:"pro" will fail here because the
@@ -605,13 +598,6 @@
             document.getElementById('footerYear').textContent = new Date().getFullYear();
             loadBoard();
         });
-
-        // document.addEventListener('DOMContentLoaded', () => {
-        //     if (!getToken()) { window.location.replace('index.html'); return; }
-        //     if (!requirePro()) return;   // ← redirects free users to pricing.html
-        //     document.getElementById('footerYear').textContent = new Date().getFullYear();
-        //     loadBoard();
-        // });
 
         // Asynchronous JavaScript function that loads data for a “job board” from an API and updates the UI.
         async function loadBoard() {
@@ -854,11 +840,7 @@
             if (!iso) return '';
             return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
         }
-        function escHtml(str) {
-            return String(str ?? '')
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
+        
     </script>
 </body>
 

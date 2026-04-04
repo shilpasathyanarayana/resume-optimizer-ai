@@ -37,7 +37,6 @@
       min-height: 100vh;
     }
 
-
     .nav-logo {
       font-family: 'DM Serif Display', serif;
       font-size: 1.4rem;
@@ -47,7 +46,7 @@
     }
 
     .nav-logo span {
-      color: var(--accent);
+      color: var(--gold);
     }
 
     /* ── Header ── */
@@ -87,6 +86,21 @@
     .badge-pro {
       background: var(--gold);
       color: white;
+    }
+
+    /* ── Region badge ── */
+    .region-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .75rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--sand);
+      padding: .25rem .65rem;
+      border-radius: 999px;
+      margin-left: .75rem;
+      vertical-align: middle;
     }
 
     /* ── Auth wall ── */
@@ -477,15 +491,58 @@
     #pro-banner.show {
       display: block;
     }
+
+    /* ── Region detector loading state ── */
+    #region-loading {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      font-size: .78rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .dot-pulse {
+      display: flex;
+      gap: 3px;
+    }
+
+    .dot-pulse span {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    .dot-pulse span:nth-child(2) {
+      animation-delay: .2s;
+    }
+
+    .dot-pulse span:nth-child(3) {
+      animation-delay: .4s;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: .3;
+        transform: scale(.8);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
   </style>
 </head>
 
 <body>
 
   <header>
-    <!-- <div class="logo">Resume<span>AI</span></div> -->
     <a href="dashboard.html" class="nav-logo">Resume<span>AI</span></a>
-    <!-- Updated dynamically from /api/auth/me -->
     <span class="badge-plan badge-free" id="plan-badge">Free Plan</span>
   </header>
 
@@ -510,12 +567,26 @@
       <h1>Land your dream job<br><em>faster.</em></h1>
       <p>Unlock unlimited optimisations, ATS keyword analysis, and AI cover letters.</p>
 
+      <!-- Region loading indicator — hidden once detection completes -->
+      <div id="region-loading">
+        <div class="dot-pulse">
+          <span></span><span></span><span></span>
+        </div>
+        Detecting your region…
+      </div>
+
+      <!-- Region badge — shown after detection -->
+      <div id="region-badge" style="display:none; margin-bottom:1.25rem;">
+        <!-- e.g. "🇮🇳 Pricing in INR" For India" 
+          🇺🇸 Pricing in USD for 🇨🇦 Canada and 🇺🇸USA-->
+      </div>
+
       <div class="toggle-wrap">
         <span class="toggle-label active" id="lbl-monthly">Monthly</span>
         <button class="pill-toggle" id="billing-toggle" onclick="toggleBilling()"
           aria-label="Toggle billing period"></button>
         <span class="toggle-label" id="lbl-yearly">Yearly</span>
-        <span class="save-chip">Save 33%</span>
+        <span class="save-chip" id="save-chip">Save 33%</span>
       </div>
     </section>
 
@@ -549,7 +620,7 @@
         <div class="plan-tag">⭐ Most popular</div>
         <h2>Pro</h2>
         <div class="price-row">
-          <span class="currency">$</span>
+          <span class="currency" id="currency-symbol">$</span>
           <span class="amount" id="price-display">9<small style="font-size:1.5rem">.99</small></span>
           <span class="period">/ mo</span>
         </div>
@@ -565,7 +636,6 @@
           <li><span class="icon check">✓</span>Job Application Tracker</li>
           <li><span class="icon check">✓</span>Interview Prep</li>
         </ul>
-        <!-- Button state is set by initPage() based on current plan -->
         <button class="btn btn-gold" id="checkout-btn" onclick="startCheckout()">
           Upgrade to Pro
         </button>
@@ -591,79 +661,136 @@
     <a class="btn btn-gold" style="max-width:220px;margin:0 auto" href="/dashboard.html">Start optimising</a>
   </div>
 
+  <script src="assets/js/config.js"></script>
+   <script src="assets/js/script.js"></script>
   <script>
     // ─────────────────────────────────────────────────────────────────────────────
-    //  Config
+    //  Region / pricing state
+    //
+    //  userCurrency is set by detectRegion() after IP lookup.
+    //  All price display and checkout calls use this value.
     // ─────────────────────────────────────────────────────────────────────────────
-    const API_BASE = 'http://localhost';
+    let userCurrency = 'usd';   // "usd" | "inr"  — default until detection
+    let billingYearly = false;
 
-    // JWT is stored in localStorage by your login page under the key 'access_token'
-    // (matches what auth.py returns: { access_token, token_type, name, email })
-    function getToken() {
-      return localStorage.getItem('authToken');
+    /**
+     * PRICES lookup table
+     *
+     * amount    — what goes into the <span id="price-display">
+     * note      — the small text below the price ("Billed $79.99/year…")
+     * symbol    — currency symbol for <span id="currency-symbol">
+     * saveChip  — text inside the green "Save X%" badge
+     */
+    const PRICES = {
+      usd: {
+        monthly: {
+          amount: '9<small style="font-size:1.5rem">.99</small>',
+          note: '&nbsp;',
+          symbol: '$',
+          saveChip: 'Save 33%',
+        },
+        yearly: {
+          amount: '6<small style="font-size:1.5rem">.67</small>',
+          note: 'Billed $79.99/year — save $39.89',
+          symbol: '$',
+          saveChip: 'Save 33%',
+        },
+      },
+      inr: {
+        monthly: {
+          amount: '129',
+          note: '&nbsp;',
+          symbol: '₹',
+          saveChip: 'Save 35%',
+        },
+        yearly: {
+          amount: '83',
+          note: 'Billed ₹999/year — save ₹549',
+          symbol: '₹',
+          saveChip: 'Save 35%',
+        },
+      },
+    };
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Region detection via free IP geolocation (no API key required)
+    //  Falls back silently to USD on any network failure.
+    // ─────────────────────────────────────────────────────────────────────────────
+    async function detectRegion() {
+      try {
+        // https://ipapi.co/json/ 
+        // If ipapi.co is down, the catch block silently defaults to USD — page never breaks
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        //  USD pricing by default for all regions and only for india its in inr
+        if (data.country_code === 'IN') {
+          userCurrency = 'inr';
+          showRegionBadge('🇮🇳', 'India', 'INR');
+        } else {
+          userCurrency = 'usd';
+          showRegionBadge(
+            data.country_code === 'CA' ? '🇨🇦' : '🇺🇸',
+            data.country_name || 'International',
+            'USD'
+          );
+        }
+      } catch {
+        // Network error — silently stay on USD
+        userCurrency = 'usd';
+        showRegionBadge('🌐', 'International', 'USD');
+      }
+
+      // Hide loading dots, render correct prices
+      document.getElementById('region-loading').style.display = 'none';
+      document.getElementById('region-badge').style.display = 'block';
+      updatePriceDisplay();
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('pro_request') === 'true') {
-        showProRequestBanner();
-        // Clean the URL without reload
-        window.history.replaceState({}, '', 'pricing.html');
-      }
-    });
+    /**
+     * Renders the region chip below the hero subheading.
+     * @param {string} flag  — emoji flag
+     * @param {string} name  — country / region name
+     * @param {string} curr  — "USD" | "INR"
+     */
+    function showRegionBadge(flag, name, curr) {
+      const el = document.getElementById('region-badge');
+      el.innerHTML = `
+        <span style="
+          display:inline-flex;align-items:center;gap:.4rem;
+          font-size:.78rem;font-weight:500;color:var(--muted);
+          background:var(--sand);padding:.3rem .75rem;border-radius:999px;
+        ">
+          ${flag} Pricing in <strong>${curr}</strong> for ${name}
+        </span>`;
+    }
 
-    // function showProRequestBanner() {
-    //   const banner = document.createElement('div');
-    //   banner.id = 'proRequestBanner';
-    //   banner.style.cssText = `
-    //     position: fixed;
-    //     top: 80px;
-    //     left: 50%;
-    //     transform: translateX(-50%);
-    //     z-index: 999;
-    //     background: #1a7a4a;
-    //     color: white;
-    //     padding: 14px 24px;
-    //     border-radius: 12px;
-    //     font-size: 0.9rem;
-    //     font-weight: 500;
-    //     box-shadow: 0 8px 32px rgba(26,107,74,0.35);
-    //     display: flex;
-    //     align-items: center;
-    //     gap: 12px;
-    //     max-width: 480px;
-    //     width: calc(100% - 48px);
-    //     animation: slide-down 0.3s ease;
-    // `;
-    //   banner.innerHTML = `
-    //     <span style="font-size:1.2rem;">🔒</span>
-    //     <span>The Requested feature is available on <strong>Pro</strong>. Upgrade below to unlock it.</span>
-    //     <button onclick="this.parentElement.remove()" style="
-    //         background: rgba(255,255,255,0.2);
-    //         border: none;
-    //         color: white;
-    //         width: 24px;
-    //         height: 24px;
-    //         border-radius: 50%;
-    //         cursor: pointer;
-    //         font-size: 1rem;
-    //         display: flex;
-    //         align-items: center;
-    //         justify-content: center;
-    //         margin-left: auto;
-    //         flex-shrink: 0;
-    //     ">×</button>
-    // `;
-    //   document.body.appendChild(banner);
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Price card renderer — called on page load and on toggle
+    // ─────────────────────────────────────────────────────────────────────────────
+    function updatePriceDisplay() {
+      const period = billingYearly ? 'yearly' : 'monthly';
+      const p = PRICES[userCurrency]?.[period] ?? PRICES.usd[period];
 
-    //   // Auto-dismiss after 10 seconds
-    //   // setTimeout(() => {
-    //   //   if (banner.parentElement) banner.remove();
-    //   // }, 10000);
-    // }
+      document.getElementById('price-display').innerHTML = p.amount;
+      document.getElementById('billed-note').innerHTML = p.note;
+      document.getElementById('currency-symbol').textContent = p.symbol;
+      document.getElementById('save-chip').textContent = p.saveChip;
+    }
 
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Billing toggle (monthly ↔ yearly)
+    // ─────────────────────────────────────────────────────────────────────────────
+    function toggleBilling() {
+      billingYearly = !billingYearly;
+      document.getElementById('billing-toggle').classList.toggle('yearly', billingYearly);
+      document.getElementById('lbl-monthly').classList.toggle('active', !billingYearly);
+      document.getElementById('lbl-yearly').classList.toggle('active', billingYearly);
+      updatePriceDisplay();
+    }
 
-    // Shared fetch helper — injects Bearer token and handles 401 globally
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Auth helpers
+    // ─────────────────────────────────────────────────────────────────────────────
     async function apiFetch(path, options = {}) {
       const token = getToken();
       const res = await fetch(`${API_BASE}${path}`, {
@@ -675,7 +802,6 @@
         },
       });
 
-      // Token expired or invalid → redirect to login
       if (res.status === 401) {
         localStorage.removeItem('authToken');
         window.location.href = '/index.html?reason=session_expired';
@@ -686,83 +812,7 @@
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    //  Page init — runs on load
-    // ─────────────────────────────────────────────────────────────────────────────
-    let billingYearly = false;
-
-    async function initPage() {
-      const token = getToken();
-
-      // ── No token → show auth wall, hide everything else ──────────────────────
-      if (!token) {
-        document.getElementById('auth-wall').style.display = 'block';
-        document.getElementById('main-content').style.display = 'none';
-        return;
-      }
-
-      document.getElementById('main-content').style.display = 'block';
-
-      // ── Handle return from Stripe ─────────────────────────────────────────────
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('session_id')) {
-        // Payment completed — show success overlay
-        document.getElementById('success-overlay').classList.add('show');
-        return;
-      }
-      if (params.get('cancelled') === 'true') {
-        showToast('Checkout cancelled — your card was not charged.', '');
-        // Clean up URL
-        history.replaceState({}, '', window.location.pathname);
-      }
-
-      // ── Load current user from /api/auth/me ───────────────────────────────────
-      try {
-        const res = await apiFetch('/api/auth/me');
-        if (!res.ok) return;
-        const user = await res.json();
-
-        // Update plan badge in header
-        const badge = document.getElementById('plan-badge');
-        if (user.plan === 'pro') {
-          badge.textContent = '⭐ Pro';
-          badge.className = 'badge-plan badge-pro';
-
-          // Show "already Pro" banner, swap button to Manage Billing
-          document.getElementById('pro-banner').classList.add('show');
-          const btn = document.getElementById('checkout-btn');
-          btn.textContent = 'Manage Billing';
-          btn.className = 'btn btn-muted';
-          btn.onclick = openPortal;
-        } else {
-          badge.textContent = 'Free Plan';
-          badge.className = 'badge-plan badge-free';
-        }
-      } catch (err) {
-        // Silently fail — page still works, just no plan badge
-        console.warn('Could not load user profile:', err.message);
-      }
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    //  Billing toggle
-    // ─────────────────────────────────────────────────────────────────────────────
-    function toggleBilling() {
-      billingYearly = !billingYearly;
-      document.getElementById('billing-toggle').classList.toggle('yearly', billingYearly);
-      document.getElementById('lbl-monthly').classList.toggle('active', !billingYearly);
-      document.getElementById('lbl-yearly').classList.toggle('active', billingYearly);
-
-      if (billingYearly) {
-        document.getElementById('price-display').innerHTML = '6<small style="font-size:1.5rem">.67</small>';
-        document.getElementById('billed-note').textContent = 'Billed $79.99/year — save $39.89';
-      } else {
-        document.getElementById('price-display').innerHTML = '9<small style="font-size:1.5rem">.99</small>';
-        document.getElementById('billed-note').innerHTML = '&nbsp;';
-      }
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    //  Checkout — sends JWT in header, only needs { plan } in body
+    //  Checkout — sends plan + currency to backend
     // ─────────────────────────────────────────────────────────────────────────────
     async function startCheckout() {
       const btn = document.getElementById('checkout-btn');
@@ -772,10 +822,12 @@
       const plan = billingYearly ? 'pro_yearly' : 'pro_monthly';
 
       try {
-        // ✅ Only send { plan } — backend reads user_id & email from the JWT
         const res = await apiFetch('/api/payments/checkout', {
           method: 'POST',
-          body: JSON.stringify({ plan }),
+          body: JSON.stringify({
+            plan,
+            currency: userCurrency,   // ← "usd" or "inr" — backend picks correct price_id
+          }),
         });
 
         if (!res.ok) {
@@ -784,7 +836,7 @@
         }
 
         const { checkout_url } = await res.json();
-        window.location.href = checkout_url;  // → Stripe Checkout page
+        window.location.href = checkout_url;
 
       } catch (err) {
         showToast(err.message, 'error');
@@ -812,12 +864,65 @@
         }
 
         const { portal_url } = await res.json();
-        window.location.href = portal_url;  // → Stripe Customer Portal
+        window.location.href = portal_url;
 
       } catch (err) {
         showToast(err.message, 'error');
         btn.disabled = false;
         btn.textContent = originalText;
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    //  Page init — runs on load, checks auth + current plan
+    // ─────────────────────────────────────────────────────────────────────────────
+    async function initPage() {
+      const token = getToken();
+
+      if (!token) {
+        document.getElementById('auth-wall').style.display = 'block';
+        document.getElementById('main-content').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('main-content').style.display = 'block';
+
+      // Handle return from Stripe
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('session_id')) {
+        document.getElementById('success-overlay').classList.add('show');
+        return;
+      }
+      if (params.get('cancelled') === 'true') {
+        showToast('Checkout cancelled — your card was not charged.', '');
+        history.replaceState({}, '', window.location.pathname);
+      }
+      if (params.get('pro_request') === 'true') {
+        window.history.replaceState({}, '', 'pricing.html');
+      }
+
+      // Load current user from /api/auth/me
+      try {
+        const res = await apiFetch('/api/auth/me');
+        if (!res.ok) return;
+        const user = await res.json();
+
+        const badge = document.getElementById('plan-badge');
+        if (user.plan === 'pro') {
+          badge.textContent = '⭐ Pro';
+          badge.className = 'badge-plan badge-pro';
+
+          document.getElementById('pro-banner').classList.add('show');
+          const btn = document.getElementById('checkout-btn');
+          btn.textContent = 'Manage Billing';
+          btn.className = 'btn btn-muted';
+          btn.onclick = openPortal;
+        } else {
+          badge.textContent = 'Free Plan';
+          badge.className = 'badge-plan badge-free';
+        }
+      } catch (err) {
+        console.warn('Could not load user profile:', err.message);
       }
     }
 
@@ -832,9 +937,10 @@
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
-    //  Boot
+    //  Boot — run both in parallel; detectRegion updates price display when done
     // ─────────────────────────────────────────────────────────────────────────────
     initPage();
+    detectRegion();   // async — updates price display once IP lookup resolves
   </script>
 </body>
 

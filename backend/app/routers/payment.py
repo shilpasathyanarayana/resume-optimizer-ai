@@ -11,6 +11,10 @@ Endpoints:
     POST /api/payments/portal     → open Stripe customer portal     [JWT required]
     GET  /api/payments/status     → current user's subscription     [JWT required]
     POST /api/payments/webhook    → Stripe webhook receiver         [NO auth — Stripe signs it]
+
+Changes from v1:
+    - checkout() now passes body.currency to create_checkout_session()
+    - list_plans() exposes currency field from PLANS catalogue
 """
 
 import stripe
@@ -21,9 +25,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.config import settings
 
-# ── Re-use your existing auth dependency ──────────────────────────────────────
-# get_current_user returns CurrentUser (Pydantic schema, not ORM model)
-# CurrentUser fields available: id, name, email, plan, is_active, is_verified
 from app.routers.auth import get_current_user
 from app.schemas.auth import CurrentUser
 
@@ -45,7 +46,6 @@ from app.services.stripe_service import (
     handle_webhook_event,
 )
 
-# No prefix is defined here since the prefix are defained at main.py
 router = APIRouter()
 
 
@@ -61,12 +61,18 @@ async def stripe_config():
 
 @router.get("/plans", response_model=PlansResponse)
 async def list_plans():
-    """Returns all subscription plans. price_id is intentionally hidden."""
+    """
+    Returns all subscription plans.
+    price_id is intentionally hidden from the response.
+    The `currency` field reflects USD defaults; the frontend
+    overrides display values based on detected region.
+    """
     return PlansResponse(plans=[
         PlanInfo(
             key=key,
             name=p["name"],
             amount=p["amount"],
+            currency=p.get("currency", "usd"),
             interval=p["interval"],
             features=p["features"],
         )
@@ -79,14 +85,17 @@ async def list_plans():
 @router.post("/checkout", response_model=CheckoutResponse)
 async def checkout(
     body: CheckoutRequest,
-    current_user: CurrentUser = Depends(get_current_user),  # .id / .email / .plan
+    current_user: CurrentUser = Depends(get_current_user),
 ):
     """
     Creates a Stripe Checkout session for the logged-in user.
+
+    body.currency ("usd" | "inr") is detected on the frontend via IP geolocation
+    and determines which Stripe price ID is used.
+
     Frontend receives checkout_url and redirects the browser there.
-    No DB session needed here — Stripe stores the state; webhook updates our DB.
+    No DB session needed — Stripe stores the state; webhook updates our DB.
     """
-    # Prevent double-subscribing if already on Pro
     if current_user.is_pro:
         raise HTTPException(
             status_code=400,
@@ -98,6 +107,7 @@ async def checkout(
             plan_key   = body.plan,
             user_id    = current_user.id,
             user_email = current_user.email,
+            currency   = body.currency,     # ← region-aware: "usd" | "inr"
         )
         return CheckoutResponse(
             checkout_url=session.url,
