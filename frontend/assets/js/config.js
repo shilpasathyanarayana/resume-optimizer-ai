@@ -4,7 +4,7 @@ const API_BASE = (
   window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1'
 )
-  ? 'http://localhost:8000'
-  : 'https://resume-optimizer-ai-2.onrender.com';
-  
+  ? 'http://localhost:8000/api'
+  : 'https://resume-optimizer-ai-2.onrender.com/api';  // ← hardcode Render URL
+
 const FREE_LIMIT = 5;

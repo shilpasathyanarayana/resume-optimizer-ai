@@ -822,7 +822,7 @@
       const plan = billingYearly ? 'pro_yearly' : 'pro_monthly';
 
       try {
-        const res = await apiFetch('/api/payments/checkout', {
+        const res = await apiFetch('/payments/checkout', {
           method: 'POST',
           body: JSON.stringify({
             plan,
@@ -856,7 +856,7 @@
       btn.innerHTML = '<span class="spinner"></span>Opening…';
 
       try {
-        const res = await apiFetch('/api/payments/portal', { method: 'POST' });
+        const res = await apiFetch('/payments/portal', { method: 'POST' });
 
         if (!res.ok) {
           const err = await res.json();
