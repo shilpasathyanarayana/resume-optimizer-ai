@@ -589,7 +589,7 @@
                 window.location.replace('index.html');
                 return;
             }
-            // ✅ await requirePro() — verifies plan via GET /api/auth/me
+            // ✅ await requirePro() — verifies plan via GET /auth/me
             // Returns false (and shows blur gate) if user is not Pro.
             // A forged JWT with plan:"pro" will fail here because the
             // backend reads the subscriptions table, not the JWT claim.

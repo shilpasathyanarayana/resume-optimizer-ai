@@ -901,9 +901,9 @@
         window.history.replaceState({}, '', 'pricing.html');
       }
 
-      // Load current user from /api/auth/me
+      // Load current user from /auth/me
       try {
-        const res = await apiFetch('/api/auth/me');
+        const res = await apiFetch('/auth/me');
         if (!res.ok) return;
         const user = await res.json();
 
