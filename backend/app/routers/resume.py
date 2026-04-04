@@ -14,7 +14,7 @@ from app.routers.auth import get_current_user
 from app.schemas.auth import CurrentUser
 from typing import List, Optional
 
-router = APIRouter(prefix="/resume", tags=["resume"])
+router = APIRouter(tags=["resume"])
 
 FREE_MONTHLY_LIMIT = 5
 

@@ -15,14 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactForm();
 });
 
-function initScrollNav() {
-  const nav = document.getElementById('navbar');
-  if (!nav) return;
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 40);
-  }, { passive: true });
-}
-
 // ── UTILS ──────────────────────────────────────────────────────────
 function getToken() {
   return localStorage.getItem('authToken');
