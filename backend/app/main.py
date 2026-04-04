@@ -34,6 +34,12 @@ import app.models.interview  # noqa: F401 – registers InterviewQuestion model 
 # ── Lifespan: create tables on startup ───────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+     # ── DEBUG: remove after confirming env vars ──
+    import os
+    print(">>> DB_HOST =", os.getenv("DB_HOST", "NOT SET"))
+    print(">>> DB_PORT =", os.getenv("DB_PORT", "NOT SET"))
+    print(">>> DB_USER =", os.getenv("DB_USER", "NOT SET"))
+    print(">>> DATABASE_URL =", settings.DATABASE_URL)
     import asyncio
     max_retries = 10
     for attempt in range(max_retries):
