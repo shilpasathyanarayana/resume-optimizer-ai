@@ -129,29 +129,29 @@ async def save_resume(
     job_title = job_description.strip().split('\n')[0][:255] if job_description else None
 
     result = await db.execute(
-        text("""
-            INSERT INTO resumes (
-                user_id, original_filename, original_text, job_title,
-                job_description, ats_score, missing_keywords, improvements,
-                optimized_text, file_format, status
-            ) VALUES (
-                :user_id, :original_filename, :original_text, :job_title,
-                :job_description, :ats_score, :missing_keywords, :improvements,
-                :optimized_text, :file_format, 'completed'
-            )
-        """),
-        {
-            "user_id":           user_id,
-            "original_filename": original_filename,
-            "original_text":     original_text,
-            "job_title":         job_title,
-            "job_description":   job_description,
-            "ats_score":         ats_score,
-            "missing_keywords":  json.dumps(missing_keywords),
-            "improvements":      json.dumps(improvements),
-            "optimized_text":    optimized_text,
-            "file_format":       file_format,
-        }
+    text("""
+        INSERT INTO resumes (
+            user_id, original_filename, original_text, job_title,
+            job_description, ats_score, missing_keywords, improvements,
+            optimized_text, file_format, status, created_at, updated_at
+        ) VALUES (
+            :user_id, :original_filename, :original_text, :job_title,
+            :job_description, :ats_score, :missing_keywords, :improvements,
+            :optimized_text, :file_format, 'completed', NOW(), NOW()
+        )
+    """),
+    {
+        "user_id":           user_id,
+        "original_filename": original_filename,
+        "original_text":     original_text,
+        "job_title":         job_title,
+        "job_description":   job_description,
+        "ats_score":         ats_score,
+        "missing_keywords":  json.dumps(missing_keywords),
+        "improvements":      json.dumps(improvements),
+        "optimized_text":    optimized_text,
+        "file_format":       file_format,
+    }
     )
     await db.commit()
     return result.lastrowid

@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, DateTime, JSON, Enum, ForeignKey
 from app.database import Base
-
+from sqlalchemy.sql import func
 
 class Resume(Base):
     __tablename__ = "resumes"
@@ -28,5 +28,5 @@ class Resume(Base):
     )
     error_message     = Column(String(500), nullable=True)
     celery_task_id    = Column(String(255), nullable=True)
-    created_at        = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
-    updated_at        = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
