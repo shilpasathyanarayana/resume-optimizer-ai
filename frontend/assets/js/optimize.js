@@ -26,7 +26,7 @@ async function maybeLoadFromHistory() {
   if (!token) return false;
 
   try {
-    const res = await fetch(`${API_BASE}/resume/history/${resumeId}`, {
+    const res = await fetch(`${API_BASE}/history/${resumeId}`, {
       headers: { 'Authorization': `Bearer ${token}` },
     });
 
@@ -103,7 +103,7 @@ async function syncUsage() {
   const token = localStorage.getItem('authToken');
   if (!token) return;
   try {
-    const res = await fetch(`${API_BASE}/resume/usage`, {
+    const res = await fetch(`${API_BASE}/usage`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (res.status === 401) {
@@ -262,7 +262,7 @@ async function callAI() {
     formData.append('resume_file', window._resumeFile);
     formData.append('job_description', jobText);
 
-    const res = await fetch(`${API_BASE}/resume/upload`, {
+    const res = await fetch(`${API_BASE}/upload`, {
       method: 'POST',
       headers: authHeader,
       body: formData
@@ -278,7 +278,7 @@ async function callAI() {
   }
 
   // Text-based submission
-  const res = await fetch(`${API_BASE}/resume/analyze`, {
+  const res = await fetch(`${API_BASE}/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...authHeader },
     body: JSON.stringify({ resume_text: resumeText, job_description: jobText })

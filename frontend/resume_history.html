@@ -639,7 +639,7 @@
         // ─── FETCH HISTORY ────────────────────────────────────────
         async function loadHistory() {
             try {
-                const res = await fetch(`${API_BASE}/resume/history`, {
+                const res = await fetch(`${API_BASE}/history`, {
                     headers: {
                         'Authorization': `Bearer ${getToken()}`,
                         'Content-Type': 'application/json',

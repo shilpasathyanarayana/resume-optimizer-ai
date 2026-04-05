@@ -648,7 +648,7 @@
       // ── Load usage + subscription status ──────────────────────────
       try {
         const [usageRes, subRes] = await Promise.all([
-          fetch(`${API_BASE}/resume/usage`, { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch(`${API_BASE}/usage`, { headers: { 'Authorization': `Bearer ${token}` } }),
           fetch(`${API_BASE}/payments/status`, { headers: { 'Authorization': `Bearer ${token}` } }),
         ]);
 
@@ -797,7 +797,7 @@
     async function loadResumeHistory() {
       const token = getToken();
       try {
-        const res = await fetch(`${API_BASE}/resume/history`, {
+        const res = await fetch(`${API_BASE}/history`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 

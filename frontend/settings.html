@@ -1000,7 +1000,7 @@
         // ── EXPORT HISTORY ────────────────────────────────────────────────────────────
         async function exportHistory() {
             try {
-                const res = await fetch(`${API_BASE}/resume/history`, {
+                const res = await fetch(`${API_BASE}/history`, {
                     headers: { 'Authorization': `Bearer ${getToken()}` }
                 });
                 if (!res.ok) { showToast('Could not export history.', 'error'); return; }
@@ -1057,7 +1057,7 @@
             btn.innerHTML = '<span class="btn-spinner"></span>Deleting…';
 
             try {
-                const res = await fetch(`${API_BASE}/resume/history`, {
+                const res = await fetch(`${API_BASE}/history`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${getToken()}` }
                 });

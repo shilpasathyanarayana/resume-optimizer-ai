@@ -41,7 +41,7 @@ async function updateNavBadge() {
     if (!token) return;
 
     try {
-        const res = await fetch(`${API_BASE}/resume/usage`, {
+        const res = await fetch(`${API_BASE}/usage`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) return; // silently fail — never redirect from here
