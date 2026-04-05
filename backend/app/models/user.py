@@ -29,3 +29,17 @@ class UserLoginLog(Base):
     status      = Column(Enum("success", "failed", "blocked", name="login_status_enum"), nullable=False)  # ← added name
     fail_reason = Column(String(255), nullable=True)
     created_at  = Column(DateTime, nullable=False, server_default=func.now())
+    
+class UserProfile(Base):
+    __tablename__ = "user_profiles"
+
+    id               = Column(Integer, primary_key=True, autoincrement=True)
+    user_id          = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    job_title        = Column(String(150), nullable=True)
+    experience_level = Column(
+        Enum('student', 'fresher', 'junior', 'intermediate', 'senior', name='experience_level_enum'),
+        nullable=True
+    )
+    location         = Column(String(150), nullable=True)
+    created_at       = Column(DateTime, nullable=True, server_default=func.now())
+    updated_at       = Column(DateTime, nullable=True, server_default=func.now(), onupdate=func.now())

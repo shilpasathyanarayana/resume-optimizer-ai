@@ -32,7 +32,7 @@ import app.models.user       # noqa: F401 – registers ORM models with SQLAlche
 import app.models.interview  # noqa: F401 – registers InterviewQuestion model   ← NEW
 import app.models.job_tracker 
 import app.models.subscription 
-
+import app.models.resume         # noqa: F401  ← add before job_tracker
 # ── Lifespan: create tables on startup ───────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
