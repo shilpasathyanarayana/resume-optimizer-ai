@@ -97,7 +97,7 @@ async def get_or_create_default_stages(db: AsyncSession, user_id: int):
     # First visit — seed default stages
     for s in DEFAULT_STAGES:
         await db.execute(
-            text("INSERT INTO job_stages (user_id, name, position, is_default) VALUES (:uid, :name, :pos, 1)"),
+            text("INSERT INTO job_stages (user_id, name, position, is_default) VALUES (:uid, :name, :pos, TRUE)"),
             {"uid": user_id, "name": s["name"], "pos": s["position"]}
         )
     await db.commit()

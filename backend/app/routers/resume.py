@@ -139,6 +139,7 @@ async def save_resume(
             :job_description, :ats_score, :missing_keywords, :improvements,
             :optimized_text, :file_format, 'completed', NOW(), NOW()
         )
+        RETURNING id
     """),
     {
         "user_id":           user_id,
@@ -152,10 +153,10 @@ async def save_resume(
         "optimized_text":    optimized_text,
         "file_format":       file_format,
     }
-    )
-    await db.commit()
-    return result.lastrowid
-
+)
+    await db.commit() 
+    resume_id = result.scalar()  # ← replaces result.lastrowid
+    return resume_id
 
 # ── Usage endpoint ─────────────────────────────────────────────────────────────
 
