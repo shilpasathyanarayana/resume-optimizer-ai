@@ -209,7 +209,6 @@ async def remove_stage(
     return {"message": "Stage deleted."}
 
 # ── APPLICATIONS ───────────────────────────────────────────────────────────────
-
 @router.post("/applications", status_code=201)
 async def add_application(
     body: ApplicationCreate,
@@ -221,31 +220,37 @@ async def add_application(
     if not body.role.strip():
         raise HTTPException(status_code=422, detail="Role is required.")
 
-    result = await db.execute(
-        text("""
-            INSERT INTO job_applications
-                (user_id, company, role, job_url, stage_id,
-                 applied_at, next_action, next_action_due, notes)
-            VALUES
-                (:uid, :company, :role, :job_url, :stage_id,
-                 :applied_at, :next_action, :next_action_due, :notes)
-        """),
-        {
-            "uid":             user.id,
-            "company":         body.company,
-            "role":            body.role,
-            "job_url":         body.job_url,
-            "stage_id":        body.stage_id,
-            "applied_at":      body.applied_at,
-            "next_action":     body.next_action,
-            "next_action_due": body.next_action_due,
-            "notes":           body.notes,
-        }
-    )
-    
-    new_id = (await result.fetchone())[0]
-    await db.commit()
-    return {"id": new_id, "message": "Application added."}
+    try:
+        result = await db.execute(
+            text("""
+                INSERT INTO job_applications
+                    (user_id, company, role, job_url, stage_id,
+                     applied_at, next_action, next_action_due, notes)
+                VALUES
+                    (:uid, :company, :role, :job_url, :stage_id,
+                     :applied_at, :next_action, :next_action_due, :notes)
+                RETURNING id
+            """),
+            {
+                "uid":             user.id,
+                "company":         body.company,
+                "role":            body.role,
+                "job_url":         body.job_url,
+                "stage_id":        body.stage_id,
+                "applied_at":      body.applied_at,
+                "next_action":     body.next_action,
+                "next_action_due": body.next_action_due,
+                "notes":           body.notes,
+            }
+        )
+
+        new_id = (await result.fetchone())[0]
+        await db.commit()
+        return {"id": new_id, "message": "Application added."}
+
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.patch("/applications/{app_id}")
