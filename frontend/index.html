@@ -65,7 +65,58 @@
 </head>
 
 <body>
+  <style>
+    /* FAQ Section */
+    .faq {
+      max-width: 800px;
+      margin: 0 auto;
+    }
 
+    .faq-item {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 16px 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .faq-item h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      position: relative;
+      padding-right: 30px;
+    }
+
+    .faq-item h3::after {
+      content: "+";
+      position: absolute;
+      right: 0;
+      top: 0;
+      font-size: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-item.active h3::after {
+      content: "–";
+    }
+
+    .faq-item p {
+      font-size: 15px;
+      color: #555;
+      margin-top: 10px;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .faq-item.active p {
+      display: block;
+    }
+
+    /* Optional hover effect */
+    .faq-item:hover h3 {
+      color: #024b1b;
+    }
+  </style>
   <!-- ── NAV ── -->
   <nav id="navbar">
     <a href="#" class="nav-logo">Resume<span>AI</span></a>
@@ -111,9 +162,10 @@
           Log in
         </button>
       </div>
-      <p class="hero-note">No credit card required &nbsp;·&nbsp; <strong>5 free optimizations</strong> included</p>
+      <p class="hero-note">Sign up for free in seconds— No credit card required &nbsp;·&nbsp; <strong>5 free
+          optimizations</strong> included</p>
     </div>
-
+    <br>
     <div class="scroll-hint">
       <span>Scroll</span>
       <div class="scroll-line"></div>
@@ -123,27 +175,47 @@
   <!-- ── HOW IT WORKS ── -->
   <section class="section" id="how">
     <div class="section-label">How it works</div>
-    <h2 class="section-title">From upload to optimized in under a minute</h2>
+    <h2 class="section-title">From Resume Optimization to Application Tracking & Interview Preparation</h2>
     <div class="steps">
       <div class="step">
         <div class="step-num">01</div>
         <h3>Create your account</h3>
-        <p>Sign up for free in seconds — no credit card required. Get 5 optimizations included.</p>
+        <p>Sign up for free in seconds—no credit card required. Includes 5 complimentary optimizations.</p>
       </div>
       <div class="step">
         <div class="step-num">02</div>
         <h3>Upload your resume</h3>
-        <p>Paste your resume text or upload a PDF or DOCX file. We extract the content automatically.</p>
+        <p>Paste your resume text or upload a PDF or DOCX file. Our system automatically extracts the content.</p>
       </div>
       <div class="step">
         <div class="step-num">03</div>
         <h3>Add the job description</h3>
-        <p>Paste the job posting you're targeting. The AI reads both side by side.</p>
+        <p>Paste the job posting you are targeting. Our AI analyzes both documents side by side.</p>
       </div>
       <div class="step">
         <div class="step-num">04</div>
+        <h3>ATS Score and Keyword Gap Analysis</h3>
+        <p>Receive an ATS score along with a detailed analysis of missing keywords in your resume.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
         <h3>Download optimized resume</h3>
-        <p>Get a fully rewritten resume tailored to the role — ready to send.</p>
+        <p>Download a fully optimized resume tailored to the role—ready for submission.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">06</div>
+        <h3>Build a cover letter</h3>
+        <p>Generate a tailored cover letter aligned with your resume and the job description, ready for submission.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">07</div>
+        <h3>Track job applications</h3>
+        <p>Monitor and manage all your job applications in one organized dashboard.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">08</div>
+        <h3>Interview preparation</h3>
+        <p>Add a job description to generate AI-powered interview questions tailored to the role.</p>
       </div>
     </div>
   </section>
@@ -156,35 +228,36 @@
       <div class="feature-card">
         <div class="feature-icon">🎯</div>
         <h3>ATS Compatibility Score</h3>
-        <p>Get a real score showing how well your resume matches the job's requirements and keyword expectations.</p>
+        <p>Get a precise score showing how well your resume aligns with job requirements and keyword expectations.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">🔍</div>
         <h3>Keyword Gap Analysis</h3>
-        <p>Instantly see which keywords from the job description are missing from your resume — and where to add them.
-        </p>
+        <p>Identify missing keywords from the job description and receive guidance on where to include them.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">✍️</div>
         <h3>AI Resume Rewriting</h3>
-        <p>Our AI rewrites your bullet points and summary to match the role's language without fabricating experience.
+        <p>
+          Enhance your resume with AI-generated bullet points and summaries tailored to the target role.
+          Download your optimized resume in PDF or DOCX format, access version history, and receive results within
+          seconds.
         </p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">📥</div>
-        <h3>Download as PDF / DOCX</h3>
-        <p>Export your optimized resume in the format employers expect, cleanly formatted and ready to send.</p>
+        <div class="feature-icon">📝</div>
+        <h3>AI Cover Letter Builder</h3>
+        <p>Create personalized, job-specific cover letters aligned with your resume and the job description.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">📁</div>
-        <h3>Resume History</h3>
-        <p>Save all your optimized versions. Log in to keep a history of every role you've tailored your resume for.</p>
+        <div class="feature-icon">📊</div>
+        <h3>Application Tracking</h3>
+        <p>Track and manage all your job applications in one centralized and organized dashboard.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>Fast Processing</h3>
-        <p>Results arrive in under 30 seconds thanks to async AI processing — no waiting around on a spinning screen.
-        </p>
+        <div class="feature-icon">🎤</div>
+        <h3>Interview Preparation</h3>
+        <p>Generate tailored interview questions based on the job description to help you prepare effectively.</p>
       </div>
     </div>
   </section>
@@ -230,21 +303,71 @@
     </div>
   </section>
 
+  <section class="section">
+    <div class="section-label">Product Demo</div>
+    <h2 class="section-title">See how it works in seconds</h2>
+
+    <div style="max-width:900px;margin:0 auto;text-align:center;">
+      <div
+        style="background:#111;border-radius:12px;height:400px;display:flex;align-items:center;justify-content:center;color:#fff;">
+        ▶ Demo Video / App Screenshot
+      </div>
+    </div>
+  </section>
+
   <!-- FAQ -->
   <section class="section">
     <div class="section-label">FAQ</div>
     <h2 class="section-title">Frequently Asked Questions</h2>
 
     <div class="faq">
-      <h3>What is an ATS resume checker?</h3>
-      <p>An ATS resume checker analyzes your resume against job descriptions to ensure it passes applicant tracking
-        systems used by employers.</p>
+      <div class="faq-item">
+        <h3>What is an ATS resume checker?</h3>
+        <p>An ATS resume checker analyzes your resume against job descriptions to ensure it passes applicant tracking
+          systems used by employers.</p>
+      </div>
 
-      <h3>Is ResumeAI free?</h3>
-      <p>Yes, ResumeAI offers a free plan with 5 resume optimizations per month.</p>
+      <div class="faq-item">
+        <h3>Is ResumeAI free?</h3>
+        <p>Yes, ResumeAI offers a free plan that includes 5 resume optimizations per month.</p>
+      </div>
 
-      <h3>How does AI improve my resume?</h3>
-      <p>Our AI identifies missing keywords, rewrites content, and improves formatting to match job requirements.</p>
+      <div class="faq-item">
+        <h3>How does AI improve my resume?</h3>
+        <p>Our AI identifies missing keywords, rewrites content, and enhances structure to better align with job
+          requirements.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Will the AI change my experience?</h3>
+        <p>No, the AI enhances and rewrites your existing experience without adding false or misleading information.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>What file formats are supported?</h3>
+        <p>You can upload PDF or DOCX files and download your optimized resume in both formats.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Does it support cover letters?</h3>
+        <p>Yes, you can generate tailored cover letters based on your resume and the job description.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>Can I track my job applications?</h3>
+        <p>Yes, ResumeAI includes a dashboard to help you track and manage all your job applications in one place.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>How accurate is the ATS score?</h3>
+        <p>The score is based on industry-standard ATS practices, including keyword relevance, formatting, and content
+          alignment.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>How fast are the results?</h3>
+        <p>Most resume optimizations and analyses are completed within 2-3 seconds.</p>
+      </div>
     </div>
   </section>
 
@@ -342,6 +465,13 @@
 
   <!-- ── TOAST ── -->
   <div class="toast" id="toast"></div>
+  <script>
+    document.querySelectorAll(".faq-item").forEach(item => {
+      item.addEventListener("click", () => {
+        item.classList.toggle("active");
+      });
+    });
+  </script>
 </body>
 
 </html>
