@@ -75,7 +75,7 @@ async def get_current_user(
         raise HTTPException(status_code=401, detail="Invalid or expired token. Please log in again.")
 
     result = await db.execute(
-        text("SELECT id, name, email FROM users WHERE (id = :user_id OR email = :email) AND is_active = 1"),
+        text("SELECT id, name, email FROM users WHERE (id = :user_id OR email = :email) AND is_active = TRUE"),
         {"user_id": user_id, "email": sub}
     )
     user = result.fetchone()
@@ -159,7 +159,7 @@ async def add_stage(
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
-        text("INSERT INTO job_stages (user_id, name, position, is_default) VALUES (:uid, :name, :pos, 0)"),
+        text("INSERT INTO job_stages (user_id, name, position, is_default) VALUES (:uid, :name, :pos, FALSE)"),
         {"uid": user.id, "name": body.name, "pos": body.position}
     )
     await db.commit()

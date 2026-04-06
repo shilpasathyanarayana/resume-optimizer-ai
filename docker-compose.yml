@@ -13,40 +13,32 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
+      - DB_HOST=db
+      - DB_PORT=5432
     depends_on:
-      - redis
       - db
 
-  # redis:
-  #   image: redis:alpine
-  #   container_name: resume_ai_redis
-  #   ports:
-  #     - "6379:6379"
-
   db:
-    image: mariadb:11
-    container_name: resume_ai_mariadb
+    image: postgres:16
+    container_name: resume_ai_postgres
     restart: always
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MARIADB_DATABASE: ${DB_NAME}
-      MARIADB_USER: ${DB_USER}
-      MARIADB_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mariadb_data:/var/lib/mysql
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
 
-  phpmyadmin:                  # ← add this new service
-    image: phpmyadmin/phpmyadmin
-    container_name: resume_ai_phpmyadmin
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: resume_ai_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "8080:80"
-    environment:
-      PMA_HOST: db
-      PMA_USER: ${DB_USER}
-      PMA_PASSWORD: ${DB_PASSWORD}
     depends_on:
       - db
 
@@ -61,31 +53,17 @@ services:
     depends_on:
       - backend
 
-  # worker:
-  #   build: ./backend
-  #   container_name: resume_ai_worker
-  #   command: celery -A app.celery_app worker --loglevel=info
-  #   volumes:
-  #     - ./backend/app:/app
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - redis
-  #     - db
-  
   stripe-cli:
     image: stripe/stripe-cli:latest
     container_name: resume-optimizer-stripe-cli
     env_file:
-      - .env          # ← adjust path to where your .env lives
+      - .env
     command: >
       listen
       --api-key ${STRIPE_SECRET_KEY}
       --forward-to http://backend:8000/api/payments/webhook
     depends_on:
       - backend
-    # profiles:
-    #   - stripe                 
-       # only starts with: docker compose --profile stripe up
+
 volumes:
-  mariadb_data:
+  postgres_data:
