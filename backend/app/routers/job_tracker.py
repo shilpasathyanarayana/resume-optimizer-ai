@@ -244,7 +244,8 @@ async def add_application(
             }
         )
 
-        new_id_row = await result.fetchone()
+        # Correct way: no await on fetchone()
+        new_id_row = result.fetchone()
         if not new_id_row:
             raise HTTPException(status_code=500, detail="Failed to insert application.")
         
