@@ -242,8 +242,10 @@ async def add_application(
             "notes":           body.notes,
         }
     )
+    
+    new_id = (await result.fetchone())[0]
     await db.commit()
-    return {"id": result.lastrowid, "message": "Application added."}
+    return {"id": new_id, "message": "Application added."}
 
 
 @router.patch("/applications/{app_id}")
