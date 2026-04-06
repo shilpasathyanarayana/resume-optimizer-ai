@@ -244,7 +244,11 @@ async def add_application(
             }
         )
 
-        new_id = (await result.fetchone())[0]
+        new_id_row = await result.fetchone()
+        if not new_id_row:
+            raise HTTPException(status_code=500, detail="Failed to insert application.")
+        
+        new_id = new_id_row[0]
         await db.commit()
         return {"id": new_id, "message": "Application added."}
 
