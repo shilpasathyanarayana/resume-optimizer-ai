@@ -42,7 +42,6 @@ async def generate_from_description(
         for i, q in enumerate(question_texts)
     ]
 
-
 @router.post("/review-answer", response_model=FeedbackOut)
 async def review_answer_direct(
     body: DirectReviewIn,

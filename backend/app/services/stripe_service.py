@@ -137,6 +137,11 @@ async def create_checkout_session(
 
 
 # ── Customer portal ───────────────────────────────────────────────────────────
+# Takes a Stripe customer_id
+# Calls Stripe API to create a billing portal session
+# Stripe returns a session object with:
+# url → the https://billing.stripe.com/... link
+# You redirect the user to that URL
 
 async def create_portal_session(
     customer_id: str,
@@ -228,11 +233,24 @@ async def handle_webhook_event(
             return result
 
         if not subscription_id:
-            sub = await get_or_create_subscription(db, user_id)
-            sub.stripe_customer_id = customer_id
-            await db.commit()
-            result["action"] = f"stored customer_id for user={user_id} (no subscription)"
-            return result
+            # Don't just store customer_id and return — 
+            # retrieve the subscription from the customer instead
+            customer_subs = stripe.Subscription.list(customer=customer_id, limit=1)
+            if customer_subs.data:
+                stripe_sub = customer_subs.data[0]
+                subscription_id = stripe_sub["id"]
+            else:
+                # genuinely no subscription yet
+                sub = await get_or_create_subscription(db, user_id)
+                sub.stripe_customer_id = customer_id
+                await db.commit()
+                result["action"] = f"stored customer_id for user={user_id} (no subscription)"
+                return result
+            # sub = await get_or_create_subscription(db, user_id)
+            # sub.stripe_customer_id = customer_id
+            # await db.commit()
+            # result["action"] = f"stored customer_id for user={user_id} (no subscription)"
+            # return result
 
         stripe_sub = stripe.Subscription.retrieve(subscription_id)
 
